@@ -38,6 +38,6 @@ import { Checkout, Error, Estimate, Loader, Lookup, NoResults, Submitting } from
 ```
 
 ## Todo:
-- [] Update browser URL from state (if `url` prop exists on <State/> component)
-- [] Derive application state from browser URL
-- [] Render all sub <State/>
+- [ ] Update browser URL from state (if `url` prop exists on <State/> component)
+- [ ] Derive application state from browser URL
+- [ ] Render all sub <State/>
