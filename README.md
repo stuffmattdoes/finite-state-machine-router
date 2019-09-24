@@ -38,7 +38,7 @@ import { Checkout, Error, Estimate, Loader, Lookup, NoResults, Submitting } from
 ```
 
 ## Todo:
-- [ ] Update browser URL from state (if `url` prop exists on <State/> component)
+- [ ] Update browser URL from state (if `url` prop exists on `<State/>` component)
 - [ ] Derive application state from browser URL (for when user navigates directly to URL)
 - [ ] Enable browser navigation (previous, next)
-- [ ] Render all sub <State/>
+- [ ] Render all sub `<State/>`
