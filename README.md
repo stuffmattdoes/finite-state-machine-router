@@ -4,6 +4,9 @@ A finite state machine (FSM) router for React
 Made with [Create React App](./CRA.md)
 
 ## Getting Started
+1. Run `npm install`
+2. Run `npm start`
+3. Navigate to `localhost:3000` in browser
 
 Example use:
 ```jsx
