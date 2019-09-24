@@ -18,19 +18,6 @@ const actionTypes = {
     SUBMIT: 'SUBMIT'
 }
 
-// In memory for URL -> state resolution
-// const routeTree = {
-//     '/checkout': {
-//         '/': 'checkout',
-//         '/trade-in': {
-//             '/': 'trade-in',
-//             '/estimate': 'checkout.trade-in.estimate',
-//             '/no-results': 'checkout.trade-in.no-results',
-//         },
-//         '/error': 'checkout.error'
-//     }
-// };
-
 ReactDOM.render(
     <Container>
         <Machine name='checkout' url='/checkout/:stockNumber'>
