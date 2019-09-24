@@ -5,25 +5,20 @@ export const history = createBrowserHistory({
     basename: '/checkout',
 });
 
-export const StateMachineContext = React.createContext({
+const initialState = {
     current: 'loading',
     transition: () => {},
     matches: () => {}
-});
+};
+
+export const StateMachineContext = React.createContext(initialState);
 
 function Machine ({ children, url }) {
-    const [ state, setState ] = useState({
-        current: 'loading'
-    });
+    const [ state, setState ] = useState(initialState);
+    const matches = (compareState) => compareState === state.current;
+    const transition = target => setState({ ...state, current: target });
 
-    function matches(compareState) {
-        return compareState === state.current;
-    }
-
-    function transition (target) {
-        setState({ ...state, current: target });
-    }
-
+    // TODO:
     // Compose URL routes and state machine from machine tree
     // React.Children.map(children, console.log);
 

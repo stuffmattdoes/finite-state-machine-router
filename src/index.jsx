@@ -11,7 +11,7 @@ import Lookup from './components/Lookup';
 import NoResults from './components/NoResults';
 import Submitting from './components/Submitting';
 
-const actionTypes = {
+const events = {
     REJECT: 'REJECT',
     RESOLVE: 'RESOLVE',
     RETRY: 'RETRY',
@@ -22,28 +22,28 @@ ReactDOM.render(
     <Container>
         <Machine name='checkout' url='/checkout/:stockNumber'>
             <State component={Loader} initial state='loading'>
-                <Transition action={actionTypes.RESOLVE} target='hub'/>
-                <Transition action={actionTypes.REJECT} target='error'/>
+                <Transition event={events.RESOLVE} target='hub'/>
+                <Transition event={events.REJECT} target='error'/>
             </State>
             <State component={Checkout} state='hub'>
                 <State state='trade-in' url='/trade-in'>
                     <State component={Loader} initial state='loading'>
-                        <Transition action={actionTypes.RESOLVE} target='lookup'/>
-                        <Transition action={actionTypes.ERROR} target='error'/>
+                        <Transition event={events.RESOLVE} target='lookup'/>
+                        <Transition event={events.ERROR} target='error'/>
                     </State>
                     <State component={Lookup} state='lookup'>
-                        <Transition action={actionTypes.SUBMIT} target='submitting'/>
+                        <Transition event={events.SUBMIT} target='submitting'/>
                     </State>
                     <State component={Submitting} state='submitting'>
-                        <Transition action={actionTypes.RESOLVE} target='estimate'/>
-                        <Transition action={actionTypes.ERROR} target='no-results'/>
+                        <Transition event={events.RESOLVE} target='estimate'/>
+                        <Transition event={events.ERROR} target='no-results'/>
                     </State>
                     <State component={Estimate} state='estimate' url='/estimate'/>
                     <State component={NoResults} state='no-results' url='/no-results'/>
                 </State>
             </State>
             <State component={Error} state='error' url='error'>
-                <Transition action={actionTypes.RETRY} target='loading'/>
+                <Transition event={events.RETRY} target='loading'/>
             </State>
         </Machine>
     </Container>

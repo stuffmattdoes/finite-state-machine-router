@@ -2,11 +2,10 @@ import React, { useContext } from 'react';
 import { StateMachineContext } from './Machine';
 
 function State(props) {
-    const machineContext = useContext(StateMachineContext);
-    const { current, matches, transition } = machineContext;
+    const { current, matches, transition } = useContext(StateMachineContext);
     const { children, component: WrappedComponent, initial, state, url } = props;
     const transitions = {};
-    const actionTypes = [];
+    const events = [];
 
     // List our actions available to the component being rendered
     React.Children.forEach(children, child => {
@@ -26,7 +25,7 @@ function State(props) {
 
             if (!skip) {
                 transitions[child.props['action']] = child.props['target'];
-                actionTypes.push(child.props['action']);
+                events.push(child.props['action']);
             }
 
             return;
@@ -57,18 +56,23 @@ function State(props) {
     delete componentProps.component;
     
     let machineProps = {
-        actionTypes,
+        events,
         current,
         dispatch: handleDispatch,
         matches,
-        update: machineContext.update
     }
 
-    return matches(state) ?
-        <StateMachineContext.Consumer>
-            { ctx => <WrappedComponent machine={machineProps} {...componentProps}/>}
-        </StateMachineContext.Consumer>
-    : null;
+    // TODO:
+    // Compare "loading" or "checkout.loading" to current ?
+    if (matches(state)) {
+        return WrappedComponent ?
+            <StateMachineContext.Consumer>
+                { ctx => <WrappedComponent machine={machineProps} {...componentProps}/>}
+            </StateMachineContext.Consumer>
+        : children;
+    } else {
+        return null;
+    }
 }
 
 export default State;

@@ -1,6 +1,6 @@
 import React from 'react';
 
-function Transition({ action, target }) {
+function Transition({ event, target }) {
     return null;
 }
 
