@@ -39,12 +39,11 @@ const states = {        // state = traffic
 }
 ```
 
-## URL Resolution
+### URL Resolution
 As per the code above, URL `/traffic/red` would resolve to state `traffic.red[walksign.solid, pedestrian.walk]`
 
-## State matching
-Implement a `matches(state)` function to determine if a value matches the current state/
-example:
+### State matching
+Implement a `matches(state)` function to determine if a value matches the current state
 
 ```jsx
 const state = traffic.red[walksign.solid, pedestrian.walk];
