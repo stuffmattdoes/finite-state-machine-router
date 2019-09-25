@@ -17,29 +17,29 @@ Example use:
 import { Checkout, Error, Estimate, Loader, Lookup, NoResults, Submitting } from 'components';
 
 <Machine id='checkout' url='/checkout/:stockNumber'>
-    <State component={Loader} initial state='loading'>
+    <State component={Loader} initial id='loading'>
         <Transition event={events.RESOLVE} target='hub'/>
         <Transition event={events.REJECT} target='error'/>
     </State>
-    <State component={Checkout} state='hub'>
-        <State state='trade-in' url='/trade-in'>
-            <State component={Loader} initial state='loading'>
+    <State component={Checkout} id='hub'>
+        <State id='trade-in' url='/trade-in'>
+            <State component={Loader} initial id='loading'>
                 <Transition event={events.RESOLVE} target='lookup'/>
                 <Transition event={events.ERROR} target='error'/>
             </State>
-            <State component={Lookup} state='lookup'>
+            <State component={Lookup} id='lookup'>
                 <Transition event={events.SUBMIT} target='submitting'/>
             </State>
-            <State component={Submitting} state='submitting'>
+            <State component={Submitting} id='submitting'>
                 <Transition event={events.RESOLVE} target='estimate'/>
                 <Transition event={events.ERROR} target='no-results'/>
             </State>
-            <State component={Estimate} state='estimate' url='/estimate'/>
-            <State component={NoResults} state='no-results' url='/no-results'/>
+            <State component={Estimate} id='estimate' url='/estimate'/>
+            <State component={NoResults} id='no-results' url='/no-results'/>
         </State>
     </State>
-    <State component={Error} state='error' url='error'>
-        <Transition event={events.RETRY} target='loading'/>
+    <State component={Error} id='error' url='error'>
+        <Transition event={events.RELOAD} target='loading'/>
     </State>
 </Machine>
 ```

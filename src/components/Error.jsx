@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
 function Error({ children, machine }) {
     // useEffect(() => console.log('render'));
     return <div className='errir'>
-        <p>Error!</p>
-        <button onClick={e => machine.dispatch('RETRY')}>Retry</button>
+        <h1>Error!</h1>
+        <button onClick={e => machine.send('RELOAD')}>Reload</button>
     </div>;
 }
 

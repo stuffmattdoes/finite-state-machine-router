@@ -1,10 +1,11 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
-function Checkout ({ children }) {
+function Checkout ({ children, machine}) {
     // useEffect(() => console.log('render'));
 
     return <div className='checkout'>
-        Checkout
+        <h1>Checkout</h1>
+        <button onClick={e => machine.send('RELOAD')}>Reload</button>
         {children}
     </div>
 }

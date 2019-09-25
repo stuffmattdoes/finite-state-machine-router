@@ -1,20 +1,29 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { StateMachineContext } from './Machine';
 
 function State(props) {
-    const { current, matches, transition } = useContext(StateMachineContext);
-    const { children, component: WrappedComponent, initial, state, url } = props;
+    const { current, matches, resolveInitial, transition } = useContext(StateMachineContext);
+    const { children, component: WrappedComponent, id, initial, url } = props;
     const transitions = {};
     const events = [];
 
-    // List our actions available to the component being rendered
+    // Called once after first render
+    useEffect(() => {
+        // Communicate "initial" status to parent
+        if (initial) {
+            resolveInitial(id);
+            // console.log('initial:', id);
+        }
+    }, []);
+
+    // List our events available to the component being rendered
     React.Children.forEach(children, child => {
         if (child.type.name === 'Transition') {
             let skip = false;
 
             // Just check for some required props
-            if (!child.props.hasOwnProperty('action')) {
-                console.error('Component "<Transition/>" requires an "action" property.');
+            if (!child.props.hasOwnProperty('event')) {
+                console.error('Component "<Transition/>" requires an "event" property.');
                 skip = true;
             }
 
@@ -24,52 +33,57 @@ function State(props) {
             }
 
             if (!skip) {
-                transitions[child.props['action']] = child.props['target'];
-                events.push(child.props['action']);
+                transitions[child.props['event']] = child.props['target'];
+                events.push(child.props['event']);
             }
 
             return;
         }
     });
 
-    const handleDispatch = (action, event) => {
-        if (!transitions.hasOwnProperty(action)) {
-            console.error(`Action: "${action}" is not available from within state: "${state}"`);
+    const handleSend = (event) => {
+        if (!transitions.hasOwnProperty(event)) {
+            console.error(`Event: "${event}" is not available from within id: "${id}"`);
         }
 
         const date = new Date();
         const time = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}.${date.getMilliseconds()}`;
         
-        console.group(`%cFSM Router transition: %c${action} %c@ ${time}`, 'color: grey; font-weight: normal', 'font-weight: bold;', 'color: grey; font-weight: normal');
-        console.log(`%cprev state: %c${current}\n`, 'color: grey; font-weight: bold;', 'color: black; font-weight: bold;');
-        console.log(`%caction: %c${action}\n`, 'color: blue; font-weight: bold;', 'color: black; font-weight: bold;');
-        console.log(`%cnext state: %c${transitions[action]}\n`, 'color: green; font-weight: bold;', 'color: black; font-weight: bold;');
+        console.group(`%cFSM Router transition: %c${event} %c@ ${time}`, 'color: grey; font-weight: normal', 'font-weight: bold;', 'color: grey; font-weight: normal');
+        console.log(`%cprev state: %c${current}\n`, 'color: grey; font-weight: bold;', 'color: black;');
+        console.log(`%cevent: %c${event}\n`, 'color: blue; font-weight: bold;', 'color: black;');
+        console.log(`%cnext state: %c${transitions[event]}\n`, 'color: green; font-weight: bold;', 'color: black;');
         console.groupEnd();
 
-        transition(transitions[action]);
+        transition(transitions[event]);
     }
 
     const componentProps = {
-        ...props
+        ...props,
     }
 
     delete componentProps.component;
+    delete componentProps.id;
     
     let machineProps = {
         events,
         current,
-        dispatch: handleDispatch,
+        send: handleSend,
         matches,
     }
 
     // TODO:
+    // Update context for initial state
+
+    // TODO:
     // Compare "loading" or "checkout.loading" to current ?
-    if (matches(state)) {
+
+    if (matches(id)) {
         return WrappedComponent ?
             <StateMachineContext.Consumer>
                 { ctx => <WrappedComponent machine={machineProps} {...componentProps}/>}
             </StateMachineContext.Consumer>
-        : children;
+        : children ? children : null;
     } else {
         return null;
     }

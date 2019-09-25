@@ -6,25 +6,33 @@ export const history = createBrowserHistory({
 });
 
 const initialState = {
-    current: 'loading',
-    transition: () => {},
-    matches: () => {}
+    // current: {
+    //     value: 'loading',
+    //     full: null
+    // },
+    current: null,
+    matches: (id) => {},
+    resolveInitial: (id) => {},
+    transition: (target) => {}
 };
 
 export const StateMachineContext = React.createContext(initialState);
 
-function Machine ({ children, url }) {
-    const [ state, setState ] = useState(initialState);
-    const matches = (compareState) => compareState === state.current;
-    const transition = target => setState({ ...state, current: target });
+function Machine ({ children, id, url }) {
+    const [ state, setState ] = useState({
+        ...initialState,
+        // current: `#${id}`
+    });
+    const matches = (id) => state.current && state.current.includes(id);
+    const resolveInitial = (id) => setState({ ...state, current: `${state.current}.${id}` });
+    const transition = (target) => setState({ ...state, current: `#${id}.${target}` });
 
-    // TODO:
-    // Compose URL routes and state machine from machine tree
-    // React.Children.map(children, console.log);
+    // console.log(state);
 
     return <StateMachineContext.Provider value={{
         ...state,
         matches,
+        resolveInitial,
         transition
     }}>
         {children}

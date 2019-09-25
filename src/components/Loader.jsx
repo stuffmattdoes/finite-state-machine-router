@@ -1,16 +1,15 @@
 import React, { useEffect } from 'react';
 
-function Loader (props) {
-    const { children, machine } = props;
-
+function Loader ({ children, machine }) {
     useEffect(() => {
         const rnd = Math.random();
-        setTimeout(() => rnd < 0.25 ? machine.dispatch('REJECT') : machine.dispatch('RESOLVE'), 1500);
+        setTimeout(() => rnd < 0.25 ? machine.send('REJECT') : machine.send('RESOLVE'), 1500);
         // console.log('render', rnd);
     });
     
     return <div className='loader'>
-        <p>Loading...</p>
+        <h1>Loading...</h1>
+        {children}
     </div>
 }
 
