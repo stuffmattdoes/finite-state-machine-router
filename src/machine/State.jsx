@@ -1,24 +1,34 @@
 import React, { useContext, useEffect } from 'react';
 import { StateMachineContext } from './Machine';
 
+export const StateNodeContext = React.createContext();
+StateNodeContext.displayName = 'StateNode';
+
 function State(props) {
-    const { current, matches, resolveStack, transition } = useContext(StateMachineContext);
+    const { current, id: machineId, matches, resolveStack, transition } = useContext(StateMachineContext);
     const { children, component: WrappedComponent, id, initial, url } = props;
+    // const stateNodeContext = useContext(StateNodeContext);
     const transitions = {};
     const events = [];
 
+    const send = (event) => {
+        if (!transitions.hasOwnProperty(event)) {
+            console.error(`Event: "${event}" is not available from within id: "${id}"`);
+        }
+
+        // Resolve entire state stack
+        transition(event, transitions[event]);
+    }
+
     // Called once after first render
     useEffect(() => {
-        if (initial) {
-            // TODO:
-            // Should only happen once per page refresh?
+        if (initial/* || matches(id)*/) {
             resolveStack(id);
         }
-        // console.log('id', id);
     }, []);
 
     // List our events available to the component being rendered
-    React.Children.forEach(children, child => {
+    const _children = React.Children.map(children, child => {
         if (child.type.name === 'Transition') {
             let skip = false;
 
@@ -38,40 +48,32 @@ function State(props) {
                 events.push(child.props['event']);
             }
 
-            return;
+            return null;
         }
+        // else if (child.type.name === 'State') {
+        //     console.log('Clone StateNode');
+
+        //     return React.cloneElement(child, {
+        //         ...child.props,
+        //         send: send,
+        //         testProp: 'test'
+        //     });
+        // }
     });
-
-    const handleSend = (event) => {
-        if (!transitions.hasOwnProperty(event)) {
-            console.error(`Event: "${event}" is not available from within id: "${id}"`);
-        }
-
-        const date = new Date();
-        const time = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}.${date.getMilliseconds()}`;
-        
-        console.group(`%cFSM Router transition: %c${event} %c@ ${time}`, 'color: grey; font-weight: normal', 'font-weight: bold;', 'color: grey; font-weight: normal');
-        console.log(`%cprev state: %c${current}\n`, 'color: grey; font-weight: bold;', 'color: black;');
-        console.log(`%cevent: %c${event}\n`, 'color: blue; font-weight: bold;', 'color: black;');
-        console.log(`%cnext state: %c${transitions[event]}\n`, 'color: green; font-weight: bold;', 'color: black;');
-        console.groupEnd();
-
-        transition(transitions[event]);
-    }
 
     const componentProps = {
         ...props,
+        // children: _children,
+        machine: {
+            events,
+            current,
+            matches,
+            send
+        }
     }
 
     delete componentProps.component;
     delete componentProps.id;
-    
-    let machineProps = {
-        events,
-        current,
-        send: handleSend,
-        matches,
-    }
 
     // TODO:
     // Update context for initial state
@@ -79,12 +81,21 @@ function State(props) {
     // TODO:
     // Compare "loading" or "checkout.loading" to current ?
 
+    // TODO:
+    // Add additional provider for State to resolve stack
+
     if (matches(id)) {
+        // return WrappedComponent ?
+        //     <StateMachineContext.Consumer>
+        //         { ctx => <WrappedComponent {...componentProps}/>}
+        //     </StateMachineContext.Consumer>
+        // : _children;
+
         return WrappedComponent ?
-            <StateMachineContext.Consumer>
-                { ctx => <WrappedComponent machine={machineProps} {...componentProps}/>}
-            </StateMachineContext.Consumer>
-        : children ? children : null;
+            <StateNodeContext.Provider value={{ id }}>
+                <WrappedComponent {...componentProps}/>
+            </StateNodeContext.Provider>
+        : null
     } else {
         return null;
     }
