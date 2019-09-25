@@ -1,4 +1,4 @@
-# Ideas
+# Proposals
 
 Example code:
 ```jsx
