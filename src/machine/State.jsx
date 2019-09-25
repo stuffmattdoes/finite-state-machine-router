@@ -2,18 +2,19 @@ import React, { useContext, useEffect } from 'react';
 import { StateMachineContext } from './Machine';
 
 function State(props) {
-    const { current, matches, resolveInitial, transition } = useContext(StateMachineContext);
+    const { current, matches, resolveStack, transition } = useContext(StateMachineContext);
     const { children, component: WrappedComponent, id, initial, url } = props;
     const transitions = {};
     const events = [];
 
     // Called once after first render
     useEffect(() => {
-        // Communicate "initial" status to parent
         if (initial) {
-            resolveInitial(id);
-            // console.log('initial:', id);
+            // TODO:
+            // Should only happen once per page refresh?
+            resolveStack(id);
         }
+        // console.log('id', id);
     }, []);
 
     // List our events available to the component being rendered

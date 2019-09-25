@@ -34,7 +34,6 @@ ReactDOM.render(
                 <Transition event={events.RESOLVE} target='hub'/>
                 <Transition event={events.REJECT} target='error'/>
                 <State component={SubLoader} initial id='sub-loading'/>
-                <State component={Error} id='error'/>
             </State>
             <State component={Checkout} id='hub'>
                 <State id='trade-in' url='/trade-in'>

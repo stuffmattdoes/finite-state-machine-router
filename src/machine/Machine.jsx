@@ -12,7 +12,7 @@ const initialState = {
     // },
     current: null,
     matches: (id) => {},
-    resolveInitial: (id) => {},
+    resolveStack: (id) => {},
     transition: (target) => {}
 };
 
@@ -21,10 +21,10 @@ export const StateMachineContext = React.createContext(initialState);
 function Machine ({ children, id, url }) {
     const [ state, setState ] = useState({
         ...initialState,
-        // current: `#${id}`
+        current: `#${id}`
     });
     const matches = (id) => state.current && state.current.includes(id);
-    const resolveInitial = (id) => setState({ ...state, current: `${state.current}.${id}` });
+    const resolveStack = (id) => setState({ ...state, current: `${state.current}.${id}` });
     const transition = (target) => setState({ ...state, current: `#${id}.${target}` });
 
     // console.log(state);
@@ -32,7 +32,7 @@ function Machine ({ children, id, url }) {
     return <StateMachineContext.Provider value={{
         ...state,
         matches,
-        resolveInitial,
+        resolveStack,
         transition
     }}>
         {children}
