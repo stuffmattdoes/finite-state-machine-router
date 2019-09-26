@@ -8,7 +8,7 @@ StateNodeContext.displayName = 'StateNode';
 function State(props) {
     const { children, component: WrappedComponent, id, initial = false, type, url } = props;
 
-    // List our events & transitions available in this
+    // List our events & transitions available in this StateNode
     // Expensive, therefore memo
     const { _childrenArr, _hasChildrenStateNodes, _transitions, events } = useMemo(() => {
         const _childrenArr = React.Children.toArray(children);
