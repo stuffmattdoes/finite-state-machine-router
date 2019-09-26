@@ -19,7 +19,6 @@ import SubLoader2 from './components/SubLoader2';
 import Submitting from './components/Submitting';
 
 const events = {
-    ERROR: 'ERROR',
     REJECT: 'REJECT',
     RESOLVE: 'RESOLVE',
     RELOAD: 'RELOAD',
@@ -35,23 +34,25 @@ ReactDOM.render(
             <State component={Loader} id='loading' initial>
                 <Transition event={events.RESOLVE} target='hub'/>
                 <Transition event={events.REJECT} target='error'/>
-                <State component={SubLoader} id='sub-loading' initial>
-                    <Transition event={'SUBLOADER'} target='sub-loading-2'/>
+                <State id='intermediary' initial>
+                    <State component={SubLoader} id='sub-loading' initial>
+                        <Transition event={'SUBLOADER'} target='sub-loading-2'/>
+                    </State>
+                    <State component={SubLoader2} id='sub-loading-2'/>
                 </State>
-                <State component={SubLoader2} id='sub-loading-2'/>
             </State>
             <State component={Checkout} id='hub'>
                 <State id='trade-in' initial url='/trade-in'>
                     <State component={Loader} id='loading' initial>
                         <Transition event={events.RESOLVE} target='lookup'/>
-                        <Transition event={events.ERROR} target='error'/>
+                        <Transition event={events.REJECT} target='error'/>
                     </State>
                     <State component={Lookup} id='lookup'>
                         <Transition event={events.SUBMIT} target='submitting'/>
                     </State>
                     <State component={Submitting} id='submitting'>
                         <Transition event={events.RESOLVE} target='estimate'/>
-                        <Transition event={events.ERROR} target='no-results'/>
+                        <Transition event={events.REJECT} target='no-results'/>
                     </State>
                     <State component={Estimate} id='estimate' url='/estimate'/>
                     <State component={NoResults} id='no-results' url='/no-results'/>

@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useMemo } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { StateMachineContext } from './Machine';
 import { tsNamespaceExportDeclaration } from '@babel/types';
 
@@ -7,16 +7,14 @@ StateNodeContext.displayName = 'StateNode';
 
 function State(props) {
     const { children, component: WrappedComponent, id, initial = false, type, url } = props;
-    const { current, id: machineId, matches, resolveStack, transition } = useContext(StateMachineContext);
-    const { siblingStates, parentId } = useContext(StateNodeContext);
 
+    // List our events & transitions available in this
     // Expensive, therefore memo
-    const { _childrenArr, _hasStateChildren, _transitions, childStates, events } = useMemo(() => {
+    const { _childrenArr, _hasChildrenStateNodes, _transitions, events } = useMemo(() => {
         const _childrenArr = React.Children.toArray(children);
-        const _hasStateChildren = _childrenArr.find(child => child.type.name === 'State');
+        const _hasChildrenStateNodes = _childrenArr.find(child => child.type.name === 'State');
         const _transitions = {};
         const events = [];
-        // const childStates = [];
 
         _childrenArr.forEach(child => {
             if (child.type.name === 'Transition') {
@@ -36,54 +34,51 @@ function State(props) {
                     events.push(child.props['event']);
                 }
             }
-            // else if (child.type.name === 'State') {
-            //     childStates.push(child.props.id);
-            // }
         });
 
         return {
             _childrenArr,
-            _hasStateChildren,
+            _hasChildrenStateNodes,
             _transitions,
-            // childStates,
             events
         }
     }, [ children ]);
 
-    let _type = type ? type : _childrenArr.length === 0 || !_hasStateChildren ? 'atomic' : null;
-    let _mounted = true;
+    const { current, id: machineId, matches, resolveStack, transition } = useContext(StateMachineContext);
+    const { parentId, parentStack } = useContext(StateNodeContext);
+    const [ { mounted }, setState ] = useState({ mounted: false });
+    const _type = type ? type : _childrenArr.length === 0 || !_hasChildrenStateNodes ? 'atomic' : null;
+    const getNodeStack = (id) => parentStack ? `${parentStack}.${id}` : id;
 
     useEffect(() => {
-        // Resolve root stack
-        if (initial && _mounted && _type === 'atomic') {
-            resolveStack(`${parentId}.${id}`);
+        // Resolve initial stack
+        if (initial && !mounted) {
+            if (_type === 'atomic') {
+                resolveStack(getNodeStack(id));
+            }
         }
 
-        return () => _mounted = false;
+        return setState({ mounted: true });
     }, []);
 
-    // List our events available to the component being rendered
     const send = (event) => {
-        const target = parentId ? `${parentId}.${_transitions[event]}` : _transitions[event];
-        // console.log(id, childStates, target);
+        const target = getNodeStack(_transitions[event]);
+
         if (!_transitions.hasOwnProperty(event)) {
             console.error(`Event "${event}" is not available from within StateNode "${current}"`);
             return;
         }
-        // if (siblingStates && !siblingStates.includes(target)) {
-        //     console.error(`State "${target}" is not a sibling of "${id}" and cannot be transitioned to.`);
-        //     return;
-        // }
 
-        // Resolve entire state stack
-        console.log(event, target);
+        // TODO
+        // Stale state causing improper transition
+        // console.log('send', current, target);
         transition(event, target);
     }
-    
-    // const transition = (event, target) => {
-    //     setState({ ...state, current: `#${id}.${target}` });
-    // };
 
+    const initialValue = {
+        parentId: id,
+        parentStack: getNodeStack(id)
+    }
     const componentProps = {
         ...props,
         machine: {
@@ -96,15 +91,13 @@ function State(props) {
     delete componentProps.component;
     delete componentProps.id;
 
-    // console.log(id, { 'matches': matches(id), 'moutned': _mounted, 'initial': initial });
-
-    return WrappedComponent ?
-        (matches(id) || _mounted && initial) ?
-            <StateNodeContext.Provider value={{ parentId: id, /* siblingStates: childStates */ }}>
+    return (matches(id) || !mounted && initial) ?
+        <StateNodeContext.Provider value={initialValue}>
+            { WrappedComponent ? 
                 <WrappedComponent {...componentProps}/>
-            </StateNodeContext.Provider>
-        : null
-    : children;
+            : children }
+        </StateNodeContext.Provider>
+    : null;
 }
 
 export default State;
