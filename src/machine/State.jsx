@@ -57,7 +57,7 @@ function State(props) {
             }
         }
 
-        return setState({ mounted: true });
+        setState({ mounted: true });
     }, []);
 
     const send = (event) => {
@@ -70,9 +70,11 @@ function State(props) {
 
         // TODO
         // Stale state causing improper transition
-        // console.log('send', current, target);
+        // console.log('send', current);
         transition(event, target);
     }
+
+    // console.log('current', current);
 
     const initialValue = {
         parentId: id,

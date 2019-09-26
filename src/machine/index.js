@@ -1,5 +1,5 @@
 import Link from './Link';
-import Machine from './Machine';
+import { history, Machine } from './Machine';
 import State from './State';
 import Transition from './Transition';
 
