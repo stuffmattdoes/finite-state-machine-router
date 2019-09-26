@@ -1,6 +1,5 @@
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { StateMachineContext } from './Machine';
-import { tsNamespaceExportDeclaration } from '@babel/types';
 
 export const StateNodeContext = React.createContext({});
 StateNodeContext.displayName = 'StateNode';
