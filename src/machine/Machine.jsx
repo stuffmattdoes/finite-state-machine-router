@@ -15,21 +15,17 @@ function Machine ({ children, id, url }) {
         id
     });
     const matches = (stateId) => state.current.split('.').includes(stateId);
-    const resolveStack = (stateId) => {
-        const nextState = `#${id}.${stateId}`;
-        // console.log('resolveRoot', nextState);
-        setState({ ...state, current: nextState });
-    }
-    // const transition = (event, target) => {
-    //     log(state, event, target);
-    //     setState({ ...state, current: `#${id}.${target}` });
-    // };
+    const resolveStack = (stateId) => setState({ ...state, current: `#${id}.${stateId}` });
+    const transition = (event, target) => {
+        // log(state, event, target);
+        setState({ ...state, current: `#${id}.${target}` });
+    };
 
     return <StateMachineContext.Provider value={{
         ...state,
         matches,
         resolveStack,
-        // transition
+        transition
     }}>
         {children}
     </StateMachineContext.Provider>;

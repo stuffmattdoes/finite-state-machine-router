@@ -6,12 +6,50 @@ export const StateNodeContext = React.createContext({});
 StateNodeContext.displayName = 'StateNode';
 
 function State(props) {
-    const { children, component: WrappedComponent, id, initial, type, url } = props;
+    const { children, component: WrappedComponent, id, initial = false, type, url } = props;
     const { current, id: machineId, matches, resolveStack, transition } = useContext(StateMachineContext);
-    const { parentId, resolveState } = useContext(StateNodeContext);
+    const { siblingStates, parentId } = useContext(StateNodeContext);
+
+    // Expensive, therefore memo
+    const { _childrenArr, _hasStateChildren, _transitions, childStates, events } = useMemo(() => {
+        const _childrenArr = React.Children.toArray(children);
+        const _hasStateChildren = _childrenArr.find(child => child.type.name === 'State');
+        const _transitions = {};
+        const events = [];
+        // const childStates = [];
+
+        _childrenArr.forEach(child => {
+            if (child.type.name === 'Transition') {
+                let skip = false;
     
-    const _childrenArr = React.Children.toArray(children);
-    const _hasStateChildren = _childrenArr.find(child => child.type.name === 'State');
+                // Just check for some required props
+                if (!child.props.hasOwnProperty('event')) {
+                    console.error('Component "<Transition/>" requires an "event" property.');
+                    skip = true;
+                }
+                if (!child.props.hasOwnProperty('target')) {
+                    console.error('Component "<Transition/>" requires a "target" property.');
+                    skip = true; 
+                }
+                if (!skip) {
+                    _transitions[child.props['event']] = child.props['target'];
+                    events.push(child.props['event']);
+                }
+            }
+            // else if (child.type.name === 'State') {
+            //     childStates.push(child.props.id);
+            // }
+        });
+
+        return {
+            _childrenArr,
+            _hasStateChildren,
+            _transitions,
+            // childStates,
+            events
+        }
+    }, [ children ]);
+
     let _type = type ? type : _childrenArr.length === 0 || !_hasStateChildren ? 'atomic' : null;
     let _mounted = true;
 
@@ -25,40 +63,21 @@ function State(props) {
     }, []);
 
     // List our events available to the component being rendered
-    const transitions = {};
-    const events = [];
-
-    React.Children.forEach(children, child => {
-        if (child.type.name === 'Transition') {
-            let skip = false;
-
-            // Just check for some required props
-            if (!child.props.hasOwnProperty('event')) {
-                console.error('Component "<Transition/>" requires an "event" property.');
-                skip = true;
-            }
-            if (!child.props.hasOwnProperty('target')) {
-                console.error('Component "<Transition/>" requires a "target" property.');
-                skip = true; 
-            }
-            if (!skip) {
-                transitions[child.props['event']] = child.props['target'];
-                events.push(child.props['event']);
-            }
-        }
-    });
-
     const send = (event) => {
-        const target = transitions[event];
-        if (!transitions.hasOwnProperty(event)) {
-            console.error(`Event "${event}" is not available from within StateNode "${id}"`);
+        const target = parentId ? `${parentId}.${_transitions[event]}` : _transitions[event];
+        // console.log(id, childStates, target);
+        if (!_transitions.hasOwnProperty(event)) {
+            console.error(`Event "${event}" is not available from within StateNode "${current}"`);
+            return;
         }
-        // if (!states.includes(target)) {
-        //     console.error(`State "${target}" cannot be transitioned to from state "${current}"`);
+        // if (siblingStates && !siblingStates.includes(target)) {
+        //     console.error(`State "${target}" is not a sibling of "${id}" and cannot be transitioned to.`);
+        //     return;
         // }
 
         // Resolve entire state stack
-        // transition(event, target);
+        console.log(event, target);
+        transition(event, target);
     }
     
     // const transition = (event, target) => {
@@ -77,14 +96,11 @@ function State(props) {
     delete componentProps.component;
     delete componentProps.id;
 
+    // console.log(id, { 'matches': matches(id), 'moutned': _mounted, 'initial': initial });
 
     return WrappedComponent ?
         (matches(id) || _mounted && initial) ?
-            <StateNodeContext.Provider value={{
-                parentId: id,
-                // parentStack: `${parentId}.${id}`,
-                // resolveState: resolveStateCb
-            }}>
+            <StateNodeContext.Provider value={{ parentId: id, /* siblingStates: childStates */ }}>
                 <WrappedComponent {...componentProps}/>
             </StateNodeContext.Provider>
         : null

@@ -32,17 +32,17 @@ const events = {
 ReactDOM.render(
     <Container>
         <Machine id='checkout' url='/checkout'>
-            <State component={Loader} initial id='loading'>
+            <State component={Loader} id='loading' initial>
                 <Transition event={events.RESOLVE} target='hub'/>
                 <Transition event={events.REJECT} target='error'/>
-                <State component={SubLoader} initial id='sub-loading'>
+                <State component={SubLoader} id='sub-loading' initial>
                     <Transition event={'SUBLOADER'} target='sub-loading-2'/>
                 </State>
                 <State component={SubLoader2} id='sub-loading-2'/>
             </State>
             <State component={Checkout} id='hub'>
-                <State id='trade-in' url='/trade-in'>
-                    <State component={Loader} initial id='loading'>
+                <State id='trade-in' initial url='/trade-in'>
+                    <State component={Loader} id='loading' initial>
                         <Transition event={events.RESOLVE} target='lookup'/>
                         <Transition event={events.ERROR} target='error'/>
                     </State>
