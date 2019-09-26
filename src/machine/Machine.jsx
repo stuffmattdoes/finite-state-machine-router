@@ -6,49 +6,30 @@ export const history = createBrowserHistory({
     basename: '/checkout',
 });
 
-const initialState = {
-    // current: {
-    //     value: 'loading',
-    //     full: null
-    // },
-    current: null,
-    matches: (id) => {},
-    resolveStack: (id) => {},
-    transition: (target) => {}
-};
-
-export const StateMachineContext = React.createContext(initialState);
+export const StateMachineContext = React.createContext();
 StateMachineContext.displayName = 'Machine';
 
 function Machine ({ children, id, url }) {
     const [ state, setState ] = useState({
-        ...initialState,
         current: `#${id}`,
         id
     });
-    const matches = (id) => {
-        // Match entire stack to current stack
-        const matches = state.current.split('.').includes(id);
-
-        if (matches) {
-            console.log('Initial state:', id, state.current);
-        }
-
-        return matches
+    const matches = (stateId) => state.current.split('.').includes(stateId);
+    const resolveStack = (stateId) => {
+        const nextState = `#${id}.${stateId}`;
+        // console.log('resolveRoot', nextState);
+        setState({ ...state, current: nextState });
     }
-    const resolveStack = (target) => setState({ ...state, current: `${state.current}.${target}` });
-    const transition = (event, target) => {
-        log(state, event, target);
-        setState({ ...state, current: `#${id}.${target}` });
-    };
-
-    // console.log('state', state.current);
+    // const transition = (event, target) => {
+    //     log(state, event, target);
+    //     setState({ ...state, current: `#${id}.${target}` });
+    // };
 
     return <StateMachineContext.Provider value={{
         ...state,
         matches,
         resolveStack,
-        transition
+        // transition
     }}>
         {children}
     </StateMachineContext.Provider>;

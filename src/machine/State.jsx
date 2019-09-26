@@ -1,34 +1,34 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import { StateMachineContext } from './Machine';
+import { tsNamespaceExportDeclaration } from '@babel/types';
 
-export const StateNodeContext = React.createContext();
+export const StateNodeContext = React.createContext({});
 StateNodeContext.displayName = 'StateNode';
 
 function State(props) {
+    const { children, component: WrappedComponent, id, initial, type, url } = props;
     const { current, id: machineId, matches, resolveStack, transition } = useContext(StateMachineContext);
-    const { children, component: WrappedComponent, id, initial, url } = props;
-    // const stateNodeContext = useContext(StateNodeContext);
-    const transitions = {};
-    const events = [];
+    const { parentId, resolveState } = useContext(StateNodeContext);
+    
+    const _childrenArr = React.Children.toArray(children);
+    const _hasStateChildren = _childrenArr.find(child => child.type.name === 'State');
+    let _type = type ? type : _childrenArr.length === 0 || !_hasStateChildren ? 'atomic' : null;
+    let _mounted = true;
 
-    const send = (event) => {
-        if (!transitions.hasOwnProperty(event)) {
-            console.error(`Event: "${event}" is not available from within id: "${id}"`);
-        }
-
-        // Resolve entire state stack
-        transition(event, transitions[event]);
-    }
-
-    // Called once after first render
     useEffect(() => {
-        if (initial/* || matches(id)*/) {
-            resolveStack(id);
+        // Resolve root stack
+        if (initial && _mounted && _type === 'atomic') {
+            resolveStack(`${parentId}.${id}`);
         }
+
+        return () => _mounted = false;
     }, []);
 
     // List our events available to the component being rendered
-    const _children = React.Children.map(children, child => {
+    const transitions = {};
+    const events = [];
+
+    React.Children.forEach(children, child => {
         if (child.type.name === 'Transition') {
             let skip = false;
 
@@ -37,33 +37,36 @@ function State(props) {
                 console.error('Component "<Transition/>" requires an "event" property.');
                 skip = true;
             }
-
             if (!child.props.hasOwnProperty('target')) {
                 console.error('Component "<Transition/>" requires a "target" property.');
                 skip = true; 
             }
-
             if (!skip) {
                 transitions[child.props['event']] = child.props['target'];
                 events.push(child.props['event']);
             }
-
-            return null;
         }
-        // else if (child.type.name === 'State') {
-        //     console.log('Clone StateNode');
-
-        //     return React.cloneElement(child, {
-        //         ...child.props,
-        //         send: send,
-        //         testProp: 'test'
-        //     });
-        // }
     });
+
+    const send = (event) => {
+        const target = transitions[event];
+        if (!transitions.hasOwnProperty(event)) {
+            console.error(`Event "${event}" is not available from within StateNode "${id}"`);
+        }
+        // if (!states.includes(target)) {
+        //     console.error(`State "${target}" cannot be transitioned to from state "${current}"`);
+        // }
+
+        // Resolve entire state stack
+        // transition(event, target);
+    }
+    
+    // const transition = (event, target) => {
+    //     setState({ ...state, current: `#${id}.${target}` });
+    // };
 
     const componentProps = {
         ...props,
-        // children: _children,
         machine: {
             events,
             current,
@@ -71,34 +74,21 @@ function State(props) {
             send
         }
     }
-
     delete componentProps.component;
     delete componentProps.id;
 
-    // TODO:
-    // Update context for initial state
 
-    // TODO:
-    // Compare "loading" or "checkout.loading" to current ?
-
-    // TODO:
-    // Add additional provider for State to resolve stack
-
-    if (matches(id)) {
-        // return WrappedComponent ?
-        //     <StateMachineContext.Consumer>
-        //         { ctx => <WrappedComponent {...componentProps}/>}
-        //     </StateMachineContext.Consumer>
-        // : _children;
-
-        return WrappedComponent ?
-            <StateNodeContext.Provider value={{ id }}>
+    return WrappedComponent ?
+        (matches(id) || _mounted && initial) ?
+            <StateNodeContext.Provider value={{
+                parentId: id,
+                // parentStack: `${parentId}.${id}`,
+                // resolveState: resolveStateCb
+            }}>
                 <WrappedComponent {...componentProps}/>
             </StateNodeContext.Provider>
         : null
-    } else {
-        return null;
-    }
+    : children;
 }
 
 export default State;
