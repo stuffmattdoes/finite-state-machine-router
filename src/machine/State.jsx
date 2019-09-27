@@ -43,7 +43,7 @@ function State(props) {
     }, [ children ]);
 
     const { current, id: machineId, matches, resolveStack, resolveUrl, transition } = useContext(StateMachineContext);
-    const { parentId, parentStack } = useContext(StateNodeContext);
+    const { parentId, parentStack, send } = useContext(StateNodeContext);
     const [ { mounted }, setState ] = useState({ mounted: false });
     const _type = type ? type : _childrenArr.length === 0 || !_hasChildrenStateNodes ? 'atomic' : null;
     const getStateNodeStack = (id) => parentStack ? `${parentStack}.${id}` : id;
@@ -63,19 +63,21 @@ function State(props) {
     }, []);
 
     // Resolve URL
-    useEffect(() => {
+    // const _resolveUrl = useMemo(() => {
         if (matches(id) && url) {
             resolveUrl(url);
         }
 
-        return () => {
-            if (matches(id) && url) {
-                resolveUrl('/');
-            }
-        }
-    }, [ current ]);
+    //     return () => {
+    //         if (matches(id) && url) {
+    //             resolveUrl('/');
+    //         }
+    //     }
+    // }, [ current ]);
 
-    const send = (event) => {
+    // _resolveUrl();
+
+    const _send = (event) => {
         const target = getStateNodeStack(_transitions[event]);
 
         if (!_transitions.hasOwnProperty(event)) {
@@ -86,9 +88,10 @@ function State(props) {
         transition(event, target);
     }
 
-    const initialValue = {
+    const initialContext = {
         parentId: id,
-        parentStack: getStateNodeStack(id)
+        parentStack: getStateNodeStack(id),
+        send: _send
     }
     const componentProps = {
         ...props,
@@ -96,14 +99,14 @@ function State(props) {
             events,
             current,
             matches,
-            send
+            send: _send
         }
     }
     delete componentProps.component;
     delete componentProps.id;
 
     return (matches(id) || !mounted && initial) ?
-        <StateNodeContext.Provider value={initialValue}>
+        <StateNodeContext.Provider value={initialContext}>
             { WrappedComponent ? 
                 <WrappedComponent {...componentProps}/>
             : children }
