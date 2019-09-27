@@ -2,7 +2,8 @@
 
 ```jsx
 
-// This is NOT an implementation example. This is just a quick detail of how you'd conceptually structure a state machine.
+// This is NOT an implementation example.
+// This is just a detail of how you'd conceptually structure a state machine.
 const states = {        // state = traffic
     id: 'traffic',
     url: '/traffic',
