@@ -31,11 +31,11 @@ const events = {
 ReactDOM.render(
     <Container>
         <Machine id='checkout' url='/checkout'>
-            <State component={Loader} id='loading' initial>
+            <State component={Loader} id='loading' initial url='/loading'>
                 <Transition event={events.RESOLVE} target='hub'/>
                 <Transition event={events.REJECT} target='error'/>
                 <State id='intermediary' initial>
-                    <State component={SubLoader} id='sub-loading' initial>
+                    <State component={SubLoader} id='sub-loading' initial url='/sub-loading'>
                         <Transition event={'SUBLOADER'} target='sub-loading-2'/>
                     </State>
                     <State component={SubLoader2} id='sub-loading-2'/>

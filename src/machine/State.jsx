@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { StateMachineContext } from './Machine';
 
 export const StateNodeContext = React.createContext({});
@@ -7,8 +7,7 @@ StateNodeContext.displayName = 'StateNode';
 function State(props) {
     const { children, component: WrappedComponent, id, initial = false, type, url } = props;
 
-    // List our events & transitions available in this StateNode
-    // Expensive, therefore memo
+    // List our events & transitions available from this StateNode
     const { _childrenArr, _hasChildrenStateNodes, _transitions, events } = useMemo(() => {
         const _childrenArr = React.Children.toArray(children);
         const _hasChildrenStateNodes = _childrenArr.find(child => child.type.name === 'State');
@@ -44,23 +43,20 @@ function State(props) {
     }, [ children ]);
 
     const { current, id: machineId, matches, resolveStack, resolveUrl, transition } = useContext(StateMachineContext);
-    const { parentId, parentStack, parentUrl } = useContext(StateNodeContext);
+    const { parentId, parentStack } = useContext(StateNodeContext);
     const [ { mounted }, setState ] = useState({ mounted: false });
     const _type = type ? type : _childrenArr.length === 0 || !_hasChildrenStateNodes ? 'atomic' : null;
     const getStateNodeStack = (id) => parentStack ? `${parentStack}.${id}` : id;
-    const stateNodeUrl = url ? parentUrl ? `${parentUrl}${url}` : url : null;
 
     // resolve initial stack
     useEffect(() => {
         // Resolve initial stack
-        if (initial && !mounted) {
-            if (_type === 'atomic') {
-                resolveStack(getStateNodeStack(id));
-                
-                // if (url) {
-                //     resolveUrl(stateNodeUrl);
-                // }
-            }
+        if (initial && !mounted && _type === 'atomic') {
+            resolveStack(getStateNodeStack(id));
+            
+            // if (url) {
+            //     resolveUrl(stateNodeUrl);
+            // }
         }
 
         setState({ mounted: true });
@@ -69,12 +65,12 @@ function State(props) {
     // Resolve URL
     useEffect(() => {
         if (matches(id) && url) {
-            resolveUrl(stateNodeUrl);
+            resolveUrl(url);
         }
 
         return () => {
             if (matches(id) && url) {
-                resolveUrl('');
+                resolveUrl('/');
             }
         }
     }, [ current ]);
@@ -92,8 +88,7 @@ function State(props) {
 
     const initialValue = {
         parentId: id,
-        parentStack: getStateNodeStack(id),
-        parentUrl: stateNodeUrl
+        parentStack: getStateNodeStack(id)
     }
     const componentProps = {
         ...props,

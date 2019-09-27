@@ -9,37 +9,6 @@ export const history = createBrowserHistory({
 export const StateMachineContext = React.createContext();
 StateMachineContext.displayName = 'Machine';
 
-// export class MachineClass extends React.Component {
-//     constructor(props) {
-//         super(props);
-        
-//         this.state = {
-//             current: `#${props.id}`,
-//             id: props.id,
-//             matches: this.matches,
-//             resolveStack: this.resolveStack,
-//             transition: this.transition
-//         }
-//     }
-
-//     matches = (stateId) => this.state.current.split('.').includes(stateId);
-
-//     resolveStack = (stateId, url) => {
-//         this.setState({ current: `#${this.state.id}.${stateId}` });
-//     }
-
-//     transition = (event, target) => {
-//         log(this.state, event, target);
-//         return this.setState({ current: `#${this.state.id}.${target}` });
-//     };
-
-//     render() {
-//         return <StateMachineContext.Provider value={this.state}>
-//             {this.props.children}
-//         </StateMachineContext.Provider>;
-//     }
-// }
-
 export function Machine ({ children, id, url }) {
     const [ state, setState ] = useState({
         current: `#${id}`,
@@ -54,9 +23,14 @@ export function Machine ({ children, id, url }) {
         // console.log('resolveStack', stateId);
         setState({ ...state, current: `#${id}.${stateId}` });
     };
+
+    // TODO
+    // Resolve doulbe URL push
     const resolveUrl = (url) => {
+        const { pathname } = history.location;
+        let stateNodeUrl = url ? pathname.length === '/' ? `${pathname}${url}` : url : null;
         console.log('resolveUrl', url);
-        history.push(url);
+        stateNodeUrl && history.push(stateNodeUrl);
     };
     const transition = (event, target) => {
         // log(state, event, target);
