@@ -68,13 +68,8 @@ function State(props) {
             return;
         }
 
-        // TODO
-        // Stale state causing improper transition
-        // console.log('send', current);
         transition(event, target);
     }
-
-    // console.log('current', current);
 
     const initialValue = {
         parentId: id,

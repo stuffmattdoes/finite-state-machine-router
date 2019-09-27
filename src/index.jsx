@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import './index.css';
 
 // State machine
-import { Machine, State, Transition } from './machine/';
+import { Machine, State, Transition } from './machine';
 
 // Components
 import Container from './components/Container';
@@ -43,11 +43,11 @@ ReactDOM.render(
             </State>
             <State component={Checkout} id='hub'>
                 <State id='trade-in' initial url='/trade-in'>
-                    <State component={Loader} id='loading' initial>
+                    {/* <State component={Loader} id='loading' initial>
                         <Transition event={events.RESOLVE} target='lookup'/>
                         <Transition event={events.REJECT} target='error'/>
-                    </State>
-                    <State component={Lookup} id='lookup'>
+                    </State> */}
+                    <State component={Lookup} id='lookup' initial>
                         <Transition event={events.SUBMIT} target='submitting'/>
                     </State>
                     <State component={Submitting} id='submitting'>
