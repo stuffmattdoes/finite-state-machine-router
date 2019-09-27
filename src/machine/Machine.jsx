@@ -9,36 +9,36 @@ export const history = createBrowserHistory({
 export const StateMachineContext = React.createContext();
 StateMachineContext.displayName = 'Machine';
 
-export class MachineClass extends React.Component {
-    constructor(props) {
-        super(props);
+// export class MachineClass extends React.Component {
+//     constructor(props) {
+//         super(props);
         
-        this.state = {
-            current: `#${props.id}`,
-            id: props.id,
-            matches: this.matches,
-            resolveStack: this.resolveStack,
-            transition: this.transition
-        }
-    }
+//         this.state = {
+//             current: `#${props.id}`,
+//             id: props.id,
+//             matches: this.matches,
+//             resolveStack: this.resolveStack,
+//             transition: this.transition
+//         }
+//     }
 
-    matches = (stateId) => this.state.current.split('.').includes(stateId);
+//     matches = (stateId) => this.state.current.split('.').includes(stateId);
 
-    resolveStack = (stateId) => {
-        this.setState({ current: `#${this.state.id}.${stateId}` });
-    }
+//     resolveStack = (stateId, url) => {
+//         this.setState({ current: `#${this.state.id}.${stateId}` });
+//     }
 
-    transition = (event, target) => {
-        log(this.state, event, target);
-        return this.setState({ current: `#${this.state.id}.${target}` });
-    };
+//     transition = (event, target) => {
+//         log(this.state, event, target);
+//         return this.setState({ current: `#${this.state.id}.${target}` });
+//     };
 
-    render() {
-        return <StateMachineContext.Provider value={this.state}>
-            {this.props.children}
-        </StateMachineContext.Provider>;
-    }
-}
+//     render() {
+//         return <StateMachineContext.Provider value={this.state}>
+//             {this.props.children}
+//         </StateMachineContext.Provider>;
+//     }
+// }
 
 export function Machine ({ children, id, url }) {
     const [ state, setState ] = useState({
@@ -51,22 +51,24 @@ export function Machine ({ children, id, url }) {
         return state.current.split('.').includes(stateId);
     };
     const resolveStack = (stateId) => {
-        console.log('resolveStack', stateId);
+        // console.log('resolveStack', stateId);
         setState({ ...state, current: `#${id}.${stateId}` });
     };
+    const resolveUrl = (url) => {
+        console.log('resolveUrl', url);
+        history.push(url);
+    };
     const transition = (event, target) => {
-        // log(state, event, target);      // Stale
-        console.log('transition', state.current);
+        // log(state, event, target);
+        // console.log('transition', state.current);       // Stale
         setState({ ...state, current: `#${id}.${target}` });
     };
-
-    // console.log(state.current);
-    // useEffect(() => console.log(state.current));
 
     const providerValue = {
         ...state,
         matches,
         resolveStack,
+        resolveUrl,
         transition
     }
     

@@ -43,25 +43,44 @@ function State(props) {
         }
     }, [ children ]);
 
-    const { current, id: machineId, matches, resolveStack, transition } = useContext(StateMachineContext);
-    const { parentId, parentStack } = useContext(StateNodeContext);
+    const { current, id: machineId, matches, resolveStack, resolveUrl, transition } = useContext(StateMachineContext);
+    const { parentId, parentStack, parentUrl } = useContext(StateNodeContext);
     const [ { mounted }, setState ] = useState({ mounted: false });
     const _type = type ? type : _childrenArr.length === 0 || !_hasChildrenStateNodes ? 'atomic' : null;
-    const getNodeStack = (id) => parentStack ? `${parentStack}.${id}` : id;
+    const getStateNodeStack = (id) => parentStack ? `${parentStack}.${id}` : id;
+    const stateNodeUrl = url ? parentUrl ? `${parentUrl}${url}` : url : null;
 
+    // resolve initial stack
     useEffect(() => {
         // Resolve initial stack
         if (initial && !mounted) {
             if (_type === 'atomic') {
-                resolveStack(getNodeStack(id));
+                resolveStack(getStateNodeStack(id));
+                
+                // if (url) {
+                //     resolveUrl(stateNodeUrl);
+                // }
             }
         }
 
         setState({ mounted: true });
     }, []);
 
+    // Resolve URL
+    useEffect(() => {
+        if (matches(id) && url) {
+            resolveUrl(stateNodeUrl);
+        }
+
+        return () => {
+            if (matches(id) && url) {
+                resolveUrl('');
+            }
+        }
+    }, [ current ]);
+
     const send = (event) => {
-        const target = getNodeStack(_transitions[event]);
+        const target = getStateNodeStack(_transitions[event]);
 
         if (!_transitions.hasOwnProperty(event)) {
             console.error(`Event "${event}" is not available from within StateNode "${current}"`);
@@ -73,7 +92,8 @@ function State(props) {
 
     const initialValue = {
         parentId: id,
-        parentStack: getNodeStack(id)
+        parentStack: getStateNodeStack(id),
+        parentUrl: stateNodeUrl
     }
     const componentProps = {
         ...props,
