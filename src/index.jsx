@@ -35,10 +35,10 @@ ReactDOM.render(
                 <Transition event={events.RESOLVE} target='hub'/>
                 <Transition event={events.REJECT} target='error'/>
                 <State id='intermediary' initial>
-                    <State component={SubLoader} id='sub-loading' initial url='/sub-loading'>
+                    <State component={SubLoader} id='sub-loading' initial url='#sub-loading'>
                         <Transition event={'SUBLOADER'} target='sub-loading-2'/>
                     </State>
-                    <State component={SubLoader2} id='sub-loading-2'/>
+                    <State component={SubLoader2} id='sub-loading-2' url='#sub-loading-2'/>
                 </State>
             </State>
             <State component={Checkout} id='hub'>

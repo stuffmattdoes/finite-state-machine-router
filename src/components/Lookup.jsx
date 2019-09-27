@@ -1,7 +1,6 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
 function Lookup({ children }) {
-    // useEffect(() => console.log('render'));
     return <div className='lookup'>
         <h1>Lookup</h1>
         {children}

@@ -1,11 +1,12 @@
 import React from 'react';
+import { Link } from '../machine';
 
 function Checkout ({ children, machine}) {
-    // useEffect(() => console.log('render'));
-
     return <div className='checkout'>
         <h1>Checkout</h1>
-        <button onClick={e => machine.send('RELOAD')}>Reload</button>
+        <Link event={'RELOAD'}>Reload (State event)</Link>
+        <br/>
+        <Link href='/loading'>Reload (URL push)</Link>
         {children}
     </div>
 }

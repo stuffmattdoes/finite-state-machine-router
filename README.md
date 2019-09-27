@@ -56,3 +56,4 @@ Check out [proposals](./proposals.md).
 - [ ] Update browser URL from state (if `url` prop exists on `<State/>` component)
 - [ ] Derive application state from browser URL (for when user navigates directly to URL/refreshes. Based on `initial` prop existence)
 - [ ] Enable browser navigation (previous, next)
+- [ ] Hash routing?!?!?!?!??!?!

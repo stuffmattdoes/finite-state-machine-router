@@ -1,11 +1,13 @@
 import React from 'react';
+import { Link } from '../machine';
 
 function Error({ children, machine }) {
-    // useEffect(() => console.log('render'));
-    return <div className='errir'>
+    return <div className='error'>
         <h1>Error</h1>
         {children}
-        <button onClick={e => machine.send('RELOAD')}>Reload</button>
+        <Link event={'RELOAD'}>Reload (State event)</Link>
+        <br/>
+        <Link href='/loading'>Reload (URL push)</Link>
     </div>;
 }
 

@@ -2,18 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { createBrowserHistory } from 'history';
 import { log } from './util';
 
-export const history = createBrowserHistory({
-    basename: '/checkout',
-});
-
 export const StateMachineContext = React.createContext();
 StateMachineContext.displayName = 'Machine';
 
-export function Machine ({ children, id, url }) {
+export function Machine ({ children, history, id, url }) {
     const [ state, setState ] = useState({
         current: `#${id}`,
         id
     });
+
+    // Default history
+    if (!history) {
+        history = createBrowserHistory({ basename: url });
+    }
     
     const matches = (stateId) => {
         // console.log('matches', stateId, state.current);
@@ -40,6 +41,7 @@ export function Machine ({ children, id, url }) {
 
     const providerValue = {
         ...state,
+        history,
         matches,
         resolveStack,
         resolveUrl,
