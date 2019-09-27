@@ -4,6 +4,8 @@
 
 // This is NOT an implementation example.
 // This is just a detail of how you'd conceptually structure a state machine.
+// Actual implementation would be in JSX
+
 const states = {        // state = traffic
     id: 'traffic',
     url: '/traffic',
