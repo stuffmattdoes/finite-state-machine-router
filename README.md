@@ -51,7 +51,8 @@ import { Checkout, Error, Estimate, Loader, Lookup, NoResults, Submitting } from
 
 ## Todo:
 Check out [proposals](./proposals.md).
+- [x] Recursively render all sub `<State/>`
+- [ ] Resolve all `initial` states on first render. What to do if `initial` state is not also `atomic`?
 - [ ] Update browser URL from state (if `url` prop exists on `<State/>` component)
-- [ ] Derive application state from browser URL (for when user navigates directly to URL)
+- [ ] Derive application state from browser URL (for when user navigates directly to URL/refreshes. Based on `initial` prop existence)
 - [ ] Enable browser navigation (previous, next)
-- [ ] Render all sub `<State/>`
