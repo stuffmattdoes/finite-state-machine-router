@@ -3,11 +3,11 @@ A finite state machine (FSM) router for React
 
 Made with [Create React App](./CRA.md)
 
-Reference:
+### Reference:
 - [WC4 SCXML Specification](https://www.w3.org/TR/scxml/)
 - [David Harel's "Statecharts: A Visual Formalism for Complex Systems](http://www.inf.ed.ac.uk/teaching/courses/seoc/2005_2006/resources/statecharts.pdf)
 
-Inspirations:
+### Inspirations:
 - I want declarative URL routing with a finite state machine to make my app simple and predictable
 - I like David Khourshid's [XState](https://xstate.js.org/docs/) and Ryan Florence's [React Router](https://reacttraining.com/react-router/web/guides/quick-start), so basically putting those two together
 - I don't want to constantly push to new URLs. I'd rather dispatch state transitions and have the URL resolve itself.
@@ -51,7 +51,8 @@ import { Checkout, Error, Estimate, Loader, Lookup, NoResults, Submitting } from
 
 ## Todo:
 Check out [proposals](./proposals.md).
+- [x] Recursively render all sub `<State/>`
+- [ ] Resolve all `initial` states on first render. What to do if `initial` state is not also `atomic`?
 - [ ] Update browser URL from state (if `url` prop exists on `<State/>` component)
-- [ ] Derive application state from browser URL (for when user navigates directly to URL)
+- [ ] Derive application state from browser URL (for when user navigates directly to URL/refreshes. Based on `initial` prop existence)
 - [ ] Enable browser navigation (previous, next)
-- [ ] Render all sub `<State/>`
