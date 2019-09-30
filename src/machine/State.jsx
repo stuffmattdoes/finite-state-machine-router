@@ -91,6 +91,7 @@ function State(props) {
     const _matches = matches(id);
     const stack = getStateNodeStack(id);
     const stateNodeUrl = url ? parentUrl ? parentUrl + url : url : parentUrl;
+    
     const _send = (event) => {
         const target = getStateNodeStack(_transitions[event]);
 
@@ -104,24 +105,32 @@ function State(props) {
 
     // Resolve state from URL (for direct navigation, previous, next)
     // Resolve URL first -> then 'initial' down to 'atomic' type
-    const _pathnamesResolve = null;
-    // const { _pathnamesResolve } = useMemo(() => {
-    //     const _url = url && url.replace(/#|\//g, '');
-    //     let _pathnamesResolve = pathnamesResolve || history.location.pathname.split('/').slice(1);      // Remove initial empty index
+    // const _pathnamesResolve = null;
+    const { _pathnamesResolve } = useMemo(() => {
+        const _url = url && url.replace(/#|\//g, '');
+        let _pathnamesResolve = pathnamesResolve
+            || history.location.pathname.split('/').slice(1);      // Remove initial empty index
 
-    //     if (_pathnamesResolve[0] === _url) {
-    //         _initial = true;
-    //         _pathnamesResolve.shift();
-    //     }
+        if (_url) {
+            if (_pathnamesResolve[0] === _url) {
+                // _initial = true;
+                _pathnamesResolve.shift();
 
-    //     if (_pathnamesResolve.length === 0) {
-    //         resolveStack(stack);
-    //     }
+                if (_pathnamesResolve.length === 0) {
+                    // console.log('resolve', id, _pathnamesResolve, _type, stack);
+                    resolveStack(stack);
+                }
+            }
+            // else {
+            //     _initial = false;
+            // }
+        }
 
-    //     return {
-    //         _pathnamesResolve
-    //     }
+        return {
+            _pathnamesResolve
+        }
     // }, [ history.location.pathname ]);
+    }, []);
 
     // Resolve initial state
     // needs 'effect' hook to properly resolve 'initial' states

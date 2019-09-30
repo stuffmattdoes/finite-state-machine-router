@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createBrowserHistory } from 'history';
 // import { log } from './util';
 
@@ -15,6 +15,8 @@ export function Machine ({ children, history, id, url }) {
     if (!history) {
         history = createBrowserHistory({ basename: url });
     }
+
+    useEffect(() => history.listen(console.log), []);
     
     const matches = (stateId) => state.current.split('.').includes(stateId);
     const resolveStack = (stack) => {
@@ -22,7 +24,7 @@ export function Machine ({ children, history, id, url }) {
         setState({ ...state, current: `#${id}.${stack}` });
     }
     const resolveUrl = (url) => {
-        console.log('resolveUrl', url);
+        // console.log('resolveUrl', url);
         history.push(url);
     }
     const transition = (event, target) => setState({ ...state, current: `#${id}.${target}` });
