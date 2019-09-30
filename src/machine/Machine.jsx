@@ -27,12 +27,7 @@ export function Machine ({ children, history, id, url }) {
 
     // TODO
     // Resolve doulbe URL push
-    const resolveUrl = (url) => {
-        const { pathname } = history.location;
-        let stateNodeUrl = url ? pathname.length === '/' ? `${pathname}${url}` : url : null;
-        console.log('resolveUrl', url);
-        stateNodeUrl && history.push(stateNodeUrl);
-    };
+    const resolveUrl = history.push;
     const transition = (event, target) => {
         // log(state, event, target);
         // console.log('transition', state.current);       // Stale

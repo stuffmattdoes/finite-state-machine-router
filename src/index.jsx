@@ -34,19 +34,15 @@ ReactDOM.render(
             <State component={Loader} id='loading' initial url='/loading'>
                 <Transition event={events.RESOLVE} target='hub'/>
                 <Transition event={events.REJECT} target='error'/>
-                <State id='intermediary' initial>
-                    <State component={SubLoader} id='sub-loading' initial url='#sub-loading'>
+                <State id='intermediary' initial url='/intermediary'>
+                    <State component={SubLoader} id='sub-loading' initial>
                         <Transition event={'SUBLOADER'} target='sub-loading-2'/>
                     </State>
-                    <State component={SubLoader2} id='sub-loading-2' url='#sub-loading-2'/>
+                    <State component={SubLoader2} id='sub-loading-2' url='/sub-loading-2'/>
                 </State>
             </State>
             <State component={Checkout} id='hub'>
                 <State id='trade-in' initial url='/trade-in'>
-                    {/* <State component={Loader} id='loading' initial>
-                        <Transition event={events.RESOLVE} target='lookup'/>
-                        <Transition event={events.REJECT} target='error'/>
-                    </State> */}
                     <State component={Lookup} id='lookup' initial>
                         <Transition event={events.SUBMIT} target='submitting'/>
                     </State>

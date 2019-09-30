@@ -8,6 +8,7 @@ export default function Link({ children, event: stateEvent, href = '#', onClick,
 
     const handleClick = (e) => {
         if (stateEvent) {
+            e.preventDefault();
             send(stateEvent);
         }
 
