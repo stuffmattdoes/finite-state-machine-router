@@ -1,4 +1,4 @@
-# Finite State Machine
+# React Finite State Machine Router
 A finite state machine (FSM) router for React
 
 Made with [Create React App](./CRA.md)
