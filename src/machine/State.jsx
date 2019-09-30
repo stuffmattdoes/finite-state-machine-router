@@ -45,6 +45,7 @@ function State(props) {
         });
 
         // Determine State type, if unspecified by props
+        // 'parallel' is the only StateNode type you'd need to specify. All others can be derived.
         if (!_type) {
             if (_childStatesCount === 0) {
                 _type = 'atomic';
@@ -55,7 +56,7 @@ function State(props) {
             }
         }
 
-        // Determine initial type, if unspecified by props && not of type 'parallel'
+        // Determine initial type, if unspecified by props && parent StateNode is not of type 'parallel'
         // if (!_initial) {
         //     if ()
         // }
@@ -68,7 +69,7 @@ function State(props) {
         }
     }, [ children ]);
 
-    const { current, id: machineId, matches, resolveStack, resolveUrl, transition } = useContext(StateMachineContext);
+    const { current, history, id: machineId, matches, resolveStack, resolveUrl, transition } = useContext(StateMachineContext);
     const { parent, send } = useContext(StateNodeContext);
     const { stack: parentStack, url: parentUrl } = parent;
     const [ { _mounted }, setState ] = useState({ _mounted: false });
@@ -77,27 +78,31 @@ function State(props) {
 
     // Resolve initial. needs 'effect' hook to properly resolve 'initial' states
     useEffect(() => {
-        if (_type === 'atomic' /* && !_mounted */ && _initial) {
-            resolveStack(getStateNodeStack(id));
-            stateNodeUrl && resolveUrl(stateNodeUrl);
+        if (_type === 'atomic' && _initial) {
+            _resolveStack();
         }
 
         setState({ _mounted: true });
     }, []);
 
+    // Resolve URL
+    // useEffect(() => {
+    //     if (_type === 'atomic' && !_mounted) {
+    //         _resolveStack();
+    //     }
+    // }, [ history.location.pathname ]);
+
     // Resolve subsequent state changes
     useEffect(() => {
         if (_type === 'atomic' && matches(id)) {
-            resolveStack(getStateNodeStack(id));
-            resolveUrl(stateNodeUrl);
+            _resolveStack();
         }
-
-        // return () => {
-        //     if (matches(id) && url) {
-        //         resolveUrl('/');
-        //     }
-        // }
     }, [ current ]);
+
+    const _resolveStack = () => {
+        resolveStack(getStateNodeStack(id));
+        stateNodeUrl && resolveUrl(stateNodeUrl);
+    }
 
     const _send = (event) => {
         const target = getStateNodeStack(_transitions[event]);

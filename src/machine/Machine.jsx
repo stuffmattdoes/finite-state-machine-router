@@ -16,23 +16,10 @@ export function Machine ({ children, history, id, url }) {
         history = createBrowserHistory({ basename: url });
     }
     
-    const matches = (stateId) => {
-        // console.log('matches', stateId, state.current);
-        return state.current.split('.').includes(stateId);
-    };
-    const resolveStack = (stateId) => {
-        // console.log('resolveStack', stateId);
-        setState({ ...state, current: `#${id}.${stateId}` });
-    };
-
-    // TODO
-    // Resolve doulbe URL push
+    const matches = (stateId) => state.current.split('.').includes(stateId);
+    const resolveStack = (stateId) => setState({ ...state, current: `#${id}.${stateId}` });
     const resolveUrl = history.push;
-    const transition = (event, target) => {
-        // log(state, event, target);
-        // console.log('transition', state.current);       // Stale
-        setState({ ...state, current: `#${id}.${target}` });
-    };
+    const transition = (event, target) => setState({ ...state, current: `#${id}.${target}` });
 
     const providerValue = {
         ...state,
