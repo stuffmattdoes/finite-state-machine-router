@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { StateMachineContext } from './Machine';
 
 export const StateNodeContext = React.createContext({
@@ -14,11 +14,12 @@ function State(props) {
     const { children, component: WrappedComponent, id, initial = false, type, url } = props;
 
     // List our events & transitions available from this StateNode
-    const { _initial, _transitions, _type, events } = useMemo(() => {
+    const { _transitions, _type, events } = useMemo(() => {
         const _childrenArr = React.Children.toArray(children);
-        let _initial = initial;
+        // let _initial = initial;
         let _type = type;
         let _childStatesCount = 0;
+        // let _childInitial = false;
         const _transitions = {};
         const events = [];
 
@@ -41,6 +42,15 @@ function State(props) {
                 }
             } else if (child.type.name === 'State') {
                 _childStatesCount++;
+
+                // if (child.props.initial) {
+
+                //     if (!_childInitial) {
+                //         _childInitial = true;
+                //     } else {
+                //         console.error('You cannot have more than one child initial StateNode.');
+                //     }
+                // }
             }
         });
 
@@ -56,13 +66,13 @@ function State(props) {
             }
         }
 
-        // Determine initial type, if unspecified by props && parent StateNode is not of type 'parallel'
+        // Determine initial child StateNode, if unspecified by props && parent StateNode is not of type 'parallel'
         // if (!_initial) {
         //     if ()
         // }
 
         return {
-            _initial,
+            // _initial,
             _transitions,
             _type,
             events
@@ -74,33 +84,13 @@ function State(props) {
     const { stack: parentStack, url: parentUrl } = parent;
     const [ { _mounted }, setState ] = useState({ _mounted: false });
     const getStateNodeStack = (id) => parentStack ? `${parentStack}.${id}` : id;
+    const _stack = getStateNodeStack(id);
     const stateNodeUrl = url ? parentUrl ? parentUrl + url : url : parentUrl;
-
-    // Resolve initial. needs 'effect' hook to properly resolve 'initial' states
-    useEffect(() => {
-        if (_type === 'atomic' && _initial) {
-            _resolveStack();
-        }
-
-        setState({ _mounted: true });
-    }, []);
-
-    // Resolve URL
-    // useEffect(() => {
-    //     if (_type === 'atomic' && !_mounted) {
-    //         _resolveStack();
-    //     }
-    // }, [ history.location.pathname ]);
-
-    // Resolve subsequent state changes
-    useEffect(() => {
-        if (_type === 'atomic' && matches(id)) {
-            _resolveStack();
-        }
-    }, [ current ]);
+    const _matches = matches(id);
 
     const _resolveStack = () => {
-        resolveStack(getStateNodeStack(id));
+        resolveStack(_stack);
+        console.log('resolveStack', id, stateNodeUrl, _stack);
         stateNodeUrl && resolveUrl(stateNodeUrl);
     }
 
@@ -115,10 +105,37 @@ function State(props) {
         transition(event, target);
     }
 
+    // Resolve initial. needs 'effect' hook to properly resolve 'initial' states
+    useEffect(() => {
+        if (_type === 'atomic' && initial) {
+            console.log(1, id, _type, stateNodeUrl);
+            // _resolveStack();
+            resolveStack(_stack);
+        }
+
+        setState({ _mounted: true });
+    }, []);
+
+    // Resolve URL
+    // useEffect(() => {
+    //     if (_type === 'atomic' && !_mounted) {
+    //         _resolveStack();
+    //     }
+    // }, [ history.location.pathname ]);
+
+    // Resolve subsequent state changes
+    useEffect(() => {
+        if (_type === 'atomic' && _matches) {
+            console.log(2, id, _type, stateNodeUrl);
+            // _resolveStack();
+            stateNodeUrl && resolveUrl(stateNodeUrl);
+        }
+    }, [ current ]);
+
     const initialContext = {
         parent: {
             id: id,
-            stack: getStateNodeStack(id),
+            stack: _stack,
             url: stateNodeUrl,
         },
         send: _send
@@ -135,7 +152,7 @@ function State(props) {
     delete componentProps.component;
     delete componentProps.id;
 
-    return (matches(id) || !_mounted && _initial) ?
+    return (_matches || !_mounted && initial) ?
         <StateNodeContext.Provider value={initialContext}>
             { WrappedComponent ? 
                 <WrappedComponent {...componentProps}/>

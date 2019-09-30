@@ -56,3 +56,4 @@ Check out [proposals](./proposals.md).
 - [x] ~~Update browser URL from state (if `url` prop exists on `<State/>` component)~~
 - [x] ~~Hash routing?!?!?!?!??!?!~~
 - [ ] Derive initial state from URL (direct nav, prev/next)
+- [ ] Figure out parallel states

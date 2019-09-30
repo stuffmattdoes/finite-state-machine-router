@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { createBrowserHistory } from 'history';
-import { log } from './util';
+// import { log } from './util';
 
 export const StateMachineContext = React.createContext();
 StateMachineContext.displayName = 'Machine';

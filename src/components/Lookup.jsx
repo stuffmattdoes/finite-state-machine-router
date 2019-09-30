@@ -2,7 +2,7 @@ import React from 'react';
 
 function Lookup({ children }) {
     return <div className='lookup'>
-        <h1>Lookup</h1>
+        <p>Lookup body text</p>
         {children}
     </div>;
 }
