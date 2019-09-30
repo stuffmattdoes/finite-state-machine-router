@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { StateMachineContext } from './Machine';
 
 export const StateNodeContext = React.createContext({
@@ -83,20 +83,14 @@ function State(props) {
     }, [ children ]);
 
     const { current, history, id: machineId, matches, resolveStack, resolveUrl, transition } = useContext(StateMachineContext);
-    const { parent, send } = useContext(StateNodeContext);
+    const { parent, pathnamesResolve, send } = useContext(StateNodeContext);
     const { stack: parentStack, url: parentUrl } = parent;
     const [ { _mounted }, setState ] = useState({ _mounted: false });
     const getStateNodeStack = (id) => parentStack ? `${parentStack}.${id}` : id;
-    const _stack = getStateNodeStack(id);
-    const stateNodeUrl = url ? parentUrl ? parentUrl + url : url : parentUrl;
+    let _initial = initial;
     const _matches = matches(id);
-
-    // const _resolveState = () => {
-    //     resolveStack(_stack);
-    //     console.log('resolveStack', id, stateNodeUrl, _stack);
-    //     stateNodeUrl && resolveUrl(stateNodeUrl);
-    // }
-
+    const stack = getStateNodeStack(id);
+    const stateNodeUrl = url ? parentUrl ? parentUrl + url : url : parentUrl;
     const _send = (event) => {
         const target = getStateNodeStack(_transitions[event]);
 
@@ -109,22 +103,32 @@ function State(props) {
     }
 
     // Resolve state from URL (for direct navigation, previous, next)
-    // Resolve URL -> initial
-    useEffect(() => {
-        // console.log(1, id, history.location.pathname);
+    // Resolve URL first -> then 'initial' down to 'atomic' type
+    const _pathnamesResolve = null;
+    // const { _pathnamesResolve } = useMemo(() => {
+    //     const _url = url && url.replace(/#|\//g, '');
+    //     let _pathnamesResolve = pathnamesResolve || history.location.pathname.split('/').slice(1);      // Remove initial empty index
 
-        if (_type === 'atomic') {
-            console.log(2, id, history.location.pathname);
-        }
-    }, [ history.location.pathname ]);
+    //     if (_pathnamesResolve[0] === _url) {
+    //         _initial = true;
+    //         _pathnamesResolve.shift();
+    //     }
+
+    //     if (_pathnamesResolve.length === 0) {
+    //         resolveStack(stack);
+    //     }
+
+    //     return {
+    //         _pathnamesResolve
+    //     }
+    // }, [ history.location.pathname ]);
 
     // Resolve initial state
     // needs 'effect' hook to properly resolve 'initial' states
     useEffect(() => {
-        if (_type === 'atomic' && initial) {
-            // console.log(1, id, _type, _stack);
-            // _resolveState();
-            resolveStack(_stack);
+        if (_type === 'atomic' && _initial) {
+            // console.log(1, id, _type, stack);
+            resolveStack(stack);
         }
 
         setState({ _mounted: true });
@@ -134,7 +138,6 @@ function State(props) {
     useEffect(() => {
         if (_type === 'atomic' && _matches) {
             // console.log(2, id, _type, stateNodeUrl);
-            // _resolveState();
             stateNodeUrl && resolveUrl(stateNodeUrl);
         }
     }, [ current ]);
@@ -142,9 +145,10 @@ function State(props) {
     const initialContext = {
         parent: {
             id: id,
-            stack: _stack,
+            stack: stack,
             url: stateNodeUrl,
         },
+        pathnamesResolve: _pathnamesResolve,
         send: _send
     }
     const componentProps = {
@@ -160,7 +164,7 @@ function State(props) {
     delete componentProps.component;
     delete componentProps.id;
 
-    return (_matches || (!_mounted && initial)) ?
+    return (_matches || (!_mounted && _initial)) ?
         <StateNodeContext.Provider value={initialContext}>
             { WrappedComponent ? 
                 <WrappedComponent {...componentProps}/>

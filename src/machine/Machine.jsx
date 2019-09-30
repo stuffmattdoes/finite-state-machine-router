@@ -17,8 +17,14 @@ export function Machine ({ children, history, id, url }) {
     }
     
     const matches = (stateId) => state.current.split('.').includes(stateId);
-    const resolveStack = (stateId) => setState({ ...state, current: `#${id}.${stateId}` });
-    const resolveUrl = history.push;
+    const resolveStack = (stack) => {
+        console.log('resolveStack', stack);
+        setState({ ...state, current: `#${id}.${stack}` });
+    }
+    const resolveUrl = (url) => {
+        console.log('resolveUrl', url);
+        history.push(url);
+    }
     const transition = (event, target) => setState({ ...state, current: `#${id}.${target}` });
 
     const providerValue = {
