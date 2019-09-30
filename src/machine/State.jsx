@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { StateMachineContext } from './Machine';
 
 export const StateNodeContext = React.createContext({
@@ -35,6 +35,9 @@ function State(props) {
                 if (!child.props.hasOwnProperty('target')) {
                     console.error('Component "<Transition/>" requires a "target" property.');
                     skip = true; 
+                }
+                if (child.props.url) {
+                    console.warn(`<Transition/> has a "url" property on it. Did you mean to apply that its parent <State/>, "${id}"?`);
                 }
                 if (!skip) {
                     _transitions[child.props['event']] = child.props['target'];
@@ -88,11 +91,11 @@ function State(props) {
     const stateNodeUrl = url ? parentUrl ? parentUrl + url : url : parentUrl;
     const _matches = matches(id);
 
-    const _resolveStack = () => {
-        resolveStack(_stack);
-        console.log('resolveStack', id, stateNodeUrl, _stack);
-        stateNodeUrl && resolveUrl(stateNodeUrl);
-    }
+    // const _resolveState = () => {
+    //     resolveStack(_stack);
+    //     console.log('resolveStack', id, stateNodeUrl, _stack);
+    //     stateNodeUrl && resolveUrl(stateNodeUrl);
+    // }
 
     const _send = (event) => {
         const target = getStateNodeStack(_transitions[event]);
@@ -105,29 +108,33 @@ function State(props) {
         transition(event, target);
     }
 
-    // Resolve initial. needs 'effect' hook to properly resolve 'initial' states
+    // Resolve state from URL (for direct navigation, previous, next)
+    // Resolve URL -> initial
+    useEffect(() => {
+        // console.log(1, id, history.location.pathname);
+
+        if (_type === 'atomic') {
+            console.log(2, id, history.location.pathname);
+        }
+    }, [ history.location.pathname ]);
+
+    // Resolve initial state
+    // needs 'effect' hook to properly resolve 'initial' states
     useEffect(() => {
         if (_type === 'atomic' && initial) {
-            console.log(1, id, _type, stateNodeUrl);
-            // _resolveStack();
+            // console.log(1, id, _type, _stack);
+            // _resolveState();
             resolveStack(_stack);
         }
 
         setState({ _mounted: true });
     }, []);
 
-    // Resolve URL
-    // useEffect(() => {
-    //     if (_type === 'atomic' && !_mounted) {
-    //         _resolveStack();
-    //     }
-    // }, [ history.location.pathname ]);
-
     // Resolve subsequent state changes
     useEffect(() => {
         if (_type === 'atomic' && _matches) {
-            console.log(2, id, _type, stateNodeUrl);
-            // _resolveStack();
+            // console.log(2, id, _type, stateNodeUrl);
+            // _resolveState();
             stateNodeUrl && resolveUrl(stateNodeUrl);
         }
     }, [ current ]);
@@ -142,6 +149,7 @@ function State(props) {
     }
     const componentProps = {
         ...props,
+        history,
         machine: {
             events,
             current,
@@ -152,7 +160,7 @@ function State(props) {
     delete componentProps.component;
     delete componentProps.id;
 
-    return (_matches || !_mounted && initial) ?
+    return (_matches || (!_mounted && initial)) ?
         <StateNodeContext.Provider value={initialContext}>
             { WrappedComponent ? 
                 <WrappedComponent {...componentProps}/>

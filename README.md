@@ -57,3 +57,4 @@ Check out [proposals](./proposals.md).
 - [x] ~~Hash routing?!?!?!?!??!?!~~
 - [ ] Derive initial state from URL (direct nav, prev/next)
 - [ ] Figure out parallel states
+- [ ] Typescript
