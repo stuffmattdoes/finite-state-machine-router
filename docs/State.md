@@ -4,6 +4,7 @@
 [SCXML W3C Specification - State](https://www.w3.org/TR/scxml/#state)
 
 ### Properties
+&ast; = Required property
 <table>
     <tr>
         <th>Property</th>
@@ -13,7 +14,7 @@
     </tr>
     <tr>
         <td><code>component</code></td>
-        <td><code>Component</code></td>
+        <td><code>React component</code></td>
         <td></td>
         <td>React component to be rendered in this state.</td>
     </tr>
@@ -26,7 +27,7 @@
     <tr>
         <td><code>initial</code></td>
         <td><code>Boolean</code></td>
-        <td>false</td>
+        <td><code>false</code></td>
         <td>Denotes the state to be resolved to upon state machine initiation. If no children states are marked as initial, the first child state will be rendered. Doesn't apply if the parent state is a parallel type, because all children of parallel type are simultaneously active.</td>
     </tr>
     <tr>
@@ -66,8 +67,6 @@
         </td>
     </tr>
 </table>
-
-&ast; = Required property
 
 ### Children
 - [<State ... />](./State.md)
