@@ -50,7 +50,7 @@ import { Checkout, Error, Estimate, Loader, Lookup, NoResults, Submitting } from
 ```
 
 ## Todo:
-Check out [proposals](./docs/proposals.md).
+Check out [proposals](./docs/Proposals.md).
 - [x] ~~Recursively render all sub `<State/>`~~
 - [ ] Resolve all `initial` states on first render. What to do if `initial` state is not also `atomic`?
 - [x] ~~Update browser URL from state (if `url` prop exists on `<State/>` component)~~

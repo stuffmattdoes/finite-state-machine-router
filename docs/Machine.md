@@ -1,6 +1,6 @@
 # Machine
-Reference: [SCXML W3C Specification - SCXML](https://www.w3.org/TR/scxml/#state)
-"The top-level wrapper element, which carries version information. The actual state machine consists of its children. Note that only one of the children is active at any one time."
+**Reference:** [SCXML W3C Specification - SCXML](https://www.w3.org/TR/scxml/#state)<br>
+### "The top-level wrapper element, which carries version information. The actual state machine consists of its children. Note that only one of the children is active at any one time."
 
 ## State resolution
 Upon initialization of our `Machine` wrapper component, the active child state is determined in this order:
