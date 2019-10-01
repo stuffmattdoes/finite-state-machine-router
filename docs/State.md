@@ -18,7 +18,7 @@
         <td>React component to be rendered in this state.</td>
     </tr>
     <tr>
-        <td><code>id*</code></td>
+        <td><code>id</code>*</td>
         <td><code>String</code></td>
         <td></td>
         <td>Unique identifier for this state. This must be different than all siblings and ancestors</td>
@@ -67,7 +67,7 @@
     </tr>
 </table>
 
-* = Required property
+&ast; = Required property
 
 ### Children
 - [<State ... />](./State.md)
