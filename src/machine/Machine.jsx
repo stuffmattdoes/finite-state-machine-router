@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createBrowserHistory } from 'history';
-// import { log } from './util';
+import { log } from './util';
 
 export const StateMachineContext = React.createContext();
 StateMachineContext.displayName = 'Machine';
@@ -31,7 +31,7 @@ export function Machine ({ children, history, id, url }) {
         return _childStates;
     }, [ children ]);
 
-    // useEffect(() => history.listen(console.log), []);
+    useEffect(() => history.listen(console.log), []);
     
     const matches = (stateId) => state.current.split('.').includes(stateId);
     const resolveStack = (stack) => {
@@ -40,10 +40,11 @@ export function Machine ({ children, history, id, url }) {
     }
     const resolveUrl = (url) => {
         console.log('resolveUrl', url);
-        history.push(url);
+        history.push(url, { state: state.current });
     }
     const transition = (event, target) => {
         console.log('transition', event, target);
+        // log(state, event, target);
         setState({ ...state, current: `#${id}.${target}` })
     }
 

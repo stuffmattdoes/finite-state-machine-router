@@ -129,7 +129,7 @@ function State(props) {
     // needs 'effect' hook to properly resolve 'initial' states
     useEffect(() => {
         if (_type === 'atomic' && initial) {
-            console.log(1, id, _type, stack);
+            // console.log(1, id, _type, stack);
             resolveStack(stack);
         }
 
@@ -139,7 +139,7 @@ function State(props) {
     // Resolve subsequent state changes
     useEffect(() => {
         if (_type === 'atomic' && _matches) {
-            console.log(2, id, _type, stateNodeUrl);
+            // console.log(2, id, _type, stateNodeUrl);
             stateNodeUrl && resolveUrl(stateNodeUrl);
         }
     }, [ current ]);
@@ -169,7 +169,6 @@ function State(props) {
 
     // BUG
     // Sub states marked as initial aren't rendering. 'initial' is still false
-    console.log(id, _matches, !_mounted, initial, _type);
     return (_matches || (!_mounted && initial)) ?
         <StateNodeContext.Provider value={initialContext}>
             { WrappedComponent ?
