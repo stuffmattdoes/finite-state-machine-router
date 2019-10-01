@@ -9,7 +9,11 @@ Upon initialization of our `Machine` wrapper component, the active child state i
 - If a URL pathname is not present or does not apply, each `initial` child state is resolved until a state of type `atomic` is reached.
 
 ## Signature
-`<Machine {...props} />`
+```jsx
+<Machine {...props}>
+    {children}
+</Machine>
+```
 
 ## Properties
 &ast; = Required property
