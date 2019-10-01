@@ -3,7 +3,7 @@
 
 >Holds the representation of a state.
 
-States are the building block of our application. Everything our user will see is a combination of states supplied with React Components to render. As a departure from the W3C SCXML Specification, our states can accept a URL which will handle browser history synchhronization automatically.
+States are the building block of our application. Everything our user will see is a combination of states supplied with React Components to render. As a departure from the W3C SCXML Specification referenced above, our states can accept a `url` property which will handle browser history synchhronization automatically.
 
 ## Signature
 `<State {...props} />`
