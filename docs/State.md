@@ -1,9 +1,13 @@
-# State Machine Behavior
+# States
+Reference: [SCXML W3C Specification - State](https://www.w3.org/TR/scxml/#state)
+"Holds the representation of a state."
 
-## States
-[SCXML W3C Specification - State](https://www.w3.org/TR/scxml/#state)
+States are the building block of our application. Everything our user will see is a combination of states supplied with React Components to render. As a departure from the W3C SCXML Specification, our states can accept a URL which will handle browser history synchhronization automatically.
 
-### Properties
+## Signature
+`<State {...props} />`
+
+## Properties
 &ast; = Required property
 <table>
     <tr>
@@ -70,6 +74,6 @@
     </tr>
 </table>
 
-### Children
+## Children
 - [<State ... />](./State.md)
 - [<Transition ... />](./Transition.md)
