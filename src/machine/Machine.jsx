@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { createBrowserHistory } from 'history';
 // import { log } from './util';
 
@@ -16,7 +16,22 @@ export function Machine ({ children, history, id, url }) {
         history = createBrowserHistory({ basename: url });
     }
 
-    useEffect(() => history.listen(console.log), []);
+    // Determine initial child StateNode (if undefined, which is likely)
+    const _children = useMemo(() => {
+        let _childStates = React.Children.toArray(children).filter(c => c.type.name === 'State');
+        const _hasInitialChild = _childStates.filter(c => c.props.initial).length > 0;
+
+        if (!_hasInitialChild) {
+            _childStates[0] = React.cloneElement(_childStates[0], {
+                ..._childStates[0].props,
+                initial: true
+            });
+        }
+
+        return _childStates;
+    }, [ children ]);
+
+    // useEffect(() => history.listen(console.log), []);
     
     const matches = (stateId) => state.current.split('.').includes(stateId);
     const resolveStack = (stack) => {
@@ -24,10 +39,13 @@ export function Machine ({ children, history, id, url }) {
         setState({ ...state, current: `#${id}.${stack}` });
     }
     const resolveUrl = (url) => {
-        // console.log('resolveUrl', url);
+        console.log('resolveUrl', url);
         history.push(url);
     }
-    const transition = (event, target) => setState({ ...state, current: `#${id}.${target}` });
+    const transition = (event, target) => {
+        console.log('transition', event, target);
+        setState({ ...state, current: `#${id}.${target}` })
+    }
 
     const providerValue = {
         ...state,
@@ -39,7 +57,7 @@ export function Machine ({ children, history, id, url }) {
     }
     
     return <StateMachineContext.Provider value={providerValue}>
-        {children}
+        {_children}
     </StateMachineContext.Provider>;
 }
 

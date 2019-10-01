@@ -31,19 +31,19 @@ const events = {
 ReactDOM.render(
     <Container>
         <Machine id='checkout' url='/checkout'>
-            <State component={Loader} id='loading' initial url='/loading'>
+            <State component={Loader} id='loading' url='/loading'>
                 <Transition event={events.RESOLVE} target='hub'/>
                 <Transition event={events.REJECT} target='error'/>
-                <State id='intermediary' initial url='/intermediary'>
+                <State id='intermediary' url='/intermediary'>
+                    <State component={SubLoader2} id='sub-loading-2' url='/sub-loading-2'/>
                     <State component={SubLoader} id='sub-loading' initial url='/sub-loading'>
                         <Transition event={'SUBLOADER'} target='sub-loading-2'/>
                     </State>
-                    <State component={SubLoader2} id='sub-loading-2' url='/sub-loading-2'/>
                 </State>
             </State>
             <State component={Checkout} id='hub'>
-                <State id='trade-in' initial url='/trade-in'>
-                    <State component={Lookup} id='lookup' initial>
+                <State id='trade-in' url='/trade-in'>
+                    <State component={Lookup} id='lookup'>
                         <Transition event={events.SUBMIT} target='submitting'/>
                     </State>
                     <State component={Submitting} id='submitting'>
@@ -57,7 +57,7 @@ ReactDOM.render(
             </State>
             <State component={Error} id='error' url='/error'>
                 <Transition event={events.RELOAD} target='loading'/>
-                <State component={SubError} id='sub-error' initial/>
+                <State component={SubError} id='sub-error'/>
             </State>
         </Machine>
     </Container>
