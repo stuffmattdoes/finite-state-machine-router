@@ -2,7 +2,7 @@ import React from 'react';
 
 function SubLoader2 ({ children, machine }) {
     return <div className='sub-loader'>
-        <p>Seconadry loader text!</p>
+        <p>Secondary loader text!</p>
     </div>
 }
 
