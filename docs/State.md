@@ -22,7 +22,7 @@
         <td><code>id</code>*</td>
         <td><code>String</code></td>
         <td></td>
-        <td>Unique identifier for this state. This must be different than all siblings and ancestors</td>
+        <td>Unique identifier for this state. This must be different than all ancestors and siblings.</td>
     </tr>
     <tr>
         <td><code>initial</code></td>
@@ -59,11 +59,13 @@
         <td><code>String: [ "atomic", "compound", "default", "final", "parallel" ]</code></td>
         <td><code>default</code></tc>
         <td>Determines state behavior:<br><br>
-            - <strong>atomic</strong> - has no children states.
-            - <strong>compound</strong> - has multiple children states, of which only one can be active.
-            - <strong>default</strong> - has a sinle child state.
-            - <strong>final</strong> - has no children states or transitions. Upon entry to this state, a <code>done</code> event is generated.
-            - <strong>parallel</strong> - all children states are simultaneously active.
+            <ul>
+                <li><strong>atomic</strong> - has no children states.</li>
+                <li><strong>compound</strong> - has multiple children states, of which only one can be active.</li>
+                <li><strong>default</strong> - has a sinle child state.</li>
+                <li><strong>final</strong> - has no children states or transitions. Upon entry to this state, a <code>done</code> event is generated.</li>
+                <li><strong>parallel</strong> - all children states are simultaneously active.</li>
+            </ul>
         </td>
     </tr>
 </table>
