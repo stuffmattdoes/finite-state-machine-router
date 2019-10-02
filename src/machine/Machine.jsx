@@ -48,16 +48,22 @@ export function Machine ({ children, history, id, url }) {
         }, {});
     }
 
+    // useEffect(() => {
+    //     const nextUrl = Object.keys(_routeMap).find(key => state.current === '#' + id + _routeMap[key]);
+    //     resolveUrl(nextUrl);
+    // }, [ state.current ]);
+
     // Determine initial child StateNode (if undefined, which is likely)
-    const { _children } = useMemo(() => {
+    const { _children, _routeMap } = useMemo(() => {
         let _childStates = React.Children.toArray(children).filter(c => c.type.name === 'State');
         const _hasInitialChild = _childStates.filter(c => c.props.initial).length > 0;
 
         // 1. Derive state from URL
         const _pathname = history.location.pathname;
-        const _routeMap = routeMap(_childStates); 
+        const _routeMap = routeMap(_childStates);
 
         if (_routeMap.hasOwnProperty(_pathname)) {
+            console.log(0);
             resolveStack(_routeMap[_pathname]);
         } else {
             // TODO:
@@ -74,6 +80,7 @@ export function Machine ({ children, history, id, url }) {
 
         return {
             _children: _childStates,
+            _routeMap
         };
     }, [ children ]);
 
