@@ -16,11 +16,35 @@ export function Machine ({ children, history, id, url }) {
         history = createBrowserHistory({ basename: url });
     }
 
+    const routeMap = (childStates, parentUrl, parentStack) => {
+        return childStates.reduce((acc, { props, type }, i_) => {
+            const { children, id, url } = props;
+            const _childStates = React.Children.toArray(children).filter(c => c.type.name === 'State');
+            const _fullUrl = parentUrl ? parentUrl + url : url;
+            const _parentStack = parentStack ? `${parentStack}.${id}` : `.${id}`;
+    
+            if (url) {
+                acc[_fullUrl] = _parentStack;
+            }
+            if (_childStates.length) {
+                acc = { ...acc, ...routeMap(_childStates, _fullUrl, _parentStack) }
+            }
+    
+            return acc;
+        }, {});
+    }
+
     // Determine initial child StateNode (if undefined, which is likely)
-    const _children = useMemo(() => {
+    const { _children } = useMemo(() => {
         let _childStates = React.Children.toArray(children).filter(c => c.type.name === 'State');
         const _hasInitialChild = _childStates.filter(c => c.props.initial).length > 0;
 
+        // 1. Derive state from URL
+        const _routeMap = routeMap(_childStates); 
+
+        console.log(_routeMap);
+        
+        // 2. Resolve initial children
         if (!_hasInitialChild) {
             _childStates[0] = React.cloneElement(_childStates[0], {
                 ..._childStates[0].props,
@@ -28,15 +52,18 @@ export function Machine ({ children, history, id, url }) {
             });
         }
 
-        return _childStates;
+        return {
+            _children: _childStates,
+        };
     }, [ children ]);
+
 
     useEffect(() => history.listen(console.log), []);
     
     const matches = (stateId) => state.current.split('.').includes(stateId);
     const resolveStack = (stack) => {
         console.log('resolveStack', stack);
-        setState({ ...state, current: `#${id}.${stack}` });
+        setState({ ...state, current: `#${id}${stack}` });
     }
     const resolveUrl = (url) => {
         console.log('resolveUrl', url);

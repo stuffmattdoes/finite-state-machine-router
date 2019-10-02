@@ -76,11 +76,10 @@ function State(props) {
     }, [ children ]);
 
     const { current, history, id: machineId, matches, resolveStack, resolveUrl, transition } = useContext(StateMachineContext);
-    const { parent, pathnamesResolve, send } = useContext(StateNodeContext);
+    const { parent, send } = useContext(StateNodeContext);
     const { stack: parentStack, url: parentUrl } = parent;
     const [ { _mounted }, setState ] = useState({ _mounted: false });
-    const getStateNodeStack = (id) => parentStack ? `${parentStack}.${id}` : id;
-    // let _derivedStateFromUrl = false;
+    const getStateNodeStack = (id) => parentStack ? `${parentStack}.${id}` : `.${id}`;
     const _matches = matches(id);
     const stack = getStateNodeStack(id);
     const stateNodeUrl = url ? parentUrl ? parentUrl + url : url : parentUrl;
@@ -95,35 +94,6 @@ function State(props) {
 
         transition(event, target);
     }
-
-    // Resolve state from URL (for direct navigation, previous, next)
-    // Resolve URL first -> then 'initial' down to 'atomic' type
-    // const { _pathnamesResolve } = useMemo(() => {
-    // // let _pathnamesResolve = null;
-    // // useMemo(() => {
-    //     const _url = url && url.replace(/#|\//g, '');
-    //     let _pathnamesResolve = pathnamesResolve
-    //         || history.location.pathname.split('/').slice(1);      // Remove initial empty index
-
-    //     if (_url) {
-    //         // console.log(_url);
-    //         if (_pathnamesResolve[0] === _url) {
-    //             _derivedStateFromUrl = true;
-    //             _pathnamesResolve.shift();
-    //             // console.log(2);
-
-    //             if (_pathnamesResolve.length === 0) {
-    //                 // console.log('resolve', id, _pathnamesResolve, _type, stack);
-    //                 resolveStack(stack);
-    //             }
-    //         }
-    //     }
-
-    //     return {
-    //         _pathnamesResolve
-    //     }
-    // }, [ history.location.pathname ]);
-    // // }, []);
 
     // Resolve initial state
     // needs 'effect' hook to properly resolve 'initial' states
@@ -147,10 +117,9 @@ function State(props) {
     const initialContext = {
         parent: {
             id: id,
-            stack: stack,
+            stack,
             url: stateNodeUrl,
         },
-        // pathnamesResolve: _pathnamesResolve,
         send: _send
     }
     const componentProps = {
