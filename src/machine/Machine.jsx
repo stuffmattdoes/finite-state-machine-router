@@ -6,10 +6,7 @@ export const StateMachineContext = React.createContext();
 StateMachineContext.displayName = 'Machine';
 
 export function Machine ({ children, history, id, url }) {
-    const [ state, setState ] = useState({
-        current: `#${id}`,
-        id
-    });
+    const [ state, setState ] = useState({ current: `#${id}` });
 
     // Default history
     if (!history) {
@@ -34,7 +31,7 @@ export function Machine ({ children, history, id, url }) {
     }
 
     const routeMap = (childStates, parentUrl, parentStack) => {
-        return childStates.reduce((acc, { props, type }, i_) => {
+        return childStates.reduce((acc, { props }, i) => {
             const { children, id, url } = props;
             const _childStates = React.Children.toArray(children).filter(c => c.type.name === 'State');
             const _fullUrl = parentUrl ? parentUrl + url : url;
