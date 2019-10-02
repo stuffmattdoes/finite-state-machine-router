@@ -16,6 +16,23 @@ export function Machine ({ children, history, id, url }) {
         history = createBrowserHistory({ basename: url });
     }
 
+    useEffect(() => history.listen(console.log), []);
+    
+    const matches = (stateId) => state.current.split('.').includes(stateId);
+    const resolveStack = (stack) => {
+        console.log('resolveStack', stack);
+        setState({ ...state, current: `#${id}${stack}` });
+    }
+    const resolveUrl = (url) => {
+        console.log('resolveUrl', url);
+        history.push(url, { state: state.current });
+    }
+    const transition = (event, target) => {
+        console.log('transition', event, target);
+        // log(state, event, target);
+        setState({ ...state, current: `#${id}.${target}` })
+    }
+
     const routeMap = (childStates, parentUrl, parentStack) => {
         return childStates.reduce((acc, { props, type }, i_) => {
             const { children, id, url } = props;
@@ -40,9 +57,15 @@ export function Machine ({ children, history, id, url }) {
         const _hasInitialChild = _childStates.filter(c => c.props.initial).length > 0;
 
         // 1. Derive state from URL
+        const _pathname = history.location.pathname;
         const _routeMap = routeMap(_childStates); 
 
-        console.log(_routeMap);
+        if (_routeMap.hasOwnProperty(_pathname)) {
+            resolveStack(_routeMap[_pathname]);
+        } else {
+            // TODO:
+            // Resolve to 404
+        }
         
         // 2. Resolve initial children
         if (!_hasInitialChild) {
@@ -56,24 +79,6 @@ export function Machine ({ children, history, id, url }) {
             _children: _childStates,
         };
     }, [ children ]);
-
-
-    useEffect(() => history.listen(console.log), []);
-    
-    const matches = (stateId) => state.current.split('.').includes(stateId);
-    const resolveStack = (stack) => {
-        console.log('resolveStack', stack);
-        setState({ ...state, current: `#${id}${stack}` });
-    }
-    const resolveUrl = (url) => {
-        console.log('resolveUrl', url);
-        history.push(url, { state: state.current });
-    }
-    const transition = (event, target) => {
-        console.log('transition', event, target);
-        // log(state, event, target);
-        setState({ ...state, current: `#${id}.${target}` })
-    }
 
     const providerValue = {
         ...state,
