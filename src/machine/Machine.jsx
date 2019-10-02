@@ -62,20 +62,23 @@ export function Machine ({ children, history, id, url }) {
         const _pathname = history.location.pathname;
         const _routeMap = routeMap(_childStates);
 
-        if (_routeMap.hasOwnProperty(_pathname)) {
-            console.log(0);
-            resolveStack(_routeMap[_pathname]);
-        } else {
-            // TODO:
-            // Resolve to 404
+        // 1. Derive state from URL
+        if (_pathname.slice(1)) {
+            if (_routeMap.hasOwnProperty(_pathname)) {
+                resolveStack(_routeMap[_pathname]);
+            } else {
+                // TODO:
+                // Resolve to 404
+            }
         }
-        
         // 2. Resolve initial children
-        if (!_hasInitialChild) {
-            _childStates[0] = React.cloneElement(_childStates[0], {
-                ..._childStates[0].props,
-                initial: true
-            });
+        else {
+            if (!_hasInitialChild) {
+                _childStates[0] = React.cloneElement(_childStates[0], {
+                    ..._childStates[0].props,
+                    initial: true
+                });
+            }
         }
 
         return {
