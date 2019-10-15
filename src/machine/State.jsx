@@ -99,7 +99,7 @@ function State(props) {
     // needs 'effect' hook to properly resolve 'initial' states
     useEffect(() => {
         if (_type === 'atomic' && initial) {
-            console.log(1, id, _type, stack);
+            // console.log(1, id, _type, stack);
             resolveStack(stack);
         }
 
