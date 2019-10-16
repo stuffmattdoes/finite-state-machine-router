@@ -1,4 +1,4 @@
-# React Finite State Machine Router
+# Finite State Machine Router (for React)
 A finite state machine router for React.
 
 A **finite state machine** (FSM) is mathematical concept used to describe a flow of information from one state to another according to a set of rules. FSMs are described as a limited number of states and corresponding transitions from these states into other states. FSMs are widely popular in many domains of computer science and beyond - such as electrical engineering, biology, and so on. In front-end web development we'll use FSMs to render the proper user interface. Furthermore, we'll pair our FSM with a routing mechanism so our URLs and state resolution can be handled for us - hence **React Finite State Machine Router**!
