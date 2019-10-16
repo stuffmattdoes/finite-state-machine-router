@@ -33,6 +33,7 @@ export function Machine ({ children, history, id, url }) {
     }
 
     useEffect(() => history.listen((location, action) => {
+        // console.log('history listen', location, action);
         resolveStack(_routeMap[location.pathname]);
     }));
 
@@ -87,6 +88,8 @@ export function Machine ({ children, history, id, url }) {
             _routeMap
         };
     }, [ children ]);
+
+    // console.log(_routeMap);
 
     const providerValue = {
         ...state,

@@ -21,7 +21,7 @@ export const StateNodeContext = React.createContext({
 StateNodeContext.displayName = 'StateNode';
 
 function State(props) {
-    const { children, component: WrappedComponent, id, initial, type, url } = props;
+    const { children, component: WrappedComponent, id, initial, onEntry, onExit, type, url } = props;
     const { _children, _transitions, _type, events } = useMemo(() => {
         const _childrenArr = React.Children.toArray(children);
         const _hasInitialChild = _childrenArr.filter(c => c.props.initial).length > 0;
@@ -103,7 +103,12 @@ function State(props) {
             resolveStack(stack);
         }
 
+        onEntry && onEntry();
         setState({ _mounted: true });
+
+        // if (!_matches && onExit) {
+        //     return onExit();
+        // }
     }, []);
 
     // Resolve subsequent state changes

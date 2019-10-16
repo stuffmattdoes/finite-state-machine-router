@@ -1,7 +1,6 @@
 # Proposals
 
 ```jsx
-
 // This is NOT an implementation example.
 // This is just a detail of how you'd conceptually structure a state machine.
 // Actual implementation would be in JSX
@@ -43,7 +42,7 @@ const states = {        // state = traffic
 }
 ```
 
-### URL Resolution
+### URL resolution
 As per the code above, URL `/traffic/red` would resolve to state `traffic.red[walksign.solid, pedestrian.walk]`
 
 ### State matching
@@ -62,4 +61,20 @@ matches({
         }
     }
 );      // = true
+```
+
+### Render props
+```jsx
+<State id='loading' url='/loading'>
+    { (props) => <Loader>
+        <Transition event={events.RESOLVE} target='hub'/>
+        <Transition event={events.REJECT} target='error'/>
+        <State id='intermediary' url='/intermediary'>
+            <State component={SubLoader2} id='sub-loading-2' url='/sub-loading-2'/>
+            <State component={SubLoader} id='sub-loading' initial url='/sub-loading'>
+                <Transition event={'SUBLOADER'} target='sub-loading-2'/>
+            </State>
+        </State>
+    </Loader>}
+</State>
 ```

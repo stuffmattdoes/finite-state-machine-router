@@ -31,7 +31,7 @@ const events = {
 ReactDOM.render(
     <Container>
         <Machine id='checkout' url='/checkout'>
-            <State component={Loader} id='loading' url='/loading'>
+            <State component={Loader} id='loading' url='/loading' onEntry={() => console.log('onEntry')} onExit={() => console.log('onExit')}>
                 <Transition event={events.RESOLVE} target='hub'/>
                 <Transition event={events.REJECT} target='error'/>
                 <State id='intermediary' url='/intermediary'>
