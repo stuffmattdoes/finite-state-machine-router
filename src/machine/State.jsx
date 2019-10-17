@@ -28,9 +28,10 @@ function State(props) {
     const getStateNodeStack = (id) => parentStack ? `${parentStack}.${id}` : `#${machineId}.${id}`;
     const stack = getStateNodeStack(id);
     const stackPath = path ? parentPath ? parentPath + path : path : parentPath;
-    const _matches = matches(id);
     const _exact = current === stack;
-    
+    const _matches = matches(id);
+    const _send = (event) => transition(event, getStateNodeStack(events[event]));
+
     const { _initialChild, _type, events } = useMemo(() => {
         const _childrenArr = React.Children.toArray(children);
         const _childStates = _childrenArr.filter(c => c.type.name === 'State');
@@ -41,7 +42,7 @@ function State(props) {
             return acc;
         }, {});
         const _initialChild = _childStates.find(c => c.props.initial) || _childStates[0];
-        
+
         // Determine State type, if unspecified by props
         // 'parallel' is the only StateNode type you'd need to specify. All others can be derived.
         let _type = type;
@@ -59,23 +60,9 @@ function State(props) {
         return {_initialChild,  _type, events };
     }, [ children ]);
 
-    const _send = (event) => {
-        const target = getStateNodeStack(events[event]);
-
-        transition(event, target);
+    if (_matches) {
+        console.log(id, 'matches!');
     }
-
-    useEffect(() => {
-        if(_matches) {
-            onEntry && onEntry();
-        }
-
-        // TODO
-        // onExit state action
-        // if (_matches && onExit) {
-        //     return () => onExit();
-        // }
-    }, []);
 
     useMemo(() => {
         if (_exact && _initialChild) {
@@ -84,7 +71,17 @@ function State(props) {
         if (_type === 'atomic' && _matches) {
             stackPath && resolvePath(stackPath);
         }
+
+        if (!_matches) {
+            console.log(id, 'doesn\'t match!');
+        }
     }, [ current ]);
+
+    useEffect(() => {
+        if(_matches) {
+            onEntry && onEntry();
+        }
+    }, []);
 
     const initialContext = {
         parent: {
