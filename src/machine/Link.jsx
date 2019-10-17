@@ -1,9 +1,9 @@
 import React, { useContext } from 'react';
-import { StateMachineContext } from './Machine';
+import { MachineContext } from './Machine';
 import { StateNodeContext } from './State';
 
 export default function Link({ children, event: stateEvent, href = '#', onClick, replace }) {
-    const { history } = useContext(StateMachineContext);
+    const { history } = useContext(MachineContext);
     const { send } = useContext(StateNodeContext);
 
     const handleClick = (e) => {

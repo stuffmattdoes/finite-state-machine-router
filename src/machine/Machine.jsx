@@ -2,39 +2,42 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { createBrowserHistory } from 'history';
 import { log } from './util';
 
-export const StateMachineContext = React.createContext();
-StateMachineContext.displayName = 'Machine';
+export const MachineContext = React.createContext();
+MachineContext.displayName = 'Machine';
 
 export function Machine ({ children, history, id, url }) {
-    const [ state, setState ] = useState({
-        current: `#${id}`,
-        // derivedFromUrl: false
-    });
+    const [ state, setState ] = useState({ current: `#${id}` });
 
     // Default history
-    if (!history) {
-        // console.log('history');
-        history = createBrowserHistory({ basename: url });
-    }
+    // useMemo(() => {
+        if (!history) {
+            // console.log('history');
+            history = createBrowserHistory({ basename: url });
+        }
+    // }, []);
     
-    const matches = (stateId) => state.current.split('.').includes(stateId);
+    // const isExact = (stateId) => state.current === stateId;
+    const matches = (stateId) => {
+        // console.log('matches', stateId, state.current);
+        return state.current.split('.').includes(stateId);
+    }
     const resolveStack = (stack) => {
-        console.log('resolveStack', stack, state);
-        setState({ ...state, current: `#${id}${stack}` });
+        console.log('resolveStack', stack);
+        setState({ ...state, current: stack });
     }
     const resolveUrl = (url) => {
-        console.log('resolveUrl', url, state);
+        console.log('resolveUrl', url);
         history.push(url, { stack: state.current });
     }
     const transition = (event, target) => {
         console.log('transition', event, target);
         // log(state, event, target);
-        setState({ ...state, current: `#${id}.${target}` })
+        setState({ ...state, current: target })
     }
 
     useEffect(() => history.listen((location, action) => {
-        // console.log('history listen', location, action);
-        resolveStack(_routeMap[location.pathname]);
+        console.log('history listen', location, action);
+        resolveStack(`#${id}${_routeMap[location.pathname]}`);
     }));
 
     const routeMap = (childStates, parentUrl, parentStack) => {
@@ -65,12 +68,12 @@ export function Machine ({ children, history, id, url }) {
         // 1. Derive state from URL
         if (_pathname.slice(1)) {
             if (_routeMap.hasOwnProperty(_pathname)) {
-                // setState({ ...state, derivedFromUrl: true });
-                resolveStack(_routeMap[_pathname]);
+                // console.log('resolve stack from URL');
+                resolveStack(`#${id}${_routeMap[_pathname]}`);
             } else {
                 // TODO:
                 // Resolve to 404
-                console.error('Route not found!');
+                console.error(`Route ${_pathname} was not found!`);
             }
         }
         // 2. Resolve initial children
@@ -94,14 +97,15 @@ export function Machine ({ children, history, id, url }) {
     const providerValue = {
         ...state,
         history,
+        id,
         matches,
         resolveStack,
         resolveUrl,
         transition
     }
     
-    return <StateMachineContext.Provider value={providerValue}>
+    return <MachineContext.Provider value={providerValue}>
         {_children}
-    </StateMachineContext.Provider>;
+    </MachineContext.Provider>;
 }
 

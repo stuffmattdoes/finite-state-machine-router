@@ -22,7 +22,8 @@ const events = {
     REJECT: 'REJECT',
     RESOLVE: 'RESOLVE',
     RELOAD: 'RELOAD',
-    SUBMIT: 'SUBMIT'
+    SUBMIT: 'SUBMIT',
+    SUBLOADER: 'SUBLOADER'
 }
 
 // Initial state should be:
@@ -37,7 +38,7 @@ ReactDOM.render(
                 <State id='intermediary' url='/intermediary'>
                     <State component={SubLoader2} id='sub-loading-2' url='/sub-loading-2'/>
                     <State component={SubLoader} id='sub-loading' initial url='/sub-loading'>
-                        <Transition event={'SUBLOADER'} target='sub-loading-2'/>
+                        <Transition event={events.SUBLOADER} target='sub-loading-2'/>
                     </State>
                 </State>
             </State>
