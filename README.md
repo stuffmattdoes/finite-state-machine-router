@@ -79,3 +79,5 @@ Check out [proposals](./docs/Proposals.md).
 - [ ] Figure out parallel states
 - [ ] Typescript
 - [ ] Deriving state from URL resolves to all states with matching `url` prop *except* for `atomic` state, which resolve to `initial`.
+- [ ] `Final` state types
+- [ ] `History` state types?
