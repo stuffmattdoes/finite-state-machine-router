@@ -77,12 +77,10 @@ function State(props) {
         // }
     }, []);
 
-    // Resolve subsequent state changes
-    useEffect(() => {
+    useMemo(() => {
         if (_exact && _initialChild) {
             resolveStack(`${stack}.${_initialChild.props.id}`);
         }
-        
         if (_type === 'atomic' && _matches) {
             stackPath && resolvePath(stackPath);
         }

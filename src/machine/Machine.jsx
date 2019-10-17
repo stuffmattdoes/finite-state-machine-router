@@ -22,7 +22,7 @@ export function Machine ({ children, history, id, path }) {
         return state.current.split('.').includes(stateId);
     }
     const resolveStack = (stack) => {
-        // console.log('resolveStack', stack);
+        console.log('resolveStack', stack);
         setState({ ...state, current: stack });
     }
     const resolvePath = (path) => {
@@ -32,7 +32,7 @@ export function Machine ({ children, history, id, path }) {
         }
     }
     const transition = (event, target) => {
-        // console.log('transition', event, target);
+        console.log('transition', event, target);
         // log(state, event, target);
         setState({ ...state, current: target })
     }
