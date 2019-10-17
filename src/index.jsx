@@ -48,7 +48,12 @@ ReactDOM.render(
                     </State>
                 </State>
             </State>
-            <State component={Checkout} id='hub'>
+            <State
+                component={Checkout}
+                id='hub'
+                onEntry={() => console.log('onEntry')}
+                onExit={() => console.log('onExit')}
+            >
                 <State id='trade-in' path='/trade-in'>
                     <State component={Lookup} id='lookup'>
                         <Transition event={events.SUBMIT} target='submitting'/>

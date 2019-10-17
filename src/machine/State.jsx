@@ -8,7 +8,7 @@ Render steps:
         - if atomic, send stack & URL resolutions
 */
 
-import React, { useCallback, useContext, useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { MachineContext } from './Machine';
 
 export const StateNodeContext = React.createContext({
@@ -23,8 +23,9 @@ StateNodeContext.displayName = 'StateNode';
 function State(props) {
     const { children, component: WrappedComponent, id, initial, onEntry, onExit, path, type } = props;
     const { current, history, id: machineId, matches, resolvePath, resolveStack, transition } = useContext(MachineContext);
-    const { parent, send } = useContext(StateNodeContext);
+    const { parent } = useContext(StateNodeContext);
     const { stack: parentStack, path: parentPath } = parent;
+    const [ { _mounted }, setState ] = useState({ _mounted: false });
     const getStateNodeStack = (id) => parentStack ? `${parentStack}.${id}` : `#${machineId}.${id}`;
     const stack = getStateNodeStack(id);
     const stackPath = path ? parentPath ? parentPath + path : path : parentPath;
@@ -60,10 +61,6 @@ function State(props) {
         return {_initialChild,  _type, events };
     }, [ children ]);
 
-    if (_matches) {
-        console.log(id, 'matches!');
-    }
-
     useMemo(() => {
         if (_exact && _initialChild) {
             resolveStack(`${stack}.${_initialChild.props.id}`);
@@ -71,17 +68,18 @@ function State(props) {
         if (_type === 'atomic' && _matches) {
             stackPath && resolvePath(stackPath);
         }
-
-        if (!_matches) {
-            console.log(id, 'doesn\'t match!');
+        if (!_matches && _mounted) {
+            onExit && onExit();
+            setState({ _mounted: false });
         }
     }, [ current ]);
 
     useEffect(() => {
-        if(_matches) {
+        if(_matches && !_mounted) {
             onEntry && onEntry();
+            setState({ _mounted: true });
         }
-    }, []);
+    }, [ current ]);
 
     const initialContext = {
         parent: {
