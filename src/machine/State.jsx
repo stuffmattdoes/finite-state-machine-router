@@ -1,7 +1,7 @@
 /*
 Render steps:
     1. Determine resolution method:
-        - If URL, match 'url' prop to URL until atomic child (children if parallel)
+        - If URL, match 'path' prop to URL until atomic child (children if parallel)
     2. Determine state type:
         - If compound (default), determine initial child state node
         - If parallel, render all children
@@ -14,20 +14,20 @@ import { MachineContext } from './Machine';
 export const StateNodeContext = React.createContext({
     parent: {
         id: null,
-        stack: null,
-        url: null
+        path: null,
+        stack: null
     }
 });
 StateNodeContext.displayName = 'StateNode';
 
 function State(props) {
-    const { children, component: WrappedComponent, id, initial, onEntry, onExit, type, url } = props;
-    const { current, history, id: machineId, matches, resolveStack, resolveUrl, transition } = useContext(MachineContext);
+    const { children, component: WrappedComponent, id, initial, onEntry, onExit, path, type } = props;
+    const { current, history, id: machineId, matches, resolvePath, resolveStack, transition } = useContext(MachineContext);
     const { parent, send } = useContext(StateNodeContext);
-    const { stack: parentStack, url: parentUrl } = parent;
-    const stateNodeUrl = url ? parentUrl ? parentUrl + url : url : parentUrl;
+    const { stack: parentStack, path: parentPath } = parent;
     const getStateNodeStack = (id) => parentStack ? `${parentStack}.${id}` : `#${machineId}.${id}`;
     const stack = getStateNodeStack(id);
+    const stackPath = path ? parentPath ? parentPath + path : path : parentPath;
     const _matches = matches(id);
     const _exact = current === stack;
     
@@ -41,12 +41,6 @@ function State(props) {
             return acc;
         }, {});
         const _initialChild = _childStates.find(c => c.props.initial) || _childStates[0];
-
-        // if (_exact && _initialChild) {
-        //     resolveStack(`${stack}.${_initialChild.props.id}`);
-        // }
-
-        console.log('current', current);
         
         // Determine State type, if unspecified by props
         // 'parallel' is the only StateNode type you'd need to specify. All others can be derived.
@@ -76,7 +70,11 @@ function State(props) {
             onEntry && onEntry();
         }
 
-        return () => _matches && onExit && onExit();
+        // TODO
+        // onExit state action
+        // if (_matches && onExit) {
+        //     return () => onExit();
+        // }
     }, []);
 
     // Resolve subsequent state changes
@@ -86,15 +84,15 @@ function State(props) {
         }
         
         if (_type === 'atomic' && _matches) {
-            stateNodeUrl && resolveUrl(stateNodeUrl);
+            stackPath && resolvePath(stackPath);
         }
     }, [ current ]);
 
     const initialContext = {
         parent: {
             id: id,
-            stack,
-            url: stateNodeUrl,
+            path,
+            stack
         },
         send: _send
     }

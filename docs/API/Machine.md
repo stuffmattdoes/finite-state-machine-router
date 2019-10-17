@@ -5,7 +5,7 @@
 
 ## State resolution
 Upon initialization of our `Machine` wrapper component, the active child state is determined in this order:
-- If the URL pathname (such as `//localhost:3000/example/pathname)` is present (obtained from (History)[https://github.com/ReactTraining/history/blob/master/docs/GettingStarted.md#properties] package's `history.location.pathname`), the children states with matching `url` properties will be resolve until the URL pathname tree is depleted. If the resultant state is not of type `atomic`, then each `initial` child state is resolved.
+- If the URL pathname (such as `//localhost:3000/example/pathname)` is present (obtained from (History)[https://github.com/ReactTraining/history/blob/master/docs/GettingStarted.md#properties] package's `history.location.pathname`), the children states with matching `path` properties will be resolve until the URL pathname tree is depleted. If the resultant state is not of type `atomic`, then each `initial` child state is resolved.
 - If a URL pathname is not present or does not apply, each `initial` child state is resolved until a state of type `atomic` is reached.
 
 ## Signature
@@ -31,7 +31,7 @@ Upon initialization of our `Machine` wrapper component, the active child state i
         <td>Unique identifier for this machine. This must be different than all ancestors and siblings.</td>
     </tr>
     <tr>
-        <td><code>url</code></td>
+        <td><code>path</code></td>
         <td><code>String</code></td>
         <td></td>
         <td>The URL that the browser will resolve to upon entry of this machine. It is relative to all ancestor urls.</td>

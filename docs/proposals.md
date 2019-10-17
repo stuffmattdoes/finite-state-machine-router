@@ -7,20 +7,20 @@
 
 const states = {        // state = traffic
     id: 'traffic',
-    url: '/traffic',
+    path: '/traffic',
     states: {
         green: {                                // state =  traffic.green
-            url: '/green',
+            path: '/green',
             on: { TIMER: 'yellow' } },
         yellow: {                               // state = traffic.yellow
-            url: '/yellow',
+            path: '/yellow',
             on: { TIMER: 'red' }
         },
         red: {                                  // state = traffic.red
-            url: '/red',
+            path: '/red',
             type: 'parallel',
             states: {
-                // URL prop on paralell sub states will resolve to first/query params?
+                // path prop on paralell sub states will resolve to first/query params?
                 walkSign: {                     // state = traffic.red.walkSign
                     initial: 'solid',
                     states: {
@@ -65,12 +65,12 @@ matches({
 
 ### Render props
 ```jsx
-<State id='loading' url='/loading'>
+<State id='loading' path='/loading'>
     { (props) => <Loader>
         <Transition event={events.RESOLVE} target='hub'/>
         <Transition event={events.REJECT} target='error'/>
-        <State id='intermediary' url='/intermediary'>
-            <State component={SubLoader2} id='sub-loading-2' url='/sub-loading-2'/>
+        <State id='intermediary' path='/intermediary'>
+            <State component={SubLoader2} id='sub-loading-2' path='/sub-loading-2'/>
             <State component={SubLoader} id='sub-loading' initial url='/sub-loading'>
                 <Transition event={'SUBLOADER'} target='sub-loading-2'/>
             </State>

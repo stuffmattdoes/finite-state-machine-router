@@ -5,14 +5,14 @@ import { log } from './util';
 export const MachineContext = React.createContext();
 MachineContext.displayName = 'Machine';
 
-export function Machine ({ children, history, id, url }) {
+export function Machine ({ children, history, id, path }) {
     const [ state, setState ] = useState({ current: `#${id}` });
 
     // Default history
     // useMemo(() => {
         if (!history) {
             // console.log('history');
-            history = createBrowserHistory({ basename: url });
+            history = createBrowserHistory({ basename: path });
         }
     // }, []);
     
@@ -22,36 +22,38 @@ export function Machine ({ children, history, id, url }) {
         return state.current.split('.').includes(stateId);
     }
     const resolveStack = (stack) => {
-        console.log('resolveStack', stack);
+        // console.log('resolveStack', stack);
         setState({ ...state, current: stack });
     }
-    const resolveUrl = (url) => {
-        console.log('resolveUrl', url);
-        history.push(url, { stack: state.current });
+    const resolvePath = (path) => {
+        if (path !== history.location.pathname) {
+            // console.log('resolvePath', path, history.location.pathname);
+            history.push(path, { stack: state.current });
+        }
     }
     const transition = (event, target) => {
-        console.log('transition', event, target);
+        // console.log('transition', event, target);
         // log(state, event, target);
         setState({ ...state, current: target })
     }
 
     useEffect(() => history.listen((location, action) => {
-        console.log('history listen', location, action);
+        // console.log('history listen', location, action);
         resolveStack(`#${id}${_routeMap[location.pathname]}`);
     }));
 
-    const routeMap = (childStates, parentUrl, parentStack) => {
+    const routeMap = (childStates, parentPath, parentStack) => {
         return childStates.reduce((acc, { props }, i) => {
-            const { children, id, url } = props;
+            const { children, id, path } = props;
             const _childStates = React.Children.toArray(children).filter(c => c.type.name === 'State');
-            const _fullUrl = parentUrl ? parentUrl + url : url;
+            const _url = parentPath ? parentPath + path : path;
             const _parentStack = parentStack ? `${parentStack}.${id}` : `.${id}`;
     
-            if (url) {
-                acc[_fullUrl] = _parentStack;
+            if (path) {
+                acc[_url] = _parentStack;
             }
             if (_childStates.length) {
-                acc = { ...acc, ...routeMap(_childStates, _fullUrl, _parentStack) }
+                acc = { ...acc, ...routeMap(_childStates, _url, _parentStack) }
             }
     
             return acc;
@@ -68,7 +70,6 @@ export function Machine ({ children, history, id, url }) {
         // 1. Derive state from URL
         if (_pathname.slice(1)) {
             if (_routeMap.hasOwnProperty(_pathname)) {
-                // console.log('resolve stack from URL');
                 resolveStack(`#${id}${_routeMap[_pathname]}`);
             } else {
                 // TODO:
@@ -92,15 +93,13 @@ export function Machine ({ children, history, id, url }) {
         };
     }, [ children ]);
 
-    // console.log(_routeMap);
-
     const providerValue = {
         ...state,
         history,
         id,
         matches,
         resolveStack,
-        resolveUrl,
+        resolvePath,
         transition
     }
     

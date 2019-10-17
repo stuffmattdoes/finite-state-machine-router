@@ -36,7 +36,7 @@ States are the building block of our application. Everything our user will see i
         <td>Denotes the state to be resolved to upon state machine initiation. If no children states are marked as initial, the first child state will be rendered. Doesn't apply if the parent state is a parallel type, because all children of parallel type are simultaneously active.</td>
     </tr>
     <tr>
-        <td><code>url</code></td>
+        <td><code>path</code></td>
         <td><code>String</code></td>
         <td></td>
         <td>The URL that the browser will resolve to upon entry of this state. It is relative to all ancestor urls.</td>
