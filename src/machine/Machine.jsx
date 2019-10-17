@@ -27,7 +27,7 @@ export function Machine ({ children, history, id, path }) {
     }
     const resolvePath = (path) => {
         if (path !== history.location.pathname) {
-            // console.log('resolvePath', path, history.location.pathname);
+            console.log('resolvePath', history.location.pathname, 'to', path);
             history.push(path, { stack: state.current });
         }
     }
@@ -98,8 +98,8 @@ export function Machine ({ children, history, id, path }) {
         history,
         id,
         matches,
-        resolveStack,
         resolvePath,
+        resolveStack,
         transition
     }
     

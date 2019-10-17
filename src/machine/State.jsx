@@ -91,7 +91,7 @@ function State(props) {
     const initialContext = {
         parent: {
             id: id,
-            path,
+            path: stackPath,
             stack
         },
         send: _send
