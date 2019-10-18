@@ -12,6 +12,7 @@ import Error from './components/Error';
 import Estimate from './components/Estimate';
 import Loader from './components/Loader';
 import Lookup from './components/Lookup';
+import NotFound from './components/NotFound';
 import NoResults from './components/NoResults';
 import SubError from './components/SubError';
 import SubLoader from './components/SubLoader';
@@ -71,6 +72,7 @@ ReactDOM.render(
                 <Transition event={events.RELOAD} target='loading'/>
                 <State component={SubError} id='sub-error'/>
             </State>
+            <State component={NotFound} id='not-found' path='*'/>
         </Machine>
     </Container>
 , document.getElementById('root'));

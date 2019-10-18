@@ -7,7 +7,7 @@ function Error({ children, machine }) {
         {children}
         <Link event={'RELOAD'}>Reload (State event)</Link>
         <br/>
-        <Link href='/loading'>Reload (URL push - WIP)</Link>
+        <Link href='/loading/asdfasdf'>Reload (URL push - WIP)</Link>
     </div>;
 }
 

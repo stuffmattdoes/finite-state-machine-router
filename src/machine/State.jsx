@@ -65,7 +65,7 @@ function State(props) {
         if (_exact && _initialChild) {
             resolveStack(`${stack}.${_initialChild.props.id}`);
         }
-        if (_type === 'atomic' && _matches) {
+        if (_type === 'atomic' && _matches && path !== '*') {
             stackPath && resolvePath(stackPath);
         }
         if (!_matches && _mounted) {
