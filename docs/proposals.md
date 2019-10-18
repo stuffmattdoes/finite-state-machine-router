@@ -63,18 +63,44 @@ matches({
 );      // = true
 ```
 
-### Render props
+### Comprehensive App
 ```jsx
-<State id='loading' path='/loading'>
-    { (props) => <Loader>
-        <Transition event={events.RESOLVE} target='hub'/>
-        <Transition event={events.REJECT} target='error'/>
-        <State id='intermediary' path='/intermediary'>
-            <State component={SubLoader2} id='sub-loading-2' path='/sub-loading-2'/>
-            <State component={SubLoader} id='sub-loading' initial url='/sub-loading'>
-                <Transition event={'SUBLOADER'} target='sub-loading-2'/>
+<Machine id='checkout' path='/checkout'>
+    <State id='hub' path='/:stockNumber' invoke={fetchProgression} onEnter={isAuth}>
+        <Transition event={progress.RESOLVE} target='hub'/>
+        <Transition event={progress.REJECT} target='error'/>
+        <ProgressHub>
+            <Transition event={progressHub.RESOLVE} target='progress-hub'/>
+            <Transition event={progressHub.REJECT} target='not-found'/>
+            <State id='loading'/>
+            <State id='finance' path='/finance' onEnter={finance.fetchApp}>
+                { ctx => (
+                    <Finance>
+                        <Transition event={ctx.events.REJECT} target='no-finance-app'/>
+                        <Transition event={ctx.events.RESOLVE} target='finance-app'/>
+                        <State id='loading' initial>
+                            <Transition event={'REJECT'} target='no-finance-app'/>
+                            <Transition event={'RESOLVE'} target='finance-app'/>
+                        </State>
+                        <State id='finance-app' path='/app'>
+                            <State id='finance-app-step-1' path='#step-1'/>
+                            <State id='finance-app-step-2' path='#step-2'/>
+                            <State id='finance-app-step-3' path='#step-3'/>
+                            <State type='final' id='finance-app-step-4'/>
+                        </State>
+                        <State id='no-finance-app' >
+                            <h1>No finance app found!</h1>
+                        </State>
+                    </Finance>
+                )}
             </State>
-        </State>
-    </Loader>}
-</State>
+            <State path='/maxcare' invoke={fetchMaxCare}>
+                <State id='maxcare-loading'/>
+            </State>
+            <State path='/trade-in' invoke={FetchTradeIn}>
+                <State id='trade-in-loading'/>
+            </State>
+        </ProgressHub>
+    </State>
+</Machine>
 ```
