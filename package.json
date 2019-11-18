@@ -1,5 +1,5 @@
 {
-  "name": "xstate-router",
+  "name": "fsm-router",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
