@@ -22,7 +22,7 @@ StateNodeContext.displayName = 'StateNode';
 
 function State(props) {
     const { children, component: WrappedComponent, id, initial, onEntry, onExit, path, type } = props;
-    const { current, history, id: machineId, matches, resolvePath, resolveStack, transition } = useContext(MachineContext);
+    const { current, history, id: machineId, resolvePath, resolveStack, transition } = useContext(MachineContext);
     const { parent } = useContext(StateNodeContext);
     const { stack: parentStack, path: parentPath } = parent;
     const [ { _mounted }, setState ] = useState({ _mounted: false });

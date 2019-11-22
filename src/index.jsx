@@ -33,7 +33,7 @@ const events = {
 ReactDOM.render(
     <Container>
         <Machine id='checkout' path='/checkout'>
-            <State 
+            <State
                 component={Loader}
                 id='loading'
                 path='/loading'
@@ -54,6 +54,7 @@ ReactDOM.render(
                 id='hub'
                 onEntry={() => console.log('onEntry')}
                 onExit={() => console.log('onExit')}
+                path='/:stockNumber'
             >
                 <State id='trade-in' path='/trade-in'>
                     <State component={Lookup} id='lookup'>
@@ -72,7 +73,7 @@ ReactDOM.render(
                 <Transition event={events.RELOAD} target='loading'/>
                 <State component={SubError} id='sub-error'/>
             </State>
-            <State component={NotFound} id='not-found' path='*'/>
+            <State component={NotFound} id='*' path='/404'/>
         </Machine>
     </Container>
 , document.getElementById('root'));

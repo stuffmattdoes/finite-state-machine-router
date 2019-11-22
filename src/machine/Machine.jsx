@@ -1,3 +1,8 @@
+/*
+    TODO
+    Derive stack path from URL with dynamic parameter
+*/
+
 import React, { useEffect, useMemo, useState } from 'react';
 import { createBrowserHistory } from 'history';
 // import { log } from './util';
@@ -5,19 +10,24 @@ import { createBrowserHistory } from 'history';
 export const MachineContext = React.createContext();
 MachineContext.displayName = 'Machine';
 
-export function Machine ({ children, history, id, path }) {
-    const [ state, setState ] = useState({ current: `#${id}` });
+export function Machine ({ children: machineChildren, history, id: machineId, path: machinePath }) {
+    const [ state, setState ] = useState({ current: `#${machineId}` });
 
     // Default history
     if (!history) {
-        // console.log('history');
-        history = createBrowserHistory({ basename: path });
+        history = createBrowserHistory({ basename: machinePath });
     }
-    
-    // const isExact = (stateId) => state.current === stateId;
-    function matches(stateId) {
-        // console.log('matches', stateId, state.current);
-        return state.current.split('.').includes(stateId);
+
+    function matchUrlToPath(url, routeMap) {
+        if (routeMap[url]) {
+            return url;
+        }
+
+        const dynamicPaths = Object.keys(routeMap).filter(route => route.match(/\/:/g));
+
+        if (dynamicPaths.length) {
+            console.log(dynamicPaths);
+        }
     }
     function resolveStack(stack) {
         console.log('resolveStack', stack);
@@ -34,29 +44,33 @@ export function Machine ({ children, history, id, path }) {
         setState({ ...state, current: target })
     }
 
-    useEffect(() => history.listen((location, action) => {
-        // console.log('history listen', location, action);
-        const nextPath = _routeMap[location.pathname] || _routeMap['*'] || null;
+    // useEffect(() => history.listen((location, action) => {
+    //     // console.log('history listen', location, action);
+    //     // const nextPath = routeMap[location.pathname] || routeMap['*'] || null;
+    //     const nextPath = matchUrlToPath(location.pathname);
 
-        if (nextPath) {
-            resolveStack(`#${id}${nextPath}`);
-        } else {
-            console.log(_routeMap);
-        }
-    }));
+    //     if (nextPath) {
+    //         resolveStack(`#${machineId}${nextPath}`);
+    //     } else {
+    //         console.log(routeMap);
+    //     }
+    // }));
 
-    function routeMap(childStates, parentPath, parentStack) {
-        return childStates.reduce((acc, { props }, i) => {
-            const { children, id, path } = props;
-            const _childStates = React.Children.toArray(children).filter(c => c.type.name === 'State');
-            const _url = parentPath ? parentPath + path : path;
-            const _parentStack = parentStack ? `${parentStack}.${id}` : `.${id}`;
+    function generateRouteMap({ states, parentPath, parentStack }) {
+        return states.reduce((acc, child, i) => {
+            const { children, id, path } = child.props;
+            const grandChildStates = React.Children.toArray(children).filter(c => c.type.name === 'State');
+            const stackPath = parentPath ? parentPath + path : path;
+            const stack = parentStack ? `${parentStack}.${id}` : `#${machineId}.${id}`;
 
             if (path) {
-                acc[_url] = _parentStack;
+                acc[stackPath] = stack;
             }
-            if (_childStates.length) {
-                acc = { ...acc, ...routeMap(_childStates, _url, _parentStack) }
+            if (grandChildStates.length) {
+                acc = { ...acc, ...generateRouteMap({
+                    states: grandChildStates,
+                    parentPath: stackPath,
+                    parentStack: stack }) }
             }
 
             return acc;
@@ -64,46 +78,47 @@ export function Machine ({ children, history, id, path }) {
     }
 
     // Determine initial child StateNode (if undefined, which is likely)
-    const { _initialChild, _children, _routeMap } = useMemo(() => {
-        let _childStates = React.Children.toArray(children).filter(c => c.type.name === 'State');
-        const _initialChild = _childStates.find(c => c.props.initial) || _childStates[0];
-        const _routeMap = routeMap(_childStates);
-        const _pathname = history.location.pathname;
+    const newChildren = useMemo(() => {
+        let childStates = React.Children.toArray(machineChildren).filter(c => c.type.name === 'State');
+        const initialChild = childStates.find(c => c.props.initial) || childStates[0];
+        const routeMap = generateRouteMap({ states: childStates });
+        const { pathname: url } = history.location;
 
         // Derive state from URL
-        if (_pathname.slice(1)) {
-            if (_routeMap.hasOwnProperty(_pathname)) {
-                resolveStack(`#${id}${_routeMap[_pathname]}`);
+        if (url.slice(1)) {
+            // if (routeMap.hasOwnProperty(url)) {
+            if (matchUrlToPath(url, routeMap)) {
+                resolveStack(`#${machineId}${routeMap[url]}`);
             } else {
                 // Resolve to 404
-                resolveStack(`#${id}.not-found`);
-                // console.error(`Route ${_pathname} was not found!`);
+                resolveStack(`#${machineId}.*`);
+                // console.error(`Route ${url} was not found!`);
             }
         } else {
             // Resolve to default URL
-            resolveStack(`#${id}.${_initialChild.props.id}`);
+            resolveStack(`#${machineId}.${initialChild.props.id}`);
         }
 
-        return {
-            _children: _childStates,
-            _initialChild,
-            _routeMap
-        };
-    }, [ children ]);
+        return childStates;
+    }, [ machineChildren ]);
 
     const providerValue = {
         ...state,
+        current: state.current,
         history,
-        id,
-        matches,
+        id: machineId,
+        // match: {
+        //     exact: false,
+        //     params: {},
+        //     path: '/path',
+        //     url: '/path'
+        // },
         resolvePath,
         resolveStack,
         transition
     }
-    
+
     return <MachineContext.Provider value={providerValue}>
-        {_children}
-        {/* { children.filter(c => matches(c.props.id))} */}
+        {newChildren}
     </MachineContext.Provider>;
 }
-
