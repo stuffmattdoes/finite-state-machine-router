@@ -10,6 +10,12 @@ import { createBrowserHistory } from 'history';
 export const MachineContext = React.createContext();
 MachineContext.displayName = 'Machine';
 
+const paramRegExp = /^:(.+)/;
+const segmentize = url => url.replace(/(^\/+|\/+$)/g, '').split('/');
+// const isRootSegment = segment => segment === '';
+const isDynamic = segment => paramRegExp.test(segment);
+// const isNotFound = segment => segment === '*';
+
 export function Machine ({ children: machineChildren, history, id: machineId, path: machinePath }) {
     const [ state, setState ] = useState({ current: `#${machineId}` });
 
@@ -18,17 +24,6 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
         history = createBrowserHistory({ basename: machinePath });
     }
 
-    function matchUrlToPath(url, routeMap) {
-        if (routeMap[url]) {
-            return url;
-        }
-
-        const dynamicPaths = Object.keys(routeMap).filter(route => route.match(/\/:/g));
-
-        if (dynamicPaths.length) {
-            console.log(dynamicPaths);
-        }
-    }
     function resolveStack(stack) {
         console.log('resolveStack', stack);
         setState({ ...state, current: stack });
@@ -46,11 +41,11 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
 
     // useEffect(() => history.listen((location, action) => {
     //     // console.log('history listen', location, action);
-    //     // const nextPath = routeMap[location.pathname] || routeMap['*'] || null;
-    //     const nextPath = matchUrlToPath(location.pathname);
+    //     // const nextStack = routeMap[location.pathname] || routeMap['*'] || null;
+    //     const { stack: nextStack } = getStateFromUrl(location.pathname);
 
-    //     if (nextPath) {
-    //         resolveStack(`#${machineId}${nextPath}`);
+    //     if (nextStack) {
+    //         resolveStack(`#${machineId}${nextStack}`);
     //     } else {
     //         console.log(routeMap);
     //     }
@@ -78,7 +73,7 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
     }
 
     // Determine initial child StateNode (if undefined, which is likely)
-    const newChildren = useMemo(() => {
+    const { newChildren, routeMap } = useMemo(() => {
         let childStates = React.Children.toArray(machineChildren).filter(c => c.type.name === 'State');
         const initialChild = childStates.find(c => c.props.initial) || childStates[0];
         const routeMap = generateRouteMap({ states: childStates });
@@ -86,9 +81,10 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
 
         // Derive state from URL
         if (url.slice(1)) {
-            // if (routeMap.hasOwnProperty(url)) {
-            if (matchUrlToPath(url, routeMap)) {
-                resolveStack(`#${machineId}${routeMap[url]}`);
+            const { params, path, stack } = getStateFromUrl(url, routeMap);
+
+            if (stack) {
+                resolveStack(`#${machineId}${stack}`);
             } else {
                 // Resolve to 404
                 resolveStack(`#${machineId}.*`);
@@ -99,8 +95,54 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
             resolveStack(`#${machineId}.${initialChild.props.id}`);
         }
 
-        return childStates;
+        return {
+            newChildren: childStates,
+            routeMap
+        };
     }, [ machineChildren ]);
+
+    function getStateFromUrl(url, routeMap) {
+        // Exact match, no dynamic URL found
+        if (routeMap[url]) {
+            return url;
+        }
+
+        // No exact match, check for dynamic URL match
+        const dynamicPaths = Object.keys(routeMap).filter(route => route.match(/\/:/g));
+
+        if (dynamicPaths.length) {
+            // Split url into arrays of paths
+            const urlSegments = segmentize(url);
+            let params = {};
+            const path = dynamicPaths.find(p => {
+                params = {};
+                const segments = segmentize(p);
+                
+                if (segments.length !== urlSegments.length) {
+                    return false;
+                }
+
+                return !segments.map((s, i) => {
+                    if(isDynamic(s)) {
+                        params[s.slice(1)] = urlSegments[i];
+                        return true;
+                    } else if (s === urlSegments[i]) {
+                        return true;
+                    }
+
+                    return false;
+                }).includes(false);
+            });
+
+            return {
+                params,
+                path,
+                stack: routeMap[path]
+            }
+        } else {
+            return null;
+        }
+    }
 
     const providerValue = {
         ...state,

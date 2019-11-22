@@ -30,7 +30,8 @@ function State(props) {
     const stack = getStateNodeStack(id);
     const stackPath = path ? parentPath ? parentPath + path : path : parentPath;
     const _exact = current === stack;
-    const _matches = matches(id);
+    // const _matches = matches(id);
+    const _matches = false;
     const _send = (event) => transition(event, getStateNodeStack(events[event]));
 
     const { _initialChild, _type, events } = useMemo(() => {
@@ -95,7 +96,7 @@ function State(props) {
         machine: {
             events,
             current,
-            matches,
+            // matches,
             send: _send
         }
     }

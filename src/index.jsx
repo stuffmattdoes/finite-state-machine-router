@@ -45,7 +45,7 @@ ReactDOM.render(
                 <State id='intermediary' path='/intermediary'>
                     <State component={SubLoader2} id='sub-loading-2' path='/sub-loading-2'/>
                     <State component={SubLoader} id='sub-loading' initial path='/sub-loading'>
-                        <Transition event={events.SUBLOADER} target='sub-loading-2'/>
+                        <Transition event={events.SUBLOADER} target='sub-loading-2' />
                     </State>
                 </State>
             </State>
@@ -67,6 +67,7 @@ ReactDOM.render(
                     <State component={Estimate} id='estimate' path='/estimate'/>
                     <State component={NoResults} id='no-results' path='/no-results'/>
                 </State>
+                <State id='test-route' path='/test-route'/>
                 <Transition event={events.RELOAD} target='loading'/>
             </State>
             <State component={Error} id='error' path='/error'>
