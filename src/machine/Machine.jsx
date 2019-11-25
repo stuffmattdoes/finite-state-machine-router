@@ -7,6 +7,7 @@
         - If exact match, return corresponding state
         - If inexact match, determine if dynamic
         - Otherwise, return 404
+    3. If attemtping to resolve to a dynamic path without proper url param meta, throw error
 
 */
 
@@ -36,31 +37,34 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
             path: url,
             stack: routeMap[url]
         }
-        // Exact match, no dynamic URL found
+
+        // 1. Exact match, no dynamic URL needed
         if (match.stack) {
             return match;
         }
 
-        // No exact match, check for dynamic URL match
+        // 2. No exact match, check for dynamic URL match
         const dynamicPaths = Object.keys(routeMap).filter(route => route.match(/\/:/g));
 
         if (dynamicPaths.length) {
-            // Split url into arrays of paths
+            // 2.1 Split url && route map into arrays, compare 1 by 1
             const urlSegments = segmentize(url);
+            // console.log(url, urlSegments);
             let params;
             const path = dynamicPaths.find(p => {
                 const pathSegments = segmentize(p);
                 params = {};
-                
+
                 if (pathSegments.length !== urlSegments.length) {
                     return false;
                 }
 
+                // 2.2 infer parameter from URL from first path that matches in length
                 return !pathSegments.map((pathSegment, i) => {
                     if (isDynamic(pathSegment)) {
                         params[pathSegment.slice(1)] = urlSegments[i];
                         return true;
-                    } else if (pathSegment === pathSegment[i]) {
+                    } else if (pathSegment === urlSegments[i]) {
                         return true;
                     }
 
@@ -77,19 +81,40 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
             return null;
         }
     }
+    function injectUrlParameters(path, params) {
+        const url = segmentize(path).map(seg => {
+            if (isDynamic(seg)) {
+                const segParam = seg.replace(':', '');
+
+                if (Object.keys(params).includes(segParam)) {
+                    return params[segParam];
+                }
+
+                // throw error
+                console.error(`Cannot push to a dynamic URL without supplying the proper parameters: ${seg} url segment is missing.`);
+            }
+
+            return seg;
+        });
+
+        return '/' + url.join('/');
+    }
     function resolveStack(stack) {
-        // console.log('resolveStack', stack);
+        console.log('resolveStack', stack);
         setState({ ...state, current: stack });
     }
-    function resolvePath(path) {
-        if (path !== history.location.pathname) {
-            // console.log('resolvePath', history.location.pathname, 'to', path);
-            history.push(path, { stack: state.current });
+    function resolvePath(path, params) {
+        const url = injectUrlParameters(path, params);
+        console.log(url, history.location.pathname);
+
+        if (url !== history.location.pathname) {
+            console.log('resolvePath', history.location.pathname, 'to', url);
+            history.push(url, { stack: state.current });
         }
     }
-    function transition(event, target) {
-        // console.log('transition', event, target);
-        setState({ ...state, current: target })
+    function send(event, meta) {
+        console.log(event, meta);
+        setState({ ...state, current: meta.target, _event: { event, meta } });
     }
 
     // useEffect(() => history.listen((location, action) => {
@@ -135,21 +160,21 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
     const routeParams = useMemo(() => {
         const initialChild = newChildren.find(c => c.props.initial) || newChildren[0];
         const { pathname: url } = history.location;
-        // let params;
 
         // Derive state from URL
         if (!isRootSemgent(url)) {
             const match = deriveStateFromUrl(url);
             const { params, path, stack } = match;
-            console.log(match);
 
-            if (stack) {
-                resolveStack(`#${machineId}${stack}`);
+            if (match) {
+                resolveStack(stack);
             } else {
                 // Resolve to 404
                 resolveStack(`#${machineId}.*`);
                 // console.error(`Route ${url} was not found!`);
             }
+
+            return params;
         } else {
             // Resolve to default URL
             resolveStack(`#${machineId}.${initialChild.props.id}`);
@@ -163,10 +188,10 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
         current: state.current,
         history,
         id: machineId,
-        // params: routeParams,
+        params: routeParams,
         resolvePath,
         resolveStack,
-        transition
+        send
     }
 
     return <MachineContext.Provider value={providerValue}>

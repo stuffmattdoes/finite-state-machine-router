@@ -22,10 +22,10 @@ StateNodeContext.displayName = 'StateNode';
 
 function State(props) {
     const { children, component: WrappedComponent, id, initial, onEntry, onExit, path, type } = props;
-    const { current, history, id: machineId, resolvePath, resolveStack, transition } = useContext(MachineContext);
+    const { current, history, id: machineId, params, resolvePath, resolveStack, send: machineSend } = useContext(MachineContext);
     const { parent } = useContext(StateNodeContext);
     const { stack: parentStack, path: parentPath } = parent;
-    const [ { _mounted }, setState ] = useState({ _mounted: false });
+    const [ { mounted }, setState ] = useState({ mounted: false });
     const getStateNodeStack = (id) => parentStack ? `${parentStack}.${id}` : `#${machineId}.${id}`;
     const stack = getStateNodeStack(id);
     const stackPath = path ? parentPath ? parentPath + path : path : parentPath;
@@ -33,7 +33,7 @@ function State(props) {
         if (current.includes(stack)) {
             return {
                 exact: current === stack,
-                // params: {},
+                params,
                 path: stackPath,
                 url: history.location.pathname
             }
@@ -41,27 +41,31 @@ function State(props) {
             return false;
         }
     })();
-    const _send = (event) => transition(event, getStateNodeStack(events[event]));
+    const send = (event, meta) => {
+        if (events[event]) {
+            machineSend(event, { ...meta, target: events[event] });
+        }
+    }
 
     const { initialChild, _type, events } = useMemo(() => {
-        const _childrenArr = React.Children.toArray(children);
-        const _childStates = _childrenArr.filter(c => c.type.name === 'State');
-        const events = _childrenArr.reduce((acc, t) => {
+        const childrenArr = React.Children.toArray(children);
+        const childStates = childrenArr.filter(c => c.type.name === 'State');
+        const events = childrenArr.reduce((acc, t) => {
             if (t.type.name === 'Transition') {
                 acc[t.props.event] = t.props.target;
             }
             return acc;
         }, {});
-        const initialChild = _childStates.find(c => c.props.initial) || _childStates[0];
+        const initialChild = childStates.find(c => c.props.initial) || childStates[0];
 
         // Determine State type, if unspecified by props
         // 'parallel' is the only StateNode type you'd need to specify. All others can be derived.
         let _type = type;
 
         if (_type !== 'parallel') {
-            if (!_childStates.length) {
+            if (!childStates.length) {
                 _type = 'atomic';
-            } else if (_childStates.length > 1) {
+            } else if (childStates.length > 1) {
                 _type = 'compound';
             } else {
                 _type = 'default';
@@ -76,18 +80,18 @@ function State(props) {
             resolveStack(`${stack}.${initialChild.props.id}`);
         }
         if (_type === 'atomic' && match && path !== '*') {
-            stackPath && resolvePath(stackPath);
+            stackPath && resolvePath(stackPath, params);
         }
-        if (!match && _mounted) {
+        if (!match && mounted) {
             onExit && onExit();
-            setState({ _mounted: false });
+            setState({ mounted: false });
         }
     }, [ current ]);
 
     useEffect(() => {
-        if(match && !_mounted) {
+        if(match && !mounted) {
             onEntry && onEntry();
-            setState({ _mounted: true });
+            setState({ mounted: true });
         }
     }, [ current ]);
 
@@ -97,16 +101,17 @@ function State(props) {
             path: stackPath,
             stack
         },
-        send: _send
+        send
     }
     const componentProps = {
         ...props,
         history,
         machine: {
-            events,
             current,
-            send: _send
-        }
+            events,
+            send
+        },
+        match
     }
     delete componentProps.component;
     delete componentProps.id;
