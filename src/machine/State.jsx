@@ -29,12 +29,21 @@ function State(props) {
     const getStateNodeStack = (id) => parentStack ? `${parentStack}.${id}` : `#${machineId}.${id}`;
     const stack = getStateNodeStack(id);
     const stackPath = path ? parentPath ? parentPath + path : path : parentPath;
-    const _exact = current === stack;
-    // const _matches = matches(id);
-    const _matches = false;
+    const match = (() => {
+        if (current.includes(stack)) {
+            return {
+                exact: current === stack,
+                // params: {},
+                path: stackPath,
+                url: history.location.pathname
+            }
+        } else {
+            return false;
+        }
+    })();
     const _send = (event) => transition(event, getStateNodeStack(events[event]));
 
-    const { _initialChild, _type, events } = useMemo(() => {
+    const { initialChild, _type, events } = useMemo(() => {
         const _childrenArr = React.Children.toArray(children);
         const _childStates = _childrenArr.filter(c => c.type.name === 'State');
         const events = _childrenArr.reduce((acc, t) => {
@@ -43,7 +52,7 @@ function State(props) {
             }
             return acc;
         }, {});
-        const _initialChild = _childStates.find(c => c.props.initial) || _childStates[0];
+        const initialChild = _childStates.find(c => c.props.initial) || _childStates[0];
 
         // Determine State type, if unspecified by props
         // 'parallel' is the only StateNode type you'd need to specify. All others can be derived.
@@ -59,24 +68,24 @@ function State(props) {
             }
         }
 
-        return {_initialChild,  _type, events };
+        return { initialChild, _type, events };
     }, [ children ]);
 
     useMemo(() => {
-        if (_exact && _initialChild) {
-            resolveStack(`${stack}.${_initialChild.props.id}`);
+        if (match.exact && initialChild) {
+            resolveStack(`${stack}.${initialChild.props.id}`);
         }
-        if (_type === 'atomic' && _matches && path !== '*') {
+        if (_type === 'atomic' && match && path !== '*') {
             stackPath && resolvePath(stackPath);
         }
-        if (!_matches && _mounted) {
+        if (!match && _mounted) {
             onExit && onExit();
             setState({ _mounted: false });
         }
     }, [ current ]);
 
     useEffect(() => {
-        if(_matches && !_mounted) {
+        if(match && !_mounted) {
             onEntry && onEntry();
             setState({ _mounted: true });
         }
@@ -96,14 +105,13 @@ function State(props) {
         machine: {
             events,
             current,
-            // matches,
             send: _send
         }
     }
     delete componentProps.component;
     delete componentProps.id;
 
-    return _matches ?
+    return match ?
         <StateNodeContext.Provider value={initialContext}>
             { WrappedComponent ?
                 <WrappedComponent {...componentProps}/>
