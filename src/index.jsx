@@ -3,84 +3,72 @@ import ReactDOM from 'react-dom';
 import './index.css';
 
 // State machine
-import { Machine, State, Transition } from './machine';
+import { Link, Machine, State, Transition } from './machine';
 
-// Components
-import Container from './components/Container';
-import Checkout from './components/Checkout';
-import Error from './components/Error';
-import Estimate from './components/Estimate';
-import Loader from './components/Loader';
-import Lookup from './components/Lookup';
-import NotFound from './components/NotFound';
-import NoResults from './components/NoResults';
-import SubError from './components/SubError';
-import SubLoader from './components/SubLoader';
-import SubLoader2 from './components/SubLoader2';
-import Submitting from './components/Submitting';
+const Generic = (title) => ({ children, machine, match }) => (
+    <div className={title && title.toLowerCase().replace(/\s/g, '')}>
+        <h1>{title}</h1>
+        {children}
+    </div>
+);
+const GenericWithLinks = (title) => ({ children, machine }) => (
+    <div className={title && title.toLowerCase().replace(/\s/g, '')}>
+        <h1>{title}</h1>
+        <Link event={'reload'}>Reload (State event)</Link>
+        <br/>
+        <Link href='/'>Reload (URL push - WIP)</Link>}
+    </div>
+);
+const App = Generic();
+const Checkout = GenericWithLinks('Checkout');
+const Error = GenericWithLinks('Error');
+const Loading = Generic('Loading');
+const NotFound = GenericWithLinks('Not Found');
+const Step1 = ({ children, machine }) => <div className='step-1'>
+    <h1>Step 1</h1>
+    <Link event={'continue'}>Continue</Link>
+</div>
+const Step2 = () => Generic('Step2')(<Link event={'continue'}>Continue</Link>);
+const Step3 = () => Generic('Step3')(<Link event={'submit'}>Submit</Link>);
+const Submitting = Generic('Submitting');
 
-const events = {
-    REJECT: 'REJECT',
-    RESOLVE: 'RESOLVE',
-    RELOAD: 'RELOAD',
-    SUBMIT: 'SUBMIT',
-    SUBLOADER: 'SUBLOADER'
-}
-
-const fetchData = new Promise((resolve, reject) => {
-    const res = Math.random() > 0.5 ? true : false;
-    setTimeout(() => res ? resolve() : reject(), 1500);
-});
+const fetchData = ({ send }) => new Promise((resolve, reject) => {
+    const rng = Math.random() > 0.5 ? true : false;
+    setTimeout(() => rng ? resolve(8675309) : reject(), 1500);
+}).then(res => send('resolve', { params: { stockNumber: res }}))
+.catch(err => send('reject'));
 
 // Initial state should be:
 // #checkout.loading.sub-loading
-
 ReactDOM.render(
-    <Container>
+    <div className='container'>
         <Machine id='checkout' path='/checkout'>
-            <State
-                component={Loader}
-                id='loading'
-                path='/loading'
-                onEntry={() => console.log('onEntry')}
-                onExit={() => console.log('onExit')}
-            >
-                <Transition event={events.RESOLVE} target='hub'/>
-                <Transition event={events.REJECT} target='error'/>
-                <State id='intermediary' path='/intermediary'>
-                    <State component={SubLoader2} id='sub-loading-2' path='/sub-loading-2'/>
-                    <State component={SubLoader} id='sub-loading' initial path='/sub-loading'>
-                        <Transition event={events.SUBLOADER} target='sub-loading-2' />
+            <State component={App} id='app' invoke={fetchData}>
+                <Transition event='resolve' target='stockNumber'/>
+                <Transition event='reject' target='error'/>
+                <State component={Loading} id='loading'/>
+                <State component={Checkout} id='stockNumber' path='/:stockNumber'>
+                    <State component={Step1} id='step-1' path='/#step-1'>
+                        <Transition event='continue' target='step-2'/>
                     </State>
-                </State>
-            </State>
-            <State
-                component={Checkout}
-                id='hub'
-                invoke={({ send }) => fetchData.then(res => send('RESOLVE')).catch(err => send('REJECT'))}
-                onEntry={() => console.log('onEntry')}
-                onExit={() => console.log('onExit')}
-                path='/:stockNumber'
-            >
-                <State id='trade-in' path='/trade-in'>
-                    <State component={Lookup} id='lookup'>
-                        <Transition event={events.SUBMIT} target='submitting'/>
+                    <State component={Step2} id='step-2' path='/#step-2'>
+                        <Transition event='continue' target='step-3'/>
+                    </State>
+                    <State component={Step3} id='step-3' path='/#step-3'>
+                        <Transition event='submit' target='submit'/>
                     </State>
                     <State component={Submitting} id='submitting'>
-                        <Transition event={events.RESOLVE} target='estimate'/>
-                        <Transition event={events.REJECT} target='no-results'/>
+                        <Transition event='resolve' target='done'/>
+                        <Transition event='reject' target='error'/>
                     </State>
-                    <State component={Estimate} id='estimate' path='/estimate'/>
-                    <State component={NoResults} id='no-results' path='/no-results'/>
                 </State>
-                <State id='test-route' path='/test-route'/>
-                <Transition event={events.RELOAD} target='loading'/>
             </State>
-            <State component={Error} id='error' path='/error'>
-                <Transition event={events.RELOAD} target='loading'/>
-                <State component={SubError} id='sub-error'/>
+            <State component={Error} id='error' path='/500'>
+                <Transition event='reload' target='app'/>
             </State>
-            <State component={NotFound} id='*' path='/404'/>
+            <State component={NotFound} id='*' path='/404'>
+                <Transition event='reload' target='app'/>
+            </State>
         </Machine>
-    </Container>
+    </div>
 , document.getElementById('root'));
