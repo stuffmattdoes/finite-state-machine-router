@@ -105,7 +105,6 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
     }
     function resolvePath(path, params) {
         const url = injectUrlParameters(path, params);
-        console.log(url, history.location.pathname);
 
         if (url !== history.location.pathname) {
             console.log('resolvePath', history.location.pathname, 'to', url);
@@ -117,17 +116,13 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
         setState({ ...state, current: meta.target, _event: { event, meta } });
     }
 
-    // useEffect(() => history.listen((location, action) => {
-    //     // console.log('history listen', location, action);
-    //     // const nextStack = routeMap[location.pathname] || routeMap['*'] || null;
-    //     const { stack: nextStack } = deriveStateFromUrl(location.pathname);
+    useEffect(() => history.listen((location, action) => {
+        const { params, path, stack } = deriveStateFromUrl(location.pathname);
 
-    //     if (nextStack) {
-    //         resolveStack(`#${machineId}${nextStack}`);
-    //     } else {
-    //         console.log(routeMap);
-    //     }
-    // }));
+        if (stack) {
+            resolveStack(stack);
+        }
+    }));
 
     function generateRouteMap(states, parentPath, parentStack) {
         return states.reduce((acc, child, i) => {

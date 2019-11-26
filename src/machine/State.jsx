@@ -21,8 +21,9 @@ export const StateNodeContext = React.createContext({
 StateNodeContext.displayName = 'StateNode';
 
 function State(props) {
-    const { children, component: WrappedComponent, id, initial, onEntry, onExit, path, type } = props;
-    const { current, history, id: machineId, params, resolvePath, resolveStack, send: machineSend } = useContext(MachineContext);
+    const { children, component: WrappedComponent, id, initial, invoke, onEntry, onExit, path, type } = props;
+    const machineContext = useContext(MachineContext);
+    const { current, history, id: machineId, params, resolvePath, resolveStack, send: machineSend }= machineContext;
     const { parent } = useContext(StateNodeContext);
     const { stack: parentStack, path: parentPath } = parent;
     const [ { mounted }, setState ] = useState({ mounted: false });
@@ -41,9 +42,15 @@ function State(props) {
             return false;
         }
     })();
+
+    useEffect(() => {
+        invoke && invoke(machineContext);
+    }, []);
+
+    // TODO - event matching
     const send = (event, meta) => {
         if (events[event]) {
-            machineSend(event, { ...meta, target: events[event] });
+            machineSend(event, { ...meta, target: getStateNodeStack(events[event]) });
         }
     }
 

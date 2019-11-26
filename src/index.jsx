@@ -27,6 +27,11 @@ const events = {
     SUBLOADER: 'SUBLOADER'
 }
 
+const fetchData = new Promise((resolve, reject) => {
+    const res = Math.random() > 0.5 ? true : false;
+    setTimeout(() => res ? resolve() : reject(), 1500);
+});
+
 // Initial state should be:
 // #checkout.loading.sub-loading
 
@@ -52,6 +57,7 @@ ReactDOM.render(
             <State
                 component={Checkout}
                 id='hub'
+                invoke={({ send }) => fetchData.then(res => send('RESOLVE')).catch(err => send('REJECT'))}
                 onEntry={() => console.log('onEntry')}
                 onExit={() => console.log('onExit')}
                 path='/:stockNumber'
