@@ -57,7 +57,7 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
                     return false;
                 }
 
-                // 2.2 infer parameter from URL from first path that matches in length
+                // 2.2 infer parameter from URL from first segment array that matches in length
                 return !pathSegments.map((pathSegment, i) => {
                     if (isDynamic(pathSegment)) {
                         params[pathSegment.slice(1)] = urlSegments[i];
@@ -134,22 +134,22 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
             const stackPath = parentPath ? parentPath + path : path;
             const stack = parentStack ? `${parentStack}.${id}` : `#${machineId}.${id}`;
 
-            if (path) {
-                acc.routeMap[stackPath] = stack;
-            }
-            if (grandChildStates.length) {
-                const nextAcc = generateRouteMap(grandChildStates, stackPath, stack);
-                acc.routeMap = { ...acc.routeMap, ...nextAcc.routeMap };
-                acc.stacks = nextAcc.stacks;
-            } else {
+            if (id) {
                 if (acc.stacks.includes(id)) {
                     console.error(`State Machine already includes StateNode with an id of "${id}". All Id properties must be unique!`);
                 } else {
                     acc.stacks.push(stack);
                 }
             }
+            if (path) {
+                acc.routeMap[stackPath] = stack;
+            }
+            if (grandChildStates.length) {
+                const nextAcc = generateRouteMap(grandChildStates, stackPath, stack);
+                acc.routeMap = { ...acc.routeMap, ...nextAcc.routeMap };
+                acc.stacks = [ ...acc.stacks, ...nextAcc.stacks ];
+            }
 
-            // console.log(acc);
             return acc;
         }, { routeMap: {}, stacks: [] });
     }
@@ -165,6 +165,8 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
             stacks
         };
     }, [ machineChildren ]);
+
+    console.log(stacks);
 
     const routeParams = useMemo(() => {
         const initialChild = childStates.find(c => c.props.initial) || childStates[0];
@@ -200,7 +202,6 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
         id: machineId,
         params: routeParams,
         resolvePath,
-        // resolveStack,
         resolveState,
         send
     }
