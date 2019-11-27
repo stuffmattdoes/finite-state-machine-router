@@ -16,7 +16,7 @@ const GenericWithLinks = (title) => ({ children, machine }) => (
         <h1>{title}</h1>
         <Link event={'reload'}>Reload (State event)</Link>
         <br/>
-        <Link href='/'>Reload (URL push - WIP)</Link>}
+        <Link href='/'>Reload (URL push - WIP)</Link>
     </div>
 );
 const App = Generic();

@@ -1,4 +1,4 @@
-export const log = (state, event, target) => {
+export const logger = (state, event, target) => {
     const { current, id } = state;
     const date = new Date();
     const time = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}.${date.getMilliseconds()}`;
@@ -9,3 +9,14 @@ export const log = (state, event, target) => {
     console.log(`%cnext state: %c#${id}.${target}\n`, 'color: green; font-weight: bold;', 'color: black;');
     console.groupEnd();
 }
+
+export const fakeUUID = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    let r = Math.random() * 16 | 0;
+    let v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+});
+
+const paramRegExp = /^:(.+)/;
+export const isDynamic = segment => paramRegExp.test(segment);
+export const isRootSemgent = url => url.slice(1) === '';
+export const segmentize = url => url.replace(/(^\/+|\/+$)/g, '').split('/');

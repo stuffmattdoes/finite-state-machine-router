@@ -20,15 +20,19 @@ export const StateNodeContext = React.createContext({
 });
 StateNodeContext.displayName = 'StateNode';
 
+// TODO
+// - auto generate ID if missing
+// - throw error if state ID is not unique
+
 function State(props) {
     const { children, component: WrappedComponent, id, initial, invoke, onEntry, onExit, path, type } = props;
     const machineContext = useContext(MachineContext);
-    const { current, history, id: machineId, params, resolvePath, resolveStack, send: machineSend } = machineContext;
+    const { current, history, id: machineId, params, resolvePath, resolveState, send: machineSend } = machineContext;
     const { parent } = useContext(StateNodeContext);
     const { stack: parentStack, path: parentPath } = parent;
     const [ { mounted }, setState ] = useState({ mounted: false });
-    const getStateNodeStack = (id) => parentStack ? `${parentStack}.${id}` : `#${machineId}.${id}`;
-    const stack = getStateNodeStack(id);
+    // const getStateNodeStack = (id) => parentStack ? `${parentStack}.${id}` : `#${machineId}.${id}`;
+    const stack = parentStack ? `${parentStack}.${id}` : `#${machineId}.${id}`;
     const stackPath = path ? parentPath ? parentPath + path : path : parentPath;
     const match = (() => {
         if (current.includes(stack)) {
@@ -43,10 +47,19 @@ function State(props) {
         }
     })();
 
-    // TODO - event matching
-    const send = (event, meta) => {
+    /*
+    https://www.w3.org/TR/scxml/#CoreIntroduction
+    
+    3.1.2 Compound States:
+    ... Thus transitions in ancestor states serve as defaults that will be taken if no transition matches in a descendant state. If no transition matches in any state, the event is discarded.
+    
+    https://www.w3.org/TR/scxml/#InternalStructureofEvents
+    
+    5.10.1 The Internal Structure of Events
+    */
+    const send = (event, data) => {
         if (events[event]) {
-            machineSend(event, { ...meta, target: getStateNodeStack(events[event]) });
+            machineSend({ name: event, sendid: id, data });
         }
     }
 
@@ -80,9 +93,11 @@ function State(props) {
 
     useMemo(() => {
         if (match.exact && initialChild) {
-            resolveStack(`${stack}.${initialChild.props.id}`);
+            // resolveStack(`${stack}.${initialChild.props.id}`);
+            resolveState(initialChild.props.id);
         }
-        if (_type === 'atomic' && match && path !== '*') {
+        // if (_type === 'atomic' && match && path !== '*') {
+            if (_type === 'atomic' && match) {
             stackPath && resolvePath(stackPath, params);
         }
         if (!match && mounted) {

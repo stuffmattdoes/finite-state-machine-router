@@ -13,18 +13,16 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { createBrowserHistory } from 'history';
-// import { log } from './util';
+import { isDynamic, isRootSemgent, logger, segmentize } from './util';
 
 export const MachineContext = React.createContext();
 MachineContext.displayName = 'Machine';
 
-const paramRegExp = /^:(.+)/;
-const isDynamic = segment => paramRegExp.test(segment);
-const isRootSemgent = url => url.slice(1) === '';
-const segmentize = url => url.replace(/(^\/+|\/+$)/g, '').split('/');
-
 export function Machine ({ children: machineChildren, history, id: machineId, path: machinePath }) {
-    const [ state, setState ] = useState({ current: `#${machineId}` });
+    const [ state, setState ] = useState({
+        current: `#${machineId}`,
+        event: null
+    });
 
     // Default history
     if (!history) {
@@ -99,8 +97,13 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
 
         return '/' + url.join('/');
     }
-    function resolveStack(stack) {
-        console.log('resolveStack', stack);
+    function resolveStack(stateId) {
+        // setState({ ...state, current: stack });
+        return stateId;
+    }
+    function resolveState(stateId) {
+        console.log('resolveState', stateId);
+        const stack = resolveStack(stateId);
         setState({ ...state, current: stack });
     }
     function resolvePath(path, params) {
@@ -111,9 +114,8 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
             history.push(url, { stack: state.current });
         }
     }
-    function send(event, meta) {
-        console.log(event, meta);
-        setState({ ...state, current: meta.target, _event: { event, meta } });
+    function send(event) {
+        setState({ ...state, event });
     }
 
     useEffect(() => history.listen((location, action) => {
@@ -124,36 +126,48 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
         }
     }));
 
+    // For deriving effective state from URL
     function generateRouteMap(states, parentPath, parentStack) {
-        return states.reduce((acc, child, i) => {
+        return states.reduce((acc, child) => {
             const { children, id, path } = child.props;
             const grandChildStates = React.Children.toArray(children).filter(c => c.type.name === 'State');
             const stackPath = parentPath ? parentPath + path : path;
             const stack = parentStack ? `${parentStack}.${id}` : `#${machineId}.${id}`;
 
             if (path) {
-                acc[stackPath] = stack;
+                acc.routeMap[stackPath] = stack;
             }
             if (grandChildStates.length) {
-                acc = { ...acc, ...generateRouteMap(grandChildStates, stackPath, stack) }
+                const nextAcc = generateRouteMap(grandChildStates, stackPath, stack);
+                acc.routeMap = { ...acc.routeMap, ...nextAcc.routeMap };
+                acc.stacks = nextAcc.stacks;
+            } else {
+                if (acc.stacks.includes(id)) {
+                    console.error(`State Machine already includes StateNode with an id of "${id}". All Id properties must be unique!`);
+                } else {
+                    acc.stacks.push(stack);
+                }
             }
 
+            // console.log(acc);
             return acc;
-        }, {});
+        }, { routeMap: {}, stacks: [] });
     }
-    
+
     // Determine initial child StateNode (if undefined, which is likely)
-    const { newChildren, routeMap } = useMemo(() => {
+    const { childStates, routeMap, stacks } = useMemo(() => {
         let childStates = React.Children.toArray(machineChildren).filter(c => c.type.name === 'State');
+        const { routeMap, stacks } = generateRouteMap(childStates);
 
         return {
-            newChildren: childStates,
-            routeMap: generateRouteMap(childStates)
+            childStates,
+            routeMap,
+            stacks
         };
     }, [ machineChildren ]);
 
     const routeParams = useMemo(() => {
-        const initialChild = newChildren.find(c => c.props.initial) || newChildren[0];
+        const initialChild = childStates.find(c => c.props.initial) || childStates[0];
         const { pathname: url } = history.location;
 
         // Derive state from URL
@@ -181,15 +195,17 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
     const providerValue = {
         ...state,
         current: state.current,
+        event: state.event,
         history,
         id: machineId,
         params: routeParams,
         resolvePath,
-        resolveStack,
+        // resolveStack,
+        resolveState,
         send
     }
 
     return <MachineContext.Provider value={providerValue}>
-        {newChildren}
+        {childStates}
     </MachineContext.Provider>;
 }
