@@ -2,17 +2,17 @@ import React, { useContext } from 'react';
 import { MachineContext } from './Machine';
 import { StateNodeContext } from './State';
 
-export default function Link({ children, event: machineEvent, href = '#', onClick, replace }) {
+export default function Link({ children, event, href = '#', onClick, replace }) {
     const { history } = useContext(MachineContext);
     const { send } = useContext(StateNodeContext);
 
     const handleClick = (e) => {
-        if (machineEvent) {
+        if (event) {
             e.preventDefault();
-            send(machineEvent);
+            send(event);
         }
 
-        if (!replace && !machineEvent) {
+        if (!replace && !event) {
             e.preventDefault();
             history.push(href);
         }

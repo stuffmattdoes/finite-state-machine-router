@@ -14,7 +14,7 @@ const Generic = (title) => ({ children, machine, match }) => (
 const GenericWithLinks = (title) => ({ children, machine }) => (
     <div className={title && title.toLowerCase().replace(/\s/g, '')}>
         <h1>{title}</h1>
-        <Link event={'reload'}>Reload (State event)</Link>
+        <Link event='reload'>Reload (State event)</Link>
         <br/>
         <Link href='/'>Reload (URL push - WIP)</Link>
     </div>
@@ -26,14 +26,14 @@ const Loading = Generic('Loading');
 const NotFound = GenericWithLinks('Not Found');
 const Step1 = ({ children, machine }) => <div className='step-1'>
     <h1>Step 1</h1>
-    <Link event={'continue'}>Continue</Link>
+    <Link event='continue'>Continue</Link>
 </div>
-const Step2 = () => Generic('Step2')(<Link event={'continue'}>Continue</Link>);
-const Step3 = () => Generic('Step3')(<Link event={'submit'}>Submit</Link>);
+const Step2 = () => Generic('Step2')(<Link event='continue'>Continue</Link>);
+const Step3 = () => Generic('Step3')(<Link event='submit'>Submit</Link>);
 const Submitting = Generic('Submitting');
 
 const fetchData = ({ send }) => new Promise((resolve, reject) => {
-    const rng = Math.random() > 0.5 ? true : false;
+    const rng = Math.random() > 1 ? true : false;
     setTimeout(() => rng ? resolve(8675309) : reject(), 1500);
 }).then(res => send('resolve', { params: { stockNumber: res }}))
 .catch(err => send('reject'));
@@ -63,7 +63,7 @@ ReactDOM.render(
                     </State>
                 </State>
             </State>
-            <State component={Error} id='error' path='/500'>
+            <State component={Error} id='error'>
                 <Transition event='reload' target='app'/>
             </State>
             <State component={NotFound} id='*' path='/404'>

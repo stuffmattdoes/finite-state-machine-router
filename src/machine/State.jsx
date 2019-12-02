@@ -27,25 +27,18 @@ StateNodeContext.displayName = 'StateNode';
 function State(props) {
     const { children, component: WrappedComponent, id, initial, invoke, onEntry, onExit, path, type } = props;
     const machineContext = useContext(MachineContext);
-    const { current, history, id: machineId, params, resolvePath, resolveState, send: machineSend } = machineContext;
+    const { _event: machineEvent, current, history, id: machineId, params, resolvePath, resolveStack, resolveState, send: machineSend } = machineContext;
     const { parent } = useContext(StateNodeContext);
     const { stack: parentStack, path: parentPath } = parent;
     const [ { mounted }, setState ] = useState({ mounted: false });
-    // const getStateNodeStack = (id) => parentStack ? `${parentStack}.${id}` : `#${machineId}.${id}`;
     const stack = parentStack ? `${parentStack}.${id}` : `#${machineId}.${id}`;
     const stackPath = path ? parentPath ? parentPath + path : path : parentPath;
-    const match = (() => {
-        if (current.includes(stack)) {
-            return {
-                exact: current === stack,
-                params,
-                path: stackPath,
-                url: history.location.pathname
-            }
-        } else {
-            return false;
-        }
-    })();
+    const match = current.includes(id) ? {
+        exact: current === stack,
+        params,
+        path: stackPath,
+        url: history.location.pathname
+    } : false;
 
     /*
     https://www.w3.org/TR/scxml/#CoreIntroduction
@@ -57,9 +50,9 @@ function State(props) {
     
     5.10.1 The Internal Structure of Events
     */
-    const send = (event, data) => {
+    function send(event, data) {
         if (events[event]) {
-            machineSend({ name: event, sendid: id, data });
+            machineSend(event, { sendid: id, data });
         }
     }
 
@@ -93,11 +86,10 @@ function State(props) {
 
     useMemo(() => {
         if (match.exact && initialChild) {
-            // resolveStack(`${stack}.${initialChild.props.id}`);
-            resolveState(initialChild.props.id);
+            resolveStack(`${stack}.${initialChild.props.id}`);
         }
         // if (_type === 'atomic' && match && path !== '*') {
-            if (_type === 'atomic' && match) {
+        if (_type === 'atomic' && match) {
             stackPath && resolvePath(stackPath, params);
         }
         if (!match && mounted) {
@@ -113,6 +105,16 @@ function State(props) {
             setState({ mounted: true });
         }
     }, [ current ]);
+
+    useEffect(() => {
+        if (machineEvent && events[machineEvent.name]) {
+            resolveState(events[machineEvent.name]);
+        }
+    }, [ machineEvent ]);
+
+    // useEffect(() => {
+    //     console.log('machineEvent', id, events, machineEvent && machineEvent.name);
+    // }, [ machineEvent ]);
 
     const initialContext = {
         parent: {

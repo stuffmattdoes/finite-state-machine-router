@@ -13,7 +13,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { createBrowserHistory } from 'history';
-import { isDynamic, isRootSemgent, logger, segmentize } from './util';
+import { isDynamic, isRootSemgent, /* logger, */ segmentize } from './util';
 
 export const MachineContext = React.createContext();
 MachineContext.displayName = 'Machine';
@@ -21,7 +21,7 @@ MachineContext.displayName = 'Machine';
 export function Machine ({ children: machineChildren, history, id: machineId, path: machinePath }) {
     const [ state, setState ] = useState({
         current: `#${machineId}`,
-        event: null
+        _event: null
     });
 
     // Default history
@@ -47,7 +47,6 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
         if (dynamicPaths.length) {
             // 2.1 Split url && route map into arrays, compare 1 by 1
             const urlSegments = segmentize(url);
-            // console.log(url, urlSegments);
             let params;
             const path = dynamicPaths.find(p => {
                 const pathSegments = segmentize(p);
@@ -97,25 +96,25 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
 
         return '/' + url.join('/');
     }
-    function resolveStack(stateId) {
-        // setState({ ...state, current: stack });
-        return stateId;
+    function resolveStack(stack) {
+        // console.log('resolveStack', stack);
+        setState({ ...state, _event: null, current: stack });
     }
     function resolveState(stateId) {
-        console.log('resolveState', stateId);
-        const stack = resolveStack(stateId);
-        setState({ ...state, current: stack });
+        const stack = stacks.find(s =>  s.split('.').pop() === stateId);
+        resolveStack(stack);
     }
     function resolvePath(path, params) {
         const url = injectUrlParameters(path, params);
 
         if (url !== history.location.pathname) {
-            console.log('resolvePath', history.location.pathname, 'to', url);
+            // console.log('resolvePath', history.location.pathname, 'to', url);
             history.push(url, { stack: state.current });
         }
     }
-    function send(event) {
-        setState({ ...state, event });
+    function send(event, data = null) {
+        console.log('send', event, data);
+        setState({ ...state, _event: { name: event, ...data } });
     }
 
     useEffect(() => history.listen((location, action) => {
@@ -154,17 +153,22 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
         }, { routeMap: {}, stacks: [] });
     }
 
-    const { childStates, routeMap, params, stacks } = useMemo(() => {
+    // Determine initial child StateNode (if undefined, which is likely)
+    const { childStates, routeMap, stacks } = useMemo(() => {
         let childStates = React.Children.toArray(machineChildren).filter(c => c.type.name === 'State');
-        const initialChild = childStates.find(c => c.props.initial) || childStates[0];
-        const { pathname: url } = history.location;
         const { routeMap, stacks } = generateStackMaps(childStates);
-        let returnObj = {
+
+        return {
             childStates,
-            params: {},
             routeMap,
             stacks
-        }
+        };
+    }, [ machineChildren ]);
+
+    const routeParams = useMemo(() => {
+        const initialChild = childStates.find(c => c.props.initial) || childStates[0];
+        const { pathname: url } = history.location;
+        let routeParams = {};
 
         // Derive state from URL
         if (!isRootSemgent(url)) {
@@ -179,25 +183,24 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
                 // console.error(`Route ${url} was not found!`);
             }
 
-            returnObj.params = params;
+            routeParams = params;
         } else {
             // Resolve to default URL
             resolveStack(`#${machineId}.${initialChild.props.id}`);
         }
 
-        return returnObj;
+        return routeParams;
     }, [ machineChildren ]);
-
-    console.log(stacks);
 
     const providerValue = {
         ...state,
         current: state.current,
-        event: state.event,
+        _event: state._event,
         history,
         id: machineId,
-        params,
+        params: routeParams,
         resolvePath,
+        resolveStack,
         resolveState,
         send
     }
