@@ -127,7 +127,7 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
     }));
 
     // For deriving effective state from URL
-    function generateRouteMap(states, parentPath, parentStack) {
+    function generateStackMaps(states, parentPath, parentStack) {
         return states.reduce((acc, child) => {
             const { children, id, path } = child.props;
             const grandChildStates = React.Children.toArray(children).filter(c => c.type.name === 'State');
@@ -145,7 +145,7 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
                 acc.routeMap[stackPath] = stack;
             }
             if (grandChildStates.length) {
-                const nextAcc = generateRouteMap(grandChildStates, stackPath, stack);
+                const nextAcc = generateStackMaps(grandChildStates, stackPath, stack);
                 acc.routeMap = { ...acc.routeMap, ...nextAcc.routeMap };
                 acc.stacks = [ ...acc.stacks, ...nextAcc.stacks ];
             }
@@ -154,23 +154,17 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
         }, { routeMap: {}, stacks: [] });
     }
 
-    // Determine initial child StateNode (if undefined, which is likely)
-    const { childStates, routeMap, stacks } = useMemo(() => {
+    const { childStates, routeMap, params, stacks } = useMemo(() => {
         let childStates = React.Children.toArray(machineChildren).filter(c => c.type.name === 'State');
-        const { routeMap, stacks } = generateRouteMap(childStates);
-
-        return {
-            childStates,
-            routeMap,
-            stacks
-        };
-    }, [ machineChildren ]);
-
-    console.log(stacks);
-
-    const routeParams = useMemo(() => {
         const initialChild = childStates.find(c => c.props.initial) || childStates[0];
         const { pathname: url } = history.location;
+        const { routeMap, stacks } = generateStackMaps(childStates);
+        let returnObj = {
+            childStates,
+            params: {},
+            routeMap,
+            stacks
+        }
 
         // Derive state from URL
         if (!isRootSemgent(url)) {
@@ -185,14 +179,16 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
                 // console.error(`Route ${url} was not found!`);
             }
 
-            return params;
+            returnObj.params = params;
         } else {
             // Resolve to default URL
             resolveStack(`#${machineId}.${initialChild.props.id}`);
         }
 
-        // return params;
+        return returnObj;
     }, [ machineChildren ]);
+
+    console.log(stacks);
 
     const providerValue = {
         ...state,
@@ -200,7 +196,7 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
         event: state.event,
         history,
         id: machineId,
-        params: routeParams,
+        params,
         resolvePath,
         resolveState,
         send
