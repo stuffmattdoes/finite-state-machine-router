@@ -32,7 +32,7 @@ function State(props) {
     } : false;
     
     function send(event, data) {
-        console.log('send');
+        console.log(0);
         if (events[event]) {
             machineSend(event, { sendid: id, data });
         }
@@ -72,7 +72,7 @@ function State(props) {
                 console.log('resolePath', stackPath);
                 stackPath && resolvePath(stackPath);
             } else if (match.exact && initialChild && !machineEvent) {
-                console.log(0);
+                console.log(1, machineEvent);
                 resolveByState(initialChild.props.id);
             }
         } else if (mounted) {
@@ -83,7 +83,7 @@ function State(props) {
 
     useEffect(() => {
         if (machineEvent && events[machineEvent.name]) {
-            console.log(1, machineEvent);
+            console.log(2, machineEvent);
             resolveByState(events[machineEvent.name]);
         }
     }, [ machineEvent ]);
