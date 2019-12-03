@@ -1,20 +1,28 @@
 /*
     Reqs:
-    - Derive target state node from URL (including dynamic paths)
+    [x] Derive target state node from URL (including dynamic paths)
         1. Parse tree on init and generate state node -> URL map
         2. If match, resolve to corresponding state
-        3. If no match, begin to parse dynamic state node paths (prefix with :) for match
+        3. If no match, begin to parse dynamic state node paths (prefixed with :) for match
         4. If still no match, 404
-    - Resolve all initial children from target/active state node to atomic state node
+            *  If attemtping to resolve to a dynamic path without proper url param meta, throw error
+    [ ] Resolve all initial children from target/active state node to atomic state node
         1. Resolve to target state node from URL (steps listed above)
         2. If target node is not atomic, resolve to every child marked "initial"
         3. If no child is marked initial, resolve to first in document order
-    - Update URL from atomic node
-    - Resolve to target state upon event
+    [ ] Update URL from atomic node
+    [ ] Resolve to target state upon event
         1. First check most deeply-nested active atomic state for matching transition.
         2. If no match, parse ancestors for matching target
         3. If match, transition to target state node (& update URL). Otherwise, discard event
-            * Node - there are no limitations on transition targets. Any state can transition to any other state.
+            * If attemtping to resolve to a dynamic path without proper url param meta, throw error
+            * There are no limitations on transition targets. Any state can transition to any other state.
+
+    if all the above steps were events:
+    1. resolve.state_from_url
+    2. resolve.initial_child
+    3. resolve.url
+    4. resolve.target_state
 */
 
 import React from 'react';
@@ -52,13 +60,11 @@ const Step3 = () => Generic('Step3')(<Link event='submit'>Submit</Link>);
 const Submitting = Generic('Submitting');
 
 const fetchData = ({ send }) => new Promise((resolve, reject) => {
-    const rng = Math.random() > 1 ? true : false;
+    const rng = Math.random() >= 0.5 ? true : false;
     setTimeout(() => rng ? resolve(8675309) : reject(), 1500);
 }).then(res => send('resolve', { params: { stockNumber: res }}))
 .catch(err => send('reject'));
 
-// Initial state should be:
-// #checkout.loading.sub-loading
 ReactDOM.render(
     <div className='container'>
         <Machine id='checkout' path='/checkout'>

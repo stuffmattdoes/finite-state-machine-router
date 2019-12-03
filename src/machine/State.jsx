@@ -1,15 +1,6 @@
-/*
-Render steps:
-    1. Determine resolution method:
-        - If URL, match 'path' prop to URL until atomic child (children if parallel)
-    2. Determine state type:
-        - If compound (default), determine initial child state node
-        - If parallel, render all children
-        - if atomic, send stack & URL resolutions
-*/
-
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { MachineContext } from './Machine';
+import { isCurrentStack } from './util';
 
 export const StateNodeContext = React.createContext({
     parent: {
@@ -27,13 +18,13 @@ StateNodeContext.displayName = 'StateNode';
 function State(props) {
     const { children, component: WrappedComponent, id, initial, invoke, onEntry, onExit, path, type } = props;
     const machineContext = useContext(MachineContext);
-    const { _event: machineEvent, current, history, id: machineId, params, resolvePath, resolveStack, resolveState, send: machineSend } = machineContext;
+    const { _event: machineEvent, current, history, id: machineId, params, resolvePath, resolveState, send: machineSend } = machineContext;
     const { parent } = useContext(StateNodeContext);
     const { stack: parentStack, path: parentPath } = parent;
     const [ { mounted }, setState ] = useState({ mounted: false });
     const stack = parentStack ? `${parentStack}.${id}` : `#${machineId}.${id}`;
     const stackPath = path ? parentPath ? parentPath + path : path : parentPath;
-    const match = current.includes(id) ? {
+    const match = isCurrentStack(id, current) ? {
         exact: current === stack,
         params,
         path: stackPath,
@@ -84,15 +75,27 @@ function State(props) {
         return { initialChild, _type, events };
     }, [ children ]);
 
+    // useMemo(() => {
+    //     if (machineEvent && events[machineEvent.name]) {
+    //         console.log('01');
+    //         resolveState(events[machineEvent.name]);
+    //     }
+    // }, [ machineEvent ]);
+
     useMemo(() => {
-        if (match.exact && initialChild) {
-            resolveStack(`${stack}.${initialChild.props.id}`);
-        }
-        // if (_type === 'atomic' && match && path !== '*') {
-        if (_type === 'atomic' && match) {
-            stackPath && resolvePath(stackPath, params);
-        }
-        if (!match && mounted) {
+        if (match) {
+            if (match.exact && initialChild) {
+                // console.log('current', current, id);
+                // resolveStack(`${stack}.${initialChild.props.id}`);
+                // console.log('00', current, stack);
+                resolveState(initialChild.props.id);
+            }
+            
+            // if (_type === 'atomic' && match && path !== '*') {
+            if (_type === 'atomic') {
+                stackPath && resolvePath(stackPath);
+            }
+        } else if (mounted) {
             onExit && onExit();
             setState({ mounted: false });
         }
@@ -105,12 +108,6 @@ function State(props) {
             setState({ mounted: true });
         }
     }, [ current ]);
-
-    useEffect(() => {
-        if (machineEvent && events[machineEvent.name]) {
-            resolveState(events[machineEvent.name]);
-        }
-    }, [ machineEvent ]);
 
     // useEffect(() => {
     //     console.log('machineEvent', id, events, machineEvent && machineEvent.name);
