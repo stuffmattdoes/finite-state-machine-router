@@ -16,15 +16,15 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
         history = createBrowserHistory({ basename: machinePath });
     }
 
-    function resolveStack(stack) {
-        console.log('resolveStack', stack);
+    function resolveByStack(stack) {
+        console.log('resolveByStack', stack);
         setState({ ...state, _event: null, current: stack });
     }
 
-    function resolveState(stateId) {
-        console.log('resolveState', stateId);
+    function resolveByState(stateId) {
+        // console.log('resolveByState', stateId);
         const stack = stacks.find(s =>  s.split('.').pop() === stateId);
-        resolveStack(stack);
+        resolveByStack(stack);
     }
     
     function resolvePath(path) {
@@ -83,14 +83,14 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
             urlParams = params;
 
             if (match) {
-                resolveStack(stack);
+                resolveByStack(stack);
             } else {
                 // Resolve to 404
-                resolveStack(`#${machineId}.*`);
+                resolveByStack(`#${machineId}.*`);
             }
         } else {
             // Resolve to default URL
-            resolveStack(`#${machineId}.${initialChild.props.id}`);
+            resolveByStack(`#${machineId}.${initialChild.props.id}`);
         }
 
         return {
@@ -105,7 +105,7 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
         const { params, path, stack } = deriveStateFromUrl(location.pathname, routeMap);
 
         if (stack) {
-            resolveStack(stack);
+            resolveByStack(stack);
         }
     }));
 
@@ -115,8 +115,8 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
         id: machineId,
         params: urlParams,
         resolvePath,
-        resolveStack,
-        resolveState,
+        resolveByStack,
+        resolveByState,
         send
     }
 

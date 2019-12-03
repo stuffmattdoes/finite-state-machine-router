@@ -18,7 +18,7 @@ StateNodeContext.displayName = 'StateNode';
 function State(props) {
     const { children, component: WrappedComponent, id, initial, invoke, onEntry, onExit, path, type } = props;
     const machineContext = useContext(MachineContext);
-    const { _event: machineEvent, current, history, id: machineId, params, resolvePath, resolveState, send: machineSend } = machineContext;
+    const { _event: machineEvent, current, history, id: machineId, params, resolvePath, resolveByState, send: machineSend } = machineContext;
     const { parent } = useContext(StateNodeContext);
     const { stack: parentStack, path: parentPath } = parent;
     const [ { mounted }, setState ] = useState({ mounted: false });
@@ -75,31 +75,27 @@ function State(props) {
         return { initialChild, _type, events };
     }, [ children ]);
 
-    // useMemo(() => {
-    //     if (machineEvent && events[machineEvent.name]) {
-    //         console.log('01');
-    //         resolveState(events[machineEvent.name]);
-    //     }
-    // }, [ machineEvent ]);
-
     useMemo(() => {
         if (match) {
-            if (match.exact && initialChild) {
-                // console.log('current', current, id);
-                // resolveStack(`${stack}.${initialChild.props.id}`);
-                // console.log('00', current, stack);
-                resolveState(initialChild.props.id);
-            }
-            
-            // if (_type === 'atomic' && match && path !== '*') {
             if (_type === 'atomic') {
                 stackPath && resolvePath(stackPath);
+            } else if (match.exact && initialChild) {
+                // TODO: this fires before event transition fires.
+                // Find a way to disable if machineEvent has updated
+                console.log(0, current);
+                resolveByState(initialChild.props.id);
             }
         } else if (mounted) {
             onExit && onExit();
             setState({ mounted: false });
         }
     }, [ current ]);
+
+    useMemo(() => {
+        if (machineEvent && events[machineEvent.name]) {
+            resolveByState(events[machineEvent.name]);
+        }
+    }, [ machineEvent ]);
 
     useEffect(() => {
         if(match && !mounted) {
