@@ -1,22 +1,22 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { MachineContext } from './Machine';
 import { isCurrentStack } from './util';
+import { fakeUUID } from './util';
 
 export const StateNodeContext = React.createContext({
     parent: {
         id: null,
-        path: null,
+        path: '/',
         stack: null
     }
 });
 StateNodeContext.displayName = 'StateNode';
 
 // TODO
-// - auto generate ID if missing
 // - throw error if state ID is not unique
 
 function State(props) {
-    const { children, component: WrappedComponent, id, initial, invoke, onEntry, onExit, path, type } = props;
+    const { children, component: WrappedComponent, id = fakeUUID(), initial, invoke, onEntry, onExit, path, type } = props;
     const machineContext = useContext(MachineContext);
     const { _event: machineEvent, current, history, id: machineId, params, resolvePath, resolveByState, send: machineSend } = machineContext;
     const { parent } = useContext(StateNodeContext);
@@ -30,18 +30,9 @@ function State(props) {
         path: stackPath,
         url: history.location.pathname
     } : false;
-
-    /*
-    https://www.w3.org/TR/scxml/#CoreIntroduction
     
-    3.1.2 Compound States:
-    ... Thus transitions in ancestor states serve as defaults that will be taken if no transition matches in a descendant state. If no transition matches in any state, the event is discarded.
-    
-    https://www.w3.org/TR/scxml/#InternalStructureofEvents
-    
-    5.10.1 The Internal Structure of Events
-    */
     function send(event, data) {
+        console.log('send');
         if (events[event]) {
             machineSend(event, { sendid: id, data });
         }
@@ -78,11 +69,10 @@ function State(props) {
     useMemo(() => {
         if (match) {
             if (_type === 'atomic') {
+                console.log('resolePath', stackPath);
                 stackPath && resolvePath(stackPath);
-            } else if (match.exact && initialChild) {
-                // TODO: this fires before event transition fires.
-                // Find a way to disable if machineEvent has updated
-                console.log(0, current);
+            } else if (match.exact && initialChild && !machineEvent) {
+                console.log(0);
                 resolveByState(initialChild.props.id);
             }
         } else if (mounted) {
@@ -91,8 +81,9 @@ function State(props) {
         }
     }, [ current ]);
 
-    useMemo(() => {
+    useEffect(() => {
         if (machineEvent && events[machineEvent.name]) {
+            console.log(1, machineEvent);
             resolveByState(events[machineEvent.name]);
         }
     }, [ machineEvent ]);
@@ -104,10 +95,6 @@ function State(props) {
             setState({ mounted: true });
         }
     }, [ current ]);
-
-    // useEffect(() => {
-    //     console.log('machineEvent', id, events, machineEvent && machineEvent.name);
-    // }, [ machineEvent ]);
 
     const initialContext = {
         parent: {

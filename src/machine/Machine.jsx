@@ -26,16 +26,16 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
         const stack = stacks.find(s =>  s.split('.').pop() === stateId);
         resolveByStack(stack);
     }
-    
+
     function resolvePath(path) {
         const url = injectUrlParameters(path, urlParams);
 
         if (url !== history.location.pathname) {
-            // console.log('resolvePath', history.location.pathname, 'to', url);
+            console.log('resolvePath', history.location.pathname, 'to', url);
             history.push(url, { stack: state.current });
         }
     }
-    
+
     function send(event, data = null) {
         // console.log('send', event, data);
         setState({ ...state, _event: { name: event, ...data } });
