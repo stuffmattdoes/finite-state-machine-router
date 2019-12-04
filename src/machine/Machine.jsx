@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createBrowserHistory } from 'history';
-import { deriveStateFromUrl, getChildStateNodes, generateStackMaps, injectUrlParameters, isRootSemgent } from './util';
+import { getChildStateNodes, generateStackMaps } from './util';
 
 export const MachineContext = React.createContext();
 MachineContext.displayName = 'Machine';
