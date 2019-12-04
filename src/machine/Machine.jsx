@@ -27,10 +27,12 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
 
     function resolveState(stateId) {
         const stack = stacks.find(s => s.split('.').pop() === stateId);
+        console.log('resolveState', state.current, '->', stack);
         setState({ ...state, current: stack });
     }
 
     function send(event, data = null) {
+        console.log('semd', event, data);
         setState({ ...state, _event: { name: event, ...data } });
     }
 

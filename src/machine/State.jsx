@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { MachineContext } from './Machine';
-import { isCurrentStack } from './util';
-import { fakeUUID, getChildrenOfType, getChildStateNodes, isExactStack } from './util';
+import { getChildrenOfType, getChildStateNodes, isCurrentStack, isExactStack } from './util';
 
 export const StateNodeContext = React.createContext({
     parent: {
@@ -13,7 +12,7 @@ export const StateNodeContext = React.createContext({
 StateNodeContext.displayName = 'StateNode';
 
 function State(props) {
-    const { children, component: WrappedComponent, id = fakeUUID(), initial, invoke, onEntry, onExit, path, type } = props;
+    const { children, component: WrappedComponent, id, initial, invoke, onEntry, onExit, path, type } = props;
     const { _event: machineEvent, current, history, id: machineId, params, resolvePath, resolveState, send: machineSend } = useContext(MachineContext)
     const match = isCurrentStack(id, current) ? {
         exact: isExactStack(id, current),
