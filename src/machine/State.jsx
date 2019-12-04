@@ -11,7 +11,8 @@ StateNodeContext.displayName = 'StateNode';
 
 function State(props) {
     const { children, component: WrappedComponent, id, initial, invoke, onEntry, onExit, path, type } = props;
-    const { _event: machineEvent, current, history, id: machineId, params, resolvePath, resolveState, send: machineSend } = useContext(MachineContext)
+    const machineContext = useContext(MachineContext);
+    const { _event: machineEvent, current, history, id: machineId, params, resolvePath, resolveState, send: machineSend } = machineContext;
     const { path: parentPath, stack } = useContext(StateNodeContext);
     const stackPath = path ? parentPath ? parentPath + path : path : parentPath;
     const match = isCurrentStack(id, current) ? {
@@ -21,16 +22,53 @@ function State(props) {
         url: history.location.pathname
     } : false;
 
-    const _type = useMemo(() => {
-        console.log('type', type);
+    const { _type, initialChild } = useMemo(() => {
+        let _type = type;
+        const childStates = getChildStateNodes(children);
+        const initialChild = childStates.find(c => c.props.initial) || childStates[0];
 
-        return type;
-    });
+        if (_type !== 'parallel') {
+            if (!childStates.length) {
+                _type = 'atomic';
+            } else if (childStates.length > 1) {
+                _type = 'compound';
+            } else {
+                _type = 'default';
+            }
+        }
+
+        return {
+            _type,
+            initialChild
+        }
+    }, [ children ]);
+
+    function send(event, data = null) {
+        machineSend(event, data);
+    }
+
+    useMemo(() => {
+        if (match) {
+            if (_type === 'atomic') {
+                // console.log('resolvePath', stackPath);
+                // stackPath && resolvePath(stackPath);
+            } else if (match.exact && initialChild) {
+                resolveState(initialChild.props.id);
+            }
+        // } else if (mounted) {
+        //     onExit && onExit();
+        //     setState({ mounted: false });
+        }
+    }, [ current ]);
+
+    useMemo(() => {
+        invoke && invoke(machineContext);
+    }, []);
 
     const initialContext = {
         path: stackPath,
         // stack,
-        // send
+        send
     }
     const componentProps = {
         children,
@@ -38,7 +76,7 @@ function State(props) {
         machine: {
             current,
             // events,
-            // send
+            send
         },
         match
     }

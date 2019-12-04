@@ -32,8 +32,9 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
     }
 
     function send(event, data = null) {
-        console.log('semd', event, data);
+        console.log('send', event, data, state.current);
         setState({ ...state, _event: { name: event, ...data } });
+        console.log(state.current);
     }
 
     const { childStates, routes, stacks } = useMemo(() => {
