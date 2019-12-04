@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createBrowserHistory } from 'history';
-import { deriveStateFromUrl, getChildStateNodes, getAllRoutes, getAllStacks, injectUrlParameters, isRootSemgent } from './util';
+import { deriveStateFromUrl, getChildStateNodes, generateStackMaps, injectUrlParameters, isRootSemgent } from './util';
 
 export const MachineContext = React.createContext();
 MachineContext.displayName = 'Machine';
@@ -34,20 +34,13 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
         setState({ ...state, _event: { name: event, ...data } });
     }
 
-    function generateStackMaps(stateNodes, rootId) {
-        return {
-            routes: getAllRoutes(stateNodes),
-            stacks: getAllStacks(stateNodes).map(s => '#' + rootId + s)
-        }
-    }
-
     const { childStates, routes, stacks } = useMemo(() => {
         let childStates = getChildStateNodes(machineChildren);
         const { routes, stacks } = generateStackMaps(childStates, machineId);
 
         return {
             childStates,
-            routes,
+            // routes,
             stacks
         }
     }, [ machineChildren ]);

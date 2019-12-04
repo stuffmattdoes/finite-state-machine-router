@@ -19,8 +19,10 @@ export const fakeUUID = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[x
 });
 
 const paramRegExp = /^:(.+)/;
-
-export const isCurrentStack = (stateId, currentStack) => !!currentStack.split('.').find(state => state === stateId);
+export const getChildrenOfType = (children, type) => React.Children.toArray(children).filter(c => c.type.name === type);
+export const getChildStateNodes = (children) => getChildrenOfType(children, 'State');
+export const isCurrentStack = (id, stack) => !!stack.split('.').find(state => state === id);
+export const isExactStack = (id, stack) => stack.split('.').pop() === id;
 export const isDynamic = segment => paramRegExp.test(segment);
 export const isRootSemgent = url => url.slice(1) === '';
 export const segmentize = url => url.replace(/(^\/+|\/+$)/g, '').split('/');
@@ -93,11 +95,7 @@ export const segmentize = url => url.replace(/(^\/+|\/+$)/g, '').split('/');
 //     }
 // }
 
-export function getChildStateNodes (children) {
-    return React.Children.toArray(children).filter(c => c.type.name === 'State');
-}
-
-export function getAllStacks(stateNodes) {
+function getAllStacks(stateNodes) {
     return stateNodes.reduce((acc, child) => {
         const childStates = getChildStateNodes(child.props.children);
         const grandChildStacks = getAllStacks(childStates);
@@ -113,7 +111,7 @@ export function getAllStacks(stateNodes) {
     }, []);
 }
 
-export function getAllRoutes(stateNodes) {
+function getAllRoutes(stateNodes) {
     return stateNodes.reduce((acc, child) => {
         const childStates = getChildStateNodes(child.props.children);
         const grandChildRoutes = getAllRoutes(childStates);
@@ -133,4 +131,14 @@ export function getAllRoutes(stateNodes) {
 
         return acc;
     }, {});
+}
+
+export function generateStackMaps(stateNodes, rootId) {
+    // let routes = getAllRoutes(stateNodes);
+    // Object.keys(routes).forEach(route => routes[route] = )
+
+    return {
+        routes: getAllRoutes(stateNodes),
+        stacks: getAllStacks(stateNodes).map(s => '#' + rootId + s)
+    }
 }

@@ -5,7 +5,7 @@ import './index.css';
 // State machine
 import { Link, Machine, State, Transition } from './machine';
 
-const Generic = (title) => ({ children, machine, match }) => (
+const Generic = (title) => ({ children, history, machine, match }) => (
     <div className={title && title.toLowerCase().replace(/\s/g, '')}>
         <h1>{title}</h1>
         {children}
@@ -14,12 +14,13 @@ const Generic = (title) => ({ children, machine, match }) => (
 const GenericWithLinks = (title) => ({ children, machine }) => (
     <div className={title && title.toLowerCase().replace(/\s/g, '')}>
         <h1>{title}</h1>
+        {children}
         <Link event='reload'>Reload (State event)</Link>
         <br/>
         <Link href='/'>Reload (URL push - WIP)</Link>
     </div>
 );
-const App = Generic();
+const App = Generic('App');
 const Checkout = GenericWithLinks('Checkout');
 const Error = GenericWithLinks('Error');
 const Loading = Generic('Loading');
