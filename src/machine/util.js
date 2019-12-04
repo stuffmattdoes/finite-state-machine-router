@@ -95,6 +95,10 @@ export const segmentize = url => url.replace(/(^\/+|\/+$)/g, '').split('/');
 //     }
 // }
 
+export function deriveStateFromUrl(url, routes) {
+    console.log(routes);
+}
+
 function getAllStacks(stateNodes) {
     return stateNodes.reduce((acc, child) => {
         const childStates = getChildStateNodes(child.props.children);
@@ -131,6 +135,36 @@ function getAllRoutes(stateNodes) {
 
         return acc;
     }, {});
+}
+
+export function flattenStateNodeTree(stateNodes) {
+    return stateNodes.reduce((acc, stateNode) => {
+        const childStates = getChildStateNodes(stateNode.props.children);
+        const grandChildStates = flattenStateNodeTree(childStates);
+        const { id, path = null, type } = stateNode.props;
+        const deriveType = _type => _type === 'parallel' ? 'parallel'
+            : grandChildStates.length === 0 ? 'atomic'
+            : grandChildStates > 1 ? 'compound' : 'default';
+
+        acc.push({
+            id: id,
+            path: path,
+            stack: '.' + id,
+            type: deriveType(type)
+        });
+        
+        if (grandChildStates.length) {
+            grandChildStates.forEach(gcs => {
+                acc.push({
+                    id: gcs.id,
+                    path: path ? path + gcs.path : gcs.path,
+                    stack: '.' + id + gcs.stack,
+                    type: deriveType(gcs.type)
+                });
+            });
+        }
+        return acc;
+    }, []);
 }
 
 export function generateStackMaps(stateNodes, rootId) {

@@ -43,32 +43,27 @@ function State(props) {
         }
     }, [ children ]);
 
-    function send(event, data = null) {
-        machineSend(event, data);
-    }
-
     useMemo(() => {
         if (match) {
             if (_type === 'atomic') {
                 // console.log('resolvePath', stackPath);
                 // stackPath && resolvePath(stackPath);
             } else if (match.exact && initialChild) {
-                resolveState(initialChild.props.id);
+                // resolveState(initialChild.props.id);
             }
-        // } else if (mounted) {
-        //     onExit && onExit();
-        //     setState({ mounted: false });
         }
     }, [ current ]);
 
-    useMemo(() => {
-        invoke && invoke(machineContext);
+    useEffect(() => {
+        if (match) {
+            invoke && invoke(machineContext);
+        }
     }, []);
 
     const initialContext = {
         path: stackPath,
         // stack,
-        send
+        send: machineSend
     }
     const componentProps = {
         children,
@@ -76,10 +71,16 @@ function State(props) {
         machine: {
             current,
             // events,
-            send
+            send: machineSend
         },
         match
     }
+
+    // console.log('render', current);
+
+    // useEffect(() => {
+    //     console.log('useEffect', current);
+    // });
 
     return match ?
         <StateNodeContext.Provider value={initialContext}>

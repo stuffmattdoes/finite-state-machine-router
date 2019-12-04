@@ -44,7 +44,7 @@ ReactDOM.render(
     <div className='container'>
         <Machine id='checkout' path='/checkout'>
             <State component={App} id='app' invoke={fetchData}>
-                <Transition event='fetch' target='loading'/>
+                {/* <Transition event='fetch' target='loading'/> */}
                 <Transition event='resolve' target='stockNumber'/>
                 <Transition event='reject' target='error'/>
                 <State component={Loading} id='loading'/>

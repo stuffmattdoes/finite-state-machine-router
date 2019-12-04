@@ -1,15 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createBrowserHistory } from 'history';
-import { getChildStateNodes, generateStackMaps } from './util';
+import { deriveStateFromUrl, flattenStateNodeTree, getChildStateNodes, generateStackMaps, isRootSemgent } from './util';
 
 export const MachineContext = React.createContext();
 MachineContext.displayName = 'Machine';
 
 export function Machine ({ children: machineChildren, history, id: machineId, path: machinePath }) {
-    const [ state, setState ] = useState({
-        _event: null,
-        current: `#${machineId}`
-    });
+    const [ event, setEvent ] = useState(null);
+    // const [ state, setState ] = useState(`#${machineId}`);
 
     // Default history
     if (!history) {
@@ -21,45 +19,70 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
 
     //     if (url !== history.location.pathname) {
     //         console.log('resolvePath', history.location.pathname, 'to', url);
-    //         history.push(url, { stack: state.current });
+    //         history.push(url, { stack: state });
     //     }
     // }
 
     function resolveState(stateId) {
         const stack = stacks.find(s => s.split('.').pop() === stateId);
-        console.log('resolveState', state.current, '->', stack);
-        setState({ ...state, current: stack });
+        console.log('resolveState', state, '->', stack);
+        setState(stack);
     }
 
     function send(event, data = null) {
-        console.log('send', event, data, state.current);
-        setState({ ...state, _event: { name: event, ...data } });
-        console.log(state.current);
+        console.log('send', event, data);
+        setEvent({ name: event, ...data });
     }
 
-    const { childStates, routes, stacks } = useMemo(() => {
+    const { childStates, initialStack, routes, stacks } = useMemo(() => {
         let childStates = getChildStateNodes(machineChildren);
-        const { routes, stacks } = generateStackMaps(childStates, machineId);
+        // const initialChild = childStates.find(c => c.props.initial) || childStates[0];
+        const { initialStack, routes, stacks } = generateStackMaps(childStates, machineId);
+        // const { pathname: url } = history.location;
+        // let initialStack;
+
+        //  // Derive state from URL
+        // if (!isRootSemgent(url)) {
+        //     const { params, path, stack } = deriveStateFromUrl(url, routes);
+        //     // urlParams = params;
+
+        //     if (stack) {
+        //         initialStack = stack;
+        //     } else {
+        //         // Resolve to 404
+        //         initialStack = `#${machineId}.*`;
+        //     }
+        // } else {
+        //     // Resolve to default URL
+        //     initialStack = `#${machineId}.${initialChild.props.id}`;
+        // }
 
         return {
             childStates,
-            // routes,
+            // initialStack,
+            routes,
             stacks
         }
     }, [ machineChildren ]);
 
-    useMemo(() => {
-        const initialChild = childStates.find(c => c.props.initial) || childStates[0];
-        resolveState(initialChild.props.id);
-    }, []);
+    const [ state, setState ] = useState(`#${machineId}.${initialStack}`);
 
     const providerValue = {
-        current: state.current,
+        current: state,
         history,
         id: machineId,
         resolveState,
         send
     }
+
+    // console.log('render', state);
+
+    // useEffect(() => {
+    //     console.log('useEffect', state);
+    // });
+
+    const flat = flattenStateNodeTree(childStates);
+    console.log(flat);
 
     return <MachineContext.Provider value={providerValue}>
         {childStates}
