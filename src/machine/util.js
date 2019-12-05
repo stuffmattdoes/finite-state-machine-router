@@ -140,29 +140,33 @@ function getAllRoutes(stateNodes) {
 export function flattenStateNodeTree(stateNodes) {
     return stateNodes.reduce((acc, stateNode) => {
         const childStates = getChildStateNodes(stateNode.props.children);
-        const grandChildStates = flattenStateNodeTree(childStates);
         const { id, path = null, type } = stateNode.props;
-        const deriveType = _type => _type === 'parallel' ? 'parallel'
-            : grandChildStates.length === 0 ? 'atomic'
-            : grandChildStates > 1 ? 'compound' : 'default';
+        const deriveType = ({ children }) => {
+            const childStates = getChildStateNodes(children);
+
+            return type === 'parallel' ? 'parallel'
+                : childStates.length === 0 ? 'atomic'
+                : childStates.length > 1 ? 'compound' : 'default';
+        }
+        
+        if (childStates.length) {
+            flattenStateNodeTree(childStates).forEach(gcs => {
+                acc.push({
+                    id: gcs.id,
+                    path: path ? gcs.path ? path + gcs.path : path : gcs.path,
+                    stack: '.' + id + gcs.stack,
+                    type: gcs.type
+                });
+            });
+        }
 
         acc.push({
             id: id,
             path: path,
             stack: '.' + id,
-            type: deriveType(type)
+            type: deriveType(stateNode.props)
         });
-        
-        if (grandChildStates.length) {
-            grandChildStates.forEach(gcs => {
-                acc.push({
-                    id: gcs.id,
-                    path: path ? path + gcs.path : gcs.path,
-                    stack: '.' + id + gcs.stack,
-                    type: deriveType(gcs.type)
-                });
-            });
-        }
+
         return acc;
     }, []);
 }
