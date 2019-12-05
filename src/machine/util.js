@@ -149,6 +149,13 @@ export function flattenStateNodeTree(stateNodes) {
                 : childStates.length > 1 ? 'compound' : 'default';
         }
         
+        acc.push({
+            id: id,
+            path: path,
+            stack: '.' + id,
+            type: deriveType(stateNode.props)
+        });
+
         if (childStates.length) {
             flattenStateNodeTree(childStates).forEach(gcs => {
                 acc.push({
@@ -159,13 +166,6 @@ export function flattenStateNodeTree(stateNodes) {
                 });
             });
         }
-
-        acc.push({
-            id: id,
-            path: path,
-            stack: '.' + id,
-            type: deriveType(stateNode.props)
-        });
 
         return acc;
     }, []);
