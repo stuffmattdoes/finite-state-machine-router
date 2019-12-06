@@ -1,6 +1,9 @@
 Machine flow:
 [ ] Derive target state node from URL (including dynamic paths)
-    1. Parse child tree on init and generate state node -> URL map
+    1. Normalize child tree
+        * Generate state node -> URL map
+        * Generate stack for all state nodes
+        * Derive initial stack
     2. If match, resolve to corresponding state
     3. If no match, begin to parse dynamic state node paths (prefixed with :) for match
     4. If still no match, 404

@@ -64,11 +64,8 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
             stacks
         }
     }, [ machineChildren ]);
-
-    console.log(stacks, routes);
-
+    // console.log(stacks, routes);
     const [ state, setState ] = useState(`#${machineId}.${initialStack}`);
-
     const providerValue = {
         current: state,
         history,
