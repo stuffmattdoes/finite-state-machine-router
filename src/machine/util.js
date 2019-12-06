@@ -137,46 +137,49 @@ function getAllRoutes(stateNodes) {
     }, {});
 }
 
-export function flattenStateNodeTree(stateNodes) {
-    return stateNodes.reduce((acc, stateNode) => {
+export function normalizeChildStates(stateNodes) {
+    return stateNodes.reduce((acc, stateNode, i) => {
         const childStates = getChildStateNodes(stateNode.props.children);
-        const { id, path = null, type } = stateNode.props;
-        const deriveType = ({ children }) => {
-            const childStates = getChildStateNodes(children);
-
-            return type === 'parallel' ? 'parallel'
-                : childStates.length === 0 ? 'atomic'
-                : childStates.length > 1 ? 'compound' : 'default';
-        }
+        const { id, initial, path = null, type } = stateNode.props;
         
         acc.push({
             id: id,
+            initial: initial || i === 0,
             path: path,
             stack: '.' + id,
-            type: deriveType(stateNode.props)
+            type: type === 'parallel' ? 'parallel'
+                : childStates.length === 0 ? 'atomic'
+                : childStates.length > 1 ? 'compound' : 'default'
         });
 
         if (childStates.length) {
-            flattenStateNodeTree(childStates).forEach(gcs => {
-                acc.push({
-                    id: gcs.id,
-                    path: path ? gcs.path ? path + gcs.path : path : gcs.path,
-                    stack: '.' + id + gcs.stack,
-                    type: gcs.type
-                });
-            });
+            normalizeChildStates(childStates).forEach(gcs => acc.push({
+                id: gcs.id,
+                path: path ? gcs.path ? path + gcs.path : path : gcs.path,
+                stack: '.' + id + gcs.stack,
+                type: gcs.type
+            }));
         }
 
         return acc;
     }, []);
 }
 
-export function generateStackMaps(stateNodes, rootId) {
-    // let routes = getAllRoutes(stateNodes);
-    // Object.keys(routes).forEach(route => routes[route] = )
+export function generateStackMaps(stateNodes, rootId, basePath) {
+    const norm = normalizeChildStates(stateNodes);
+    console.log(norm);
+    const routes = norm.reduce((acc, s) => {
+        const key = s.path ? basePath ? basePath + s.path : s.path : null;
+
+        if (key && !acc.hasOwnProperty(key)) {
+            acc[key] = s.path && '#' + rootId + s.stack;
+        }
+        return acc;
+    }, {});
+    const stacks = norm.map(s => '#' + rootId + s.stack);
 
     return {
-        routes: getAllRoutes(stateNodes),
-        stacks: getAllStacks(stateNodes).map(s => '#' + rootId + s)
+        routes,
+        stacks
     }
 }

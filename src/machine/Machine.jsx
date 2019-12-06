@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createBrowserHistory } from 'history';
-import { deriveStateFromUrl, flattenStateNodeTree, getChildStateNodes, generateStackMaps, isRootSemgent } from './util';
+import { deriveStateFromUrl, normalizeChildStates, getChildStateNodes, generateStackMaps, isRootSemgent } from './util';
 
 export const MachineContext = React.createContext();
 MachineContext.displayName = 'Machine';
@@ -37,7 +37,7 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
     const { childStates, initialStack, routes, stacks } = useMemo(() => {
         let childStates = getChildStateNodes(machineChildren);
         // const initialChild = childStates.find(c => c.props.initial) || childStates[0];
-        const { initialStack, routes, stacks } = generateStackMaps(childStates, machineId);
+        const { routes, stacks } = generateStackMaps(childStates, machineId, machinePath);
         // const { pathname: url } = history.location;
         // let initialStack;
 
@@ -65,6 +65,8 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
         }
     }, [ machineChildren ]);
 
+    console.log(stacks, routes);
+
     const [ state, setState ] = useState(`#${machineId}.${initialStack}`);
 
     const providerValue = {
@@ -80,9 +82,6 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
     // useEffect(() => {
     //     console.log('useEffect', state);
     // });
-
-    const flat = flattenStateNodeTree(childStates);
-    console.log(flat);
 
     return <MachineContext.Provider value={providerValue}>
         {childStates}
