@@ -48,11 +48,11 @@ ReactDOM.render(
                 <Transition event='resolve' target='stockNumber'/>
                 <Transition event='reject' target='error'/>
                 <State component={Loading} id='loading'/>
-                <State component={Checkout} id='stockNumber' path='/:stockNumber'>
+                <State component={Checkout} initial id='stockNumber' path='/:stockNumber'>
                     <State component={Step1} id='step-1' path='#step-1'>
                         <Transition event='continue' target='step-2'/>
                     </State>
-                    <State component={Step2} id='step-2' path='#step-2'>
+                    <State component={Step2} initial id='step-2' path='#step-2'>
                         <Transition event='continue' target='step-3'/>
                     </State>
                     <State component={Step3} id='step-3' path='#step-3'>

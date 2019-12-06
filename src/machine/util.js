@@ -138,13 +138,16 @@ function getAllRoutes(stateNodes) {
 }
 
 export function normalizeChildStates(stateNodes) {
+    // let initIndex = stateNodes.findIndex(s => s.props.initial);
+    // initIndex = initIndex >= 0 ? initIndex : 0;
+
     return stateNodes.reduce((acc, stateNode, i) => {
         const childStates = getChildStateNodes(stateNode.props.children);
         const { id, initial, path = null, type } = stateNode.props;
         
         acc.push({
             id: id,
-            initial: initial || i === 0,
+            // initial: i === initIndex,
             path: path,
             stack: '.' + id,
             type: type === 'parallel' ? 'parallel'
@@ -152,9 +155,13 @@ export function normalizeChildStates(stateNodes) {
                 : childStates.length > 1 ? 'compound' : 'default'
         });
 
+        // let initIndex2 = stateNodes.findIndex(s => s.props.initial);
+        // initIndex2 = initIndex2 >= 0 ? initIndex2 : 0;
+
         if (childStates.length) {
-            normalizeChildStates(childStates).forEach(gcs => acc.push({
+            normalizeChildStates(childStates).forEach((gcs, i) => acc.push({
                 id: gcs.id,
+                // initial: i === initIndex2,
                 path: path ? gcs.path ? path + gcs.path : path : gcs.path,
                 stack: '.' + id + gcs.stack,
                 type: gcs.type
