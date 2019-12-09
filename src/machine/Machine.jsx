@@ -40,13 +40,17 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
         // const initialStack = resolveInitial(childStates);
         // console.log(initialStack);
         const { normalized, routes, stacks } = generateStackMaps(childStates, machineId, machinePath);
+        // console.log(normalized);
         const { pathname: url } = history.location;
         let initialStack;
-        console.log(initialStack);
 
         //  // Derive state from URL
         if (!isRootSemgent(url)) {
             const { params, path, stack } = deriveStateFromUrl(url, routes);
+            // How to resolve initial states from here?
+            // #checkout.app.stockNumber -> #checkout.app.stockNumber.step-1
+
+            // const initialStack = resolveInitial(childStates);
             // urlParams = params;
 
             if (stack) {
@@ -57,14 +61,14 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
             }
         } else {
             // Resolve to default URL
-            initialStack = `#${machineId}.${initialStack}`;
+            // initialStack = initialStack;
         }
 
         return {
             childStates,
             // initialStack,
-            routes,
-            stacks
+            // routes,
+            // stacks
         }
     }, [ machineChildren ]);
     // console.log(stacks, routes);

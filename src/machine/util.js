@@ -140,7 +140,7 @@ export function normalizeChildStates(stateNodes) {
     return stateNodes.reduce((acc, stateNode, i) => {
         const childStates = getChildStateNodes(stateNode.props.children);
         const { id, path = null, type } = stateNode.props;
-        
+
         acc.push({
             id: id,
             initial: i === initIndex,
@@ -168,9 +168,9 @@ export function normalizeChildStates(stateNodes) {
 
 export function generateStackMaps(stateNodes, rootId, basePath) {
     const normalized = normalizeChildStates(stateNodes);
-    console.log(normalized);
     const routes = normalized.reduce((acc, s) => {
-        const key = s.path ? basePath ? basePath + s.path : s.path : null;
+        // const key = s.path ? basePath ? basePath + s.path : s.path : null;
+        const key = s.path;
 
         if (key && !acc.hasOwnProperty(key)) {
             acc[key] = s.path && '#' + rootId + s.stack;
