@@ -64,7 +64,7 @@ ReactDOM.render(
                     </State>
                 </State>
             </State>
-            <State component={Error} initial id='error'>
+            <State component={Error} id='error'>
                 <Transition event='reload' target='app'/>
             </State>
             <State component={NotFound} id='*' path='/404'>

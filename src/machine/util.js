@@ -45,58 +45,54 @@ export const segmentize = url => url.replace(/(^\/+|\/+$)/g, '').split('/');
 //     return '/' + url.join('/');
 // }
 
-// export const deriveStateFromUrl = (url, routeMap) => {
-//     let match = {
-//         params: {},
-//         path: url,
-//         stack: routeMap[url]
-//     }
+export const deriveStateFromUrl = (url, routeMap) => {
+    let match = {
+        params: {},
+        path: url,
+        stack: routeMap[url]
+    }
 
-//     // 1. Exact match, no dynamic URL needed
-//     if (match.stack) {
-//         return match;
-//     }
+    // 1. Exact match, no dynamic URL needed
+    if (match.stack) {
+        return match;
+    }
 
-//     // 2. No exact match, check for dynamic URL match
-//     const dynamicPaths = Object.keys(routeMap).filter(route => route.match(/\/:/g));
+    // 2. No exact match, check for dynamic URL match
+    const dynamicPaths = Object.keys(routeMap).filter(route => route.match(/\/:/g));
 
-//     if (dynamicPaths.length) {
-//         // 2.1 Split url && route map into arrays, compare 1 by 1
-//         const urlSegments = segmentize(url);
-//         let params;
-//         const path = dynamicPaths.find(p => {
-//             const pathSegments = segmentize(p);
-//             params = {};
+    if (dynamicPaths.length) {
+        // 2.1 Split url && route map into arrays, compare 1 by 1
+        const urlSegments = segmentize(url);
+        let params;
+        const path = dynamicPaths.find(p => {
+            const pathSegments = segmentize(p);
+            params = {};
 
-//             if (pathSegments.length !== urlSegments.length) {
-//                 return false;
-//             }
+            if (pathSegments.length !== urlSegments.length) {
+                return false;
+            }
 
-//             // 2.2 infer parameter from URL from first segment array that matches in length
-//             return !pathSegments.map((pathSegment, i) => {
-//                 if (isDynamic(pathSegment)) {
-//                     params[pathSegment.slice(1)] = urlSegments[i];
-//                     return true;
-//                 } else if (pathSegment === urlSegments[i]) {
-//                     return true;
-//                 }
+            // 2.2 infer parameter from URL from first segment array that matches in length
+            return !pathSegments.map((pathSegment, i) => {
+                if (isDynamic(pathSegment)) {
+                    params[pathSegment.slice(1)] = urlSegments[i];
+                    return true;
+                } else if (pathSegment === urlSegments[i]) {
+                    return true;
+                }
 
-//                 return false;
-//             }).includes(false);
-//         });
+                return false;
+            }).includes(false);
+        });
 
-//         return {
-//             params,
-//             path,
-//             stack: routeMap[path]
-//         }
-//     } else {
-//         return null;
-//     }
-// }
-
-export function deriveStateFromUrl(url, routes) {
-    console.log(routes);
+        return {
+            params,
+            path,
+            stack: routeMap[path]
+        }
+    } else {
+        return null;
+    }
 }
 
 function getAllStacks(stateNodes) {
@@ -171,9 +167,9 @@ export function normalizeChildStates(stateNodes) {
 }
 
 export function generateStackMaps(stateNodes, rootId, basePath) {
-    const norm = normalizeChildStates(stateNodes);
-    console.log(norm);
-    const routes = norm.reduce((acc, s) => {
+    const normalized = normalizeChildStates(stateNodes);
+    console.log(normalized);
+    const routes = normalized.reduce((acc, s) => {
         const key = s.path ? basePath ? basePath + s.path : s.path : null;
 
         if (key && !acc.hasOwnProperty(key)) {
@@ -181,10 +177,24 @@ export function generateStackMaps(stateNodes, rootId, basePath) {
         }
         return acc;
     }, {});
-    const stacks = norm.map(s => '#' + rootId + s.stack);
+    const stacks = normalized.map(s => '#' + rootId + s.stack);
 
     return {
+        normalized,
         routes,
         stacks
+    }
+}
+
+export function resolveInitial(stateNodes) {
+    const initialChild = stateNodes.find(c => c.props.initial) || stateNodes[0];
+    const childStates = getChildStateNodes(initialChild.props.children);
+    const { id } = initialChild.props;
+
+    if (childStates.length > 0) {
+        console.log(childStates);
+        // return id + resolveInitial(childStates);
+    } else {
+        return id;
     }
 }

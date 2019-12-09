@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createBrowserHistory } from 'history';
-import { deriveStateFromUrl, normalizeChildStates, getChildStateNodes, generateStackMaps, isRootSemgent } from './util';
+import { deriveStateFromUrl, getChildStateNodes, generateStackMaps, isRootSemgent, normalizeChildStates, resolveInitial } from './util';
 
 export const MachineContext = React.createContext();
 MachineContext.displayName = 'Machine';
@@ -37,25 +37,28 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
     const { childStates, initialStack, routes, stacks } = useMemo(() => {
         let childStates = getChildStateNodes(machineChildren);
         // const initialChild = childStates.find(c => c.props.initial) || childStates[0];
-        const { routes, stacks } = generateStackMaps(childStates, machineId, machinePath);
-        // const { pathname: url } = history.location;
-        // let initialStack;
+        // const initialStack = resolveInitial(childStates);
+        // console.log(initialStack);
+        const { normalized, routes, stacks } = generateStackMaps(childStates, machineId, machinePath);
+        const { pathname: url } = history.location;
+        let initialStack;
+        console.log(initialStack);
 
         //  // Derive state from URL
-        // if (!isRootSemgent(url)) {
-        //     const { params, path, stack } = deriveStateFromUrl(url, routes);
-        //     // urlParams = params;
+        if (!isRootSemgent(url)) {
+            const { params, path, stack } = deriveStateFromUrl(url, routes);
+            // urlParams = params;
 
-        //     if (stack) {
-        //         initialStack = stack;
-        //     } else {
-        //         // Resolve to 404
-        //         initialStack = `#${machineId}.*`;
-        //     }
-        // } else {
-        //     // Resolve to default URL
-        //     initialStack = `#${machineId}.${initialChild.props.id}`;
-        // }
+            if (stack) {
+                initialStack = stack;
+            } else {
+                // Resolve to 404
+                initialStack = `#${machineId}.*`;
+            }
+        } else {
+            // Resolve to default URL
+            initialStack = `#${machineId}.${initialStack}`;
+        }
 
         return {
             childStates,
