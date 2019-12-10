@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createBrowserHistory } from 'history';
-import { deriveStateFromUrl, getChildStateNodes, generateStackMaps, isRootSemgent, normalizeChildStates, resolveInitial } from './util';
+import { deriveStateFromUrl, getChildStateNodes, isRootSemgent, normalizeChildStates } from './util';
 
 export const MachineContext = React.createContext();
 MachineContext.displayName = 'Machine';
@@ -34,24 +34,21 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
         setEvent({ name: event, ...data });
     }
 
+    // Resolve from URL -> input URL -> get stack -> resolve to initial atomic
+    // Resolve from state -> input state ID -> get stack -> resolve to initial atomic
+
     const { childStates, initialStack, routes, stacks } = useMemo(() => {
         let childStates = getChildStateNodes(machineChildren);
-        // const initialChild = childStates.find(c => c.props.initial) || childStates[0];
-        // const initialStack = resolveInitial(childStates);
-        // console.log(initialStack);
-        const { normalized, routes, stacks } = generateStackMaps(childStates, machineId, machinePath);
-        // console.log(normalized);
+        const normalized = normalizeChildStates(childStates, machineId, machinePath);
         const { pathname: url } = history.location;
         let initialStack;
 
         //  // Derive state from URL
         if (!isRootSemgent(url)) {
-            const { params, path, stack } = deriveStateFromUrl(url, routes);
-            // How to resolve initial states from here?
-            // #checkout.app.stockNumber -> #checkout.app.stockNumber.step-1
-
-            // const initialStack = resolveInitial(childStates);
+            const { params, route, stack } = deriveStateFromUrl(url, normalized);
             // urlParams = params;
+            // console.log(params, route, stack);
+            console.log(normalized);
 
             if (stack) {
                 initialStack = stack;
@@ -66,13 +63,13 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
 
         return {
             childStates,
-            // initialStack,
+            initialStack,
             // routes,
             // stacks
         }
     }, [ machineChildren ]);
-    // console.log(stacks, routes);
-    const [ state, setState ] = useState(`#${machineId}.${initialStack}`);
+
+    const [ state, setState ] = useState(initialStack);
     const providerValue = {
         current: state,
         history,
