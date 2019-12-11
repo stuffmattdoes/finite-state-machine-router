@@ -27,10 +27,20 @@ const Loading = Generic('Loading');
 const NotFound = GenericWithLinks('Not Found');
 const Step1 = ({ children, machine }) => <div className='step-1'>
     <h1>Step 1</h1>
+    {children}
     <Link event='continue'>Continue</Link>
 </div>
-const Step2 = () => Generic('Step2')(<Link event='continue'>Continue</Link>);
-const Step3 = () => Generic('Step3')(<Link event='submit'>Submit</Link>);
+const Step2 = ({ children, machine }) => <div className='step-2'>
+    <h1>Step 2</h1>
+    {children}
+    <Link event='continue'>Continue</Link>
+</div>
+const Step3 = ({ children, machine }) => <div className='step-3'>
+    <h1>Step 3</h1>
+    {children}
+    <Link event='continue'>Continue</Link>
+</div>
+const SubStep = Generic('Sub-Step');
 const Submitting = Generic('Submitting');
 
 const fetchData = ({ send }) => new Promise((resolve, reject) => {
@@ -53,7 +63,7 @@ ReactDOM.render(
                         <Transition event='continue' target='step-2'/>
                     </State>
                     <State component={Step2} initial id='step-2' path='#step-2'>
-                        <State component={Step2} initial id='sub-step'/>
+                        <State component={SubStep} initial id='sub-step'/>
                         <Transition event='continue' target='step-3'/>
                     </State>
                     <State component={Step3} id='step-3' path='#step-3'>

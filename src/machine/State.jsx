@@ -25,7 +25,7 @@ function State(props) {
     const { _type, initialChild } = useMemo(() => {
         let _type = type;
         const childStates = getChildStateNodes(children);
-        const initialChild = childStates.find(c => c.props.initial) || childStates[0];
+        // const initialChild = childStates.find(c => c.props.initial) || childStates[0];
 
         if (_type !== 'parallel') {
             if (!childStates.length) {
@@ -39,26 +39,22 @@ function State(props) {
 
         return {
             _type,
-            initialChild
+            // initialChild
         }
     }, [ children ]);
 
     useMemo(() => {
-        if (match) {
-            if (_type === 'atomic') {
-                // console.log('resolvePath', stackPath);
-                // stackPath && resolvePath(stackPath);
-            } else if (match.exact && initialChild) {
-                // resolveState(initialChild.props.id);
-            }
+        if (match && _type === 'atomic') {
+            console.log('resolvePath', stackPath);
+            // stackPath && resolvePath(stackPath);
         }
     }, [ current ]);
 
-    useEffect(() => {
-        if (match) {
-            invoke && invoke(machineContext);
-        }
-    }, []);
+    // useEffect(() => {
+    //     if (match) {
+    //         invoke && invoke(machineContext);
+    //     }
+    // }, []);
 
     const initialContext = {
         path: stackPath,

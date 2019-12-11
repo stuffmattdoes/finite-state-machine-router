@@ -1,5 +1,4 @@
 import React from 'react';
-import { nullLiteral, isTerminatorless } from '@babel/types';
 
 export const logger = (state, event, target) => {
     const { current, id } = state;
@@ -59,7 +58,8 @@ export function deriveStateFromUrl(url, normalized) {
     }
 
     // 2. No exact match, compares to dynamic URLs for match
-    const dynamicPaths = normalized.filter(norm => norm.path && norm.path.match(/\/:/g)).map(norm => norm.path);
+    const dynamicPaths = normalized.filter(norm => norm.path && norm.path.match(/\/:/g))
+        .map(norm => norm.path);
 
     if (dynamicPaths.length) {
         // 2.1 Split url && route map into arrays, compare 1 by 1
@@ -137,7 +137,11 @@ function getAllRoutes(stateNodes) {
     }, {});
 }
 
-export function normalizeChildStates(stateNodes, rootId) {
+export function getInitialChildStateNode(stateNodes) {
+    return stateNodes.find(c => c.props.initial) || stateNodes[0];
+}
+
+export function normalizeChildStateProps(stateNodes, rootId) {
     function normalizeLoop(stateNodes) {
         let initIndex = stateNodes.findIndex(s => s.props.initial);
         initIndex = initIndex >= 0 ? initIndex : 0;
@@ -181,6 +185,7 @@ export function normalizeChildStates(stateNodes, rootId) {
 }
 
 export function resolveInitial(stack, normalized) {
+    // console.log(stack, normalized);
     const { childStates, path, stack: nextStack } = normalized.find(norm => norm.stack === stack);
     let initial = {
         route: path,

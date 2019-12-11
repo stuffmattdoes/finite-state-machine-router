@@ -1,13 +1,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createBrowserHistory } from 'history';
-import { deriveStateFromUrl, getChildStateNodes, isRootSemgent, normalizeChildStates } from './util';
+import {
+    deriveStateFromUrl, getChildStateNodes,
+    getInitialChildStateNode, isRootSemgent,
+    normalizeChildStateProps, resolveInitial
+} from './util';
 
 export const MachineContext = React.createContext();
 MachineContext.displayName = 'Machine';
 
 export function Machine ({ children: machineChildren, history, id: machineId, path: machinePath }) {
     const [ event, setEvent ] = useState(null);
-    // const [ state, setState ] = useState(`#${machineId}`);
 
     // Default history
     if (!history) {
@@ -37,18 +40,17 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
     // Resolve from URL -> input URL -> get stack -> resolve to initial atomic
     // Resolve from state -> input state ID -> get stack -> resolve to initial atomic
 
-    const { childStates, initialStack, routes, stacks } = useMemo(() => {
+    const { childStates, initialStack, params, stacks } = useMemo(() => {
         let childStates = getChildStateNodes(machineChildren);
-        const normalized = normalizeChildStates(childStates, machineId, machinePath);
-        const { pathname: url } = history.location;
-        let initialStack;
+        let initialStack = '#' + machineId + '.' + getInitialChildStateNode(childStates).props.id;
+        const normalized = normalizeChildStateProps(childStates, machineId);
+        const { pathname } = history.location;
+        let urlParams = {};
 
         //  // Derive state from URL
-        if (!isRootSemgent(url)) {
-            const { params, route, stack } = deriveStateFromUrl(url, normalized);
-            // urlParams = params;
-            // console.log(params, route, stack);
-            console.log(normalized);
+        if (!isRootSemgent(pathname)) {
+            const { params, route, stack } = deriveStateFromUrl(pathname, normalized);
+            urlParams = params;
 
             if (stack) {
                 initialStack = stack;
@@ -57,15 +59,15 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
                 initialStack = `#${machineId}.*`;
             }
         } else {
-            // Resolve to default URL
-            // initialStack = initialStack;
+            const { route, stack } = resolveInitial(initialStack, normalized);
+            // resolvePath(route);
+            initialStack = stack;
         }
 
         return {
             childStates,
             initialStack,
-            // routes,
-            // stacks
+            params: urlParams
         }
     }, [ machineChildren ]);
 
@@ -74,15 +76,25 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
         current: state,
         history,
         id: machineId,
+        params,
         resolveState,
         send
     }
 
-    // console.log('render', state);
+    useEffect(() => history.listen((location, action) => {
+        console.log('history change');
+        // const { params, route, stack } = deriveStateFromUrl(location.pathname, normalized);
+
+        // if (stack) {
+        //     resolveByStack(stack);
+        // }
+    }));
 
     // useEffect(() => {
     //     console.log('useEffect', state);
     // });
+
+    console.log('render');
 
     return <MachineContext.Provider value={providerValue}>
         {childStates}
