@@ -20,7 +20,7 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
         history = createBrowserHistory({ basename: machinePath });
     }
 
-        // Resolve from URL -> input URL -> get stack -> resolve to initial atomic
+    // Resolve from URL -> input URL -> get stack -> resolve to initial atomic
     // Resolve from state -> input state ID -> get stack -> resolve to initial atomic
 
     const { childStates, initialStack, normalized, params } = useMemo(() => {
@@ -67,32 +67,35 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
         setEvent({ name: event, ...data });
     }
 
-    const providerValue = {
-        current: state,
-        history,
-        id: machineId,
-        params,
-        resolveState,
-        send
-    }
-
     useEffect(() => history.listen((location, action) => {
         const { pathname } = location;
         const { params, path: currentPath, stack: currentStack } = deriveStateFromUrl(pathname, normalized, machineId);
         const { route, stack } = resolveInitialStack(currentStack, normalized);
 
-        setState(stack);
-
-        // TODO
-        // Maybe this should happen in atomic state?
-        resolvePath(route);
+        if (stack !== state) {
+            console.log('yep', stack, state);
+            setState(stack);
+        } else {
+            resolvePath(route);
+        }
     }));
     
     // useEffect(() => {
     //     console.log('useEffect', state);
     // });
     
-    console.log('render');
+    console.log('render', machineId);
+
+    const providerValue = {
+        current: state,
+        event,
+        history,
+        id: machineId,
+        params,
+        resolvePath,
+        resolveState,
+        send
+    }
 
     return <MachineContext.Provider value={providerValue}>
         {childStates}

@@ -46,8 +46,6 @@ export function injectUrlParameters(path, params) {
     return '/' + url.join('/');
 }
 
-// TODO
-// Route doesn't parse params if complete route match is not found
 export function deriveStateFromUrl(url, normalized, rootId) {
     let match = {
         params: {},
@@ -89,6 +87,8 @@ export function deriveStateFromUrl(url, normalized, rootId) {
                 return false;
             }
 
+            // TODO
+            // Route doesn't parse params if complete route match is not found
             return !pathSegments.map((pathSegment, i) => {
                 // 2.2 infer parameter from URL from first segment array that matches in length
                 if (isDynamic(pathSegment)) {

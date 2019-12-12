@@ -12,7 +12,7 @@ StateNodeContext.displayName = 'StateNode';
 function State(props) {
     const { children, component: WrappedComponent, id, initial, invoke, onEntry, onExit, path, type } = props;
     const machineContext = useContext(MachineContext);
-    const { _event: machineEvent, current, history, id: machineId, params, resolvePath, resolveState, send: machineSend } = machineContext;
+    const { event: machineEvent, current, history, id: machineId, params, resolvePath, resolveState, send: machineSend } = machineContext;
     const { path: parentPath, stack } = useContext(StateNodeContext);
     const stackPath = path ? parentPath ? parentPath + path : path : parentPath;
     const match = isCurrentStack(id, current) ? {
@@ -40,18 +40,25 @@ function State(props) {
         return _type;
     }, [ children ]);
 
-    // useMemo(() => {
-    //     if (match && _type === 'atomic') {
-    //         console.log('resolvePath', stackPath);
-    //         stackPath && resolvePath(stackPath);
-    //     }
-    // }, [ current ]);
-
     // useEffect(() => {
     //     if (match) {
     //         invoke && invoke(machineContext);
     //     }
     // }, []);
+
+    useEffect(() => {
+        if (match) {
+            if (_type === 'atomic') {
+                resolvePath(stackPath);
+                console.log('atomic', id);
+            }
+            if (machineEvent) {
+                console.log('machineEvent', id, machineEvent);
+                // executeTransition(events[machineEvent.name]);
+                // resolveByState(events[machineEvent.name]);
+            }
+        }
+    }, [ machineEvent ]);
 
     const initialContext = {
         path: stackPath,
@@ -71,6 +78,7 @@ function State(props) {
 
     return match ?
         <StateNodeContext.Provider value={initialContext}>
+            {console.log('render', id)}
             { WrappedComponent ?
                 <WrappedComponent {...componentProps}/>
             : children }
