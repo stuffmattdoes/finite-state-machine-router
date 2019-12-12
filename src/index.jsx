@@ -34,6 +34,8 @@ const Step2 = ({ children, machine }) => <div className='step-2'>
     <h1>Step 2</h1>
     {children}
     <Link event='continue'>Continue</Link>
+    <br/>
+    <Link event='reload'>Back to Step 1 (State Event)</Link>
 </div>
 const Step3 = ({ children, machine }) => <div className='step-3'>
     <h1>Step 3</h1>
@@ -64,10 +66,13 @@ ReactDOM.render(
                         <Transition event='continue' target='step-2'/>
                     </State>
                     <State component={Step2} initial id='step-2' path='/step-2'>
-                        <State component={SubStep} initial id='sub-step'/>
+                        <Transition event='reload' target='step-1'/>
+                        <Transition event='reload' target='app'/>
                         <Transition event='continue' target='step-3'/>
+                        <State component={SubStep} initial id='sub-step'/>
                     </State>
                     <State component={Step3} id='step-3' path='/step-3'>
+                        <Transition event='reload' target='step-1'/>
                         <Transition event='submit' target='submit'/>
                     </State>
                     <State component={Submitting} id='submitting'>

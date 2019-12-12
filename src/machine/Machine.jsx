@@ -6,15 +6,14 @@ import {
     getInitialChildStateNode,
     injectUrlParameters,
     normalizeChildStateProps,
-    resolveInitialStack
+    resolveInitialStack,
+    selectTransition
 } from './util';
 
 export const MachineContext = React.createContext();
 MachineContext.displayName = 'Machine';
 
 export function Machine ({ children: machineChildren, history, id: machineId, path: machinePath }) {
-    const [ event, setEvent ] = useState(null);
-
     // Default history
     if (!history) {
         history = createBrowserHistory({ basename: machinePath });
@@ -54,8 +53,8 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
     }
 
     function resolveState(stateId) {
-        const stack = resolveInitialStack(
-            normalized.find(norm => norm.id === stateId && norm.stack),
+        const { route, stack } = resolveInitialStack(
+            normalized.find(norm => norm.id === stateId).stack,
             normalized
         );
         console.log('resolveState', state, '->', stack);
@@ -64,7 +63,10 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
 
     function send(event, data = null) {
         console.log('send', event, data);
-        setEvent({ event, ...data });
+        const { cond, event: transitionEvent, target } = selectTransition(event, state, normalized);
+        console.log(target);
+        resolveState(target);
+        // setEvent({ event, ...data });
     }
 
     useEffect(() => history.listen((location, action) => {
@@ -79,21 +81,21 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
             resolvePath(route);
         }
     }));
-    
+
     // useEffect(() => {
     //     console.log('useEffect', state);
     // });
     
-    console.log('render', machineId);
+    // console.log('render', machineId);
 
     const providerValue = {
         current: state,
-        event,
+        // event,
         history,
         id: machineId,
         params,
         resolvePath,
-        resolveState,
+        // resolveState,
         send
     }
 

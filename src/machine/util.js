@@ -163,6 +163,13 @@ export function normalizeChildStateProps(stateNodes, rootId) {
         return stateNodes.reduce((acc, stateNode, i) => {
             const childStates = getChildStateNodes(stateNode.props.children);
             const { id, path = null, type } = stateNode.props;
+            const transitions = getChildrenOfType(stateNode.props.children, 'Transition')
+                .map(({ props }) => ({
+                    cond: props.cond || null,
+                    event: props.event,
+                    sendId: id,
+                    target: props.target
+                }));
 
             acc.push({
                 childStates: childStates.map(child => child.props.id),
@@ -170,6 +177,7 @@ export function normalizeChildStateProps(stateNodes, rootId) {
                 initial: i === initIndex,
                 path: path,
                 stack: '.' + id,
+                transitions,
                 type: type === 'parallel' ? 'parallel'
                     : childStates.length === 0 ? 'atomic'
                     : childStates.length > 1 ? 'compound' : 'default'
@@ -184,6 +192,7 @@ export function normalizeChildStateProps(stateNodes, rootId) {
                     initial: gcs.initial,
                     path: path ? gcs.path ? path + gcs.path : path : gcs.path,
                     stack: '.' + id + gcs.stack,
+                    transitions: gcs.transitions,
                     type: gcs.type
                 }));
             }
@@ -218,4 +227,19 @@ export function resolveInitialStack(stack, normalized) {
     }
     
     return initial;
+}
+
+export function selectTransition(event, stack, normalized) {
+    const activeTransitions = normalized.find(norm => norm.stack === stack).transitions;
+
+    if (activeTransitions.length) {
+        const activeTransition = activeTransitions.find(({ cond, event: transitionEvent, target }) => 
+            transitionEvent === event && cond === null || cond === true);
+        if (activeTransition) {
+            return activeTransition;
+        }
+    }
+    
+    const nextStack = stack.split('.').slice(0, -1).join('.');
+    return selectTransition(event, nextStack, normalized);
 }

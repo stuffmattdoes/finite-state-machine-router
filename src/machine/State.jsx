@@ -3,17 +3,19 @@ import { MachineContext } from './Machine';
 import { getChildrenOfType, getChildStateNodes, isCurrentStack, isExactStack } from './util';
 
 export const StateNodeContext = React.createContext({
-    // id: null,
+    id: null,
     path: null,
+    // elevateTransition: null,
     stack: null
 });
 StateNodeContext.displayName = 'StateNode';
 
 function State(props) {
-    const { children, component: WrappedComponent, id, initial, invoke, onEntry, onExit, path, type } = props;
+    const { children, component: Component, id, initial, invoke, onEntry, onExit, path, type } = props;
     const machineContext = useContext(MachineContext);
-    const { event: machineEvent, current, history, id: machineId, params, resolvePath, resolveState, send: machineSend } = machineContext;
-    const { path: parentPath, stack } = useContext(StateNodeContext);
+    const { event: machineEvent, current, history, id: machineId, params, resolvePath, send: machineSend } = machineContext;
+    const { id: parentId, path: parentPath, stack: parentStack } = useContext(StateNodeContext);
+    const stack = parentStack ? `${parentStack}.${id}` : `#${machineId}.${id}`;
     const stackPath = path ? parentPath ? parentPath + path : path : parentPath;
     const match = isCurrentStack(id, current) ? {
         exact: isExactStack(id, current),
@@ -47,41 +49,26 @@ function State(props) {
         return [ _type, transitions ];
     }, [ children ]);
 
-    // useEffect(() => {
-    //     if (match) {
-    //         invoke && invoke(machineContext);
-    //     }
-    // }, []);
-
     useEffect(() => {
         if (match) {
             if (_type === 'atomic') {
                 resolvePath(stackPath);
             }
-
-            // if (machineEvent) {
-            //     const transition = transitions.find(trans => trans.event === machineEvent.event);
-
-            //     if (transition) {
-            //         console.log('machineEvent', id, machineEvent);
-            //         // executeTransition(events[machineEvent.name]);
-            //         // resolveByState(events[machineEvent.name]);
-            //     }
-            // }
         }
-    }, [ machineEvent ]);
+    }, [ current ]);
 
     const initialContext = {
+        id,
         path: stackPath,
-        // stack,
-        send: machineSend
+        stack,
+        send: machineSend,
     }
     const componentProps = {
         children,
         history,
         machine: {
             current,
-            // events,
+            // transitions,
             send: machineSend
         },
         match
@@ -90,8 +77,8 @@ function State(props) {
     return match ?
         <StateNodeContext.Provider value={initialContext}>
             {console.log('render', id)}
-            { WrappedComponent ?
-                <WrappedComponent {...componentProps}/>
+            { Component ?
+                <Component {...componentProps}/>
             : children }
         </StateNodeContext.Provider>
     : null;
