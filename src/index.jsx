@@ -55,10 +55,11 @@ ReactDOM.render(
         <Machine id='checkout' path='/checkout'>
             <State component={App} id='app' invoke={fetchData}>
                 {/* <Transition event='fetch' target='loading'/> */}
-                <Transition event='resolve' target='stockNumber'/>
                 <Transition event='reject' target='error'/>
+                <Transition event='resolve' target='stockNumber'/>
                 <State component={Loading} id='loading'/>
                 <State component={StockNumber} initial id='stockNumber' path='/:stockNumber'>
+                    <Transition event='reload' target='app'/>
                     <State component={Step1} id='step-1' path='/step-1'>
                         <Transition event='continue' target='step-2'/>
                     </State>

@@ -64,7 +64,7 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
 
     function send(event, data = null) {
         console.log('send', event, data);
-        setEvent({ name: event, ...data });
+        setEvent({ event, ...data });
     }
 
     useEffect(() => history.listen((location, action) => {

@@ -22,9 +22,16 @@ function State(props) {
         url: history.location.pathname
     } : false;
 
-    const _type = useMemo(() => {
+    const [ _type, transitions ] = useMemo(() => {
         let _type = type;
         const childStates = getChildStateNodes(children);
+        const transitions = getChildrenOfType(children, 'Transition').map(({ props }) => ({
+            cond: props.cond || null,
+            event: props.event,
+            sendid: id,
+            target: props.target,
+            type: 'internal'
+        }));
         // const initialChild = childStates.find(c => c.props.initial) || childStates[0];
 
         if (_type !== 'parallel') {
@@ -37,7 +44,7 @@ function State(props) {
             }
         }
 
-        return _type;
+        return [ _type, transitions ];
     }, [ children ]);
 
     // useEffect(() => {
@@ -50,13 +57,17 @@ function State(props) {
         if (match) {
             if (_type === 'atomic') {
                 resolvePath(stackPath);
-                console.log('atomic', id);
             }
-            if (machineEvent) {
-                console.log('machineEvent', id, machineEvent);
-                // executeTransition(events[machineEvent.name]);
-                // resolveByState(events[machineEvent.name]);
-            }
+
+            // if (machineEvent) {
+            //     const transition = transitions.find(trans => trans.event === machineEvent.event);
+
+            //     if (transition) {
+            //         console.log('machineEvent', id, machineEvent);
+            //         // executeTransition(events[machineEvent.name]);
+            //         // resolveByState(events[machineEvent.name]);
+            //     }
+            // }
         }
     }, [ machineEvent ]);
 
