@@ -5,7 +5,6 @@ import { getChildrenOfType, getChildStateNodes, isCurrentStack, isExactStack } f
 export const StateNodeContext = React.createContext({
     id: null,
     path: null,
-    // elevateTransition: null,
     stack: null
 });
 StateNodeContext.displayName = 'StateNode';
@@ -52,10 +51,18 @@ function State(props) {
     useEffect(() => {
         if (match) {
             if (_type === 'atomic') {
-                resolvePath(stackPath);
+                console.log('resolvepath');
+                stackPath ? resolvePath(stackPath) : resolvePath('/');
             }
         }
     }, [ current ]);
+
+    useMemo(() => {
+        if (match && invoke) {
+            console.log('invoke');
+            invoke && invoke(machineContext);
+        }
+    }, []);
 
     const initialContext = {
         id,

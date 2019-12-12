@@ -13,7 +13,7 @@ const Generic = (title) => ({ children, history, machine, match }) => (
 );
 const GenericWithLinks = (title) => ({ children, history, machine, match }) => (
     <div className={title && title.toLowerCase().replace(/\s/g, '')}>
-        <h1>{title} {match.params.stockNumber}</h1>
+        <h1>{title}</h1>
         {children}
         <Link event='reload'>Reload (State event)</Link>
         <br/>
@@ -56,11 +56,11 @@ ReactDOM.render(
     <div className='container'>
         <Machine id='checkout' path='/checkout'>
             <State component={App} id='app' invoke={fetchData}>
-                {/* <Transition event='fetch' target='loading'/> */}
+                <Transition event='fetch' target='loading'/>
                 <Transition event='reject' target='error'/>
                 <Transition event='resolve' target='stockNumber'/>
                 <State component={Loading} id='loading'/>
-                <State component={StockNumber} initial id='stockNumber' path='/:stockNumber'>
+                <State component={StockNumber} id='stockNumber' path='/:stockNumber'>
                     <Transition event='reload' target='app'/>
                     <State component={Step1} id='step-1' path='/step-1'>
                         <Transition event='continue' target='step-2'/>

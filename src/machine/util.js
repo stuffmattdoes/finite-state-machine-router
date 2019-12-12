@@ -25,9 +25,11 @@ export const isCurrentStack = (id, stack) => !!stack.split('.').find(state => st
 export const isExactStack = (id, stack) => stack.split('.').pop() === id;
 export const isDynamic = segment => paramRegExp.test(segment);
 export const isRootSemgent = url => url.slice(1) === '';
+export const isRootStack = stack => !stack.match(/\./g);
 export const segmentize = url => url.replace(/(^\/+|\/+$)/g, '').split('/');
 
 export function injectUrlParameters(path, params) {
+    // console.log('injectUrlParameters', path, params);
     const url = segmentize(path).map(seg => {
         if (isDynamic(seg)) {
             const param = seg.replace(':', '');
@@ -47,6 +49,7 @@ export function injectUrlParameters(path, params) {
 }
 
 export function deriveStateFromUrl(url, normalized, rootId) {
+    // console.log('deriveStateFromUrl');
     let match = {
         params: {},
         path: url,
@@ -113,6 +116,7 @@ export function deriveStateFromUrl(url, normalized, rootId) {
     return match;
 }
 
+// Unused
 function getAllStacks(stateNodes) {
     return stateNodes.reduce((acc, child) => {
         const childStates = getChildStateNodes(child.props.children);
@@ -129,6 +133,7 @@ function getAllStacks(stateNodes) {
     }, []);
 }
 
+// Unused
 function getAllRoutes(stateNodes) {
     return stateNodes.reduce((acc, child) => {
         const childStates = getChildStateNodes(child.props.children);
@@ -230,6 +235,10 @@ export function resolveInitialStack(stack, normalized) {
 }
 
 export function selectTransition(event, stack, normalized) {
+    if (isRootStack(stack)) {
+        return null;
+    }
+
     const activeTransitions = normalized.find(norm => norm.stack === stack).transitions;
 
     if (activeTransitions.length) {
