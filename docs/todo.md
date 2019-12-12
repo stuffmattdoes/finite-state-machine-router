@@ -1,5 +1,5 @@
 Machine flow:
-[ ] Derive target state node from URL (including dynamic paths)
+[x] Derive target state node from URL (including dynamic paths)
     1. Normalize child tree
         * Generate state node -> URL map
         * Generate stack for all state nodes
@@ -8,7 +8,7 @@ Machine flow:
     3. If no match, begin to parse dynamic state node paths (prefixed with :) for match
     4. If still no match, 404
         *  If attemtping to resolve to a dynamic path without proper url param meta, throw error
-[ ] Resolve all initial children from target/active state node to atomic state node
+[x] Resolve all initial children from target/active state node to atomic state node
     1. Resolve to target state node from URL (steps listed above)
     2. If target node is not atomic, resolve to every child marked "initial"
     3. If no child is marked initial, resolve to first in document order

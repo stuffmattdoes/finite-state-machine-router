@@ -77,10 +77,15 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
     }
 
     useEffect(() => history.listen((location, action) => {
-        const { params, path: currentPath, stack: currentStack } = deriveStateFromUrl(location.pathname, normalized, machineId);
+        const { pathname } = location;
+        const { params, path: currentPath, stack: currentStack } = deriveStateFromUrl(pathname, normalized, machineId);
         const { route, stack } = resolveInitialStack(currentStack, normalized);
-        // console.log('history change', params, route, stack);
-        // setState(stack);
+
+        setState(stack);
+
+        // TODO
+        // Maybe this should happen in atomic state?
+        resolvePath(route);
     }));
     
     // useEffect(() => {

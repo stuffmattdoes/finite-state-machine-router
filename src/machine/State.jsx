@@ -21,7 +21,6 @@ function State(props) {
         path: stackPath,
         url: history.location.pathname
     } : false;
-    // console.log(id, match);
 
     const _type = useMemo(() => {
         let _type = type;
@@ -69,12 +68,6 @@ function State(props) {
         },
         match
     }
-
-    // console.log('render', current);
-
-    // useEffect(() => {
-    //     console.log('useEffect', current);
-    // });
 
     return match ?
         <StateNodeContext.Provider value={initialContext}>
