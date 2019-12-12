@@ -239,7 +239,7 @@ export function selectTransition(event, stack, normalized) {
             return activeTransition;
         }
     }
-    
+
     const nextStack = stack.split('.').slice(0, -1).join('.');
     return selectTransition(event, nextStack, normalized);
 }

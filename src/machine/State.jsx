@@ -76,7 +76,6 @@ function State(props) {
 
     return match ?
         <StateNodeContext.Provider value={initialContext}>
-            {console.log('render', id)}
             { Component ?
                 <Component {...componentProps}/>
             : children }

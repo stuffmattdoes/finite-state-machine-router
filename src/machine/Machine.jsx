@@ -47,7 +47,7 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
         const url = injectUrlParameters(path, params);
 
         if (url !== history.location.pathname) {
-            console.log('resolvePath', history.location.pathname, 'to', url);
+            // console.log('resolvePath', history.location.pathname, 'to', url);
             history.push(url, { stack: state });
         }
     }
@@ -57,16 +57,14 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
             normalized.find(norm => norm.id === stateId).stack,
             normalized
         );
-        console.log('resolveState', state, '->', stack);
+        // console.log('resolveState', state, '->', stack);
         setState(stack);
     }
 
     function send(event, data = null) {
-        console.log('send', event, data);
+        // console.log('send', event, data);
         const { cond, event: transitionEvent, target } = selectTransition(event, state, normalized);
-        console.log(target);
         resolveState(target);
-        // setEvent({ event, ...data });
     }
 
     useEffect(() => history.listen((location, action) => {
@@ -75,7 +73,6 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
         const { route, stack } = resolveInitialStack(currentStack, normalized);
 
         if (stack !== state) {
-            console.log('yep', stack, state);
             setState(stack);
         } else {
             resolvePath(route);
