@@ -11,9 +11,9 @@ const Generic = (title) => ({ children, history, machine, match }) => (
         {children}
     </div>
 );
-const GenericWithLinks = (title) => ({ children, machine }) => (
+const GenericWithLinks = (title) => ({ children, history, machine, match }) => (
     <div className={title && title.toLowerCase().replace(/\s/g, '')}>
-        <h1>{title}</h1>
+        <h1>{title} {match.params.stockNumber}</h1>
         {children}
         <Link event='reload'>Reload (State event)</Link>
         <br/>
@@ -21,7 +21,7 @@ const GenericWithLinks = (title) => ({ children, machine }) => (
     </div>
 );
 const App = Generic('App');
-const Checkout = GenericWithLinks('Checkout');
+const StockNumber = GenericWithLinks('StockNumber');
 const Error = GenericWithLinks('Error');
 const Loading = Generic('Loading');
 const NotFound = GenericWithLinks('Not Found');
@@ -58,15 +58,15 @@ ReactDOM.render(
                 <Transition event='resolve' target='stockNumber'/>
                 <Transition event='reject' target='error'/>
                 <State component={Loading} id='loading'/>
-                <State component={Checkout} initial id='stockNumber' path='/:stockNumber'>
-                    <State component={Step1} id='step-1' path='#step-1'>
+                <State component={StockNumber} initial id='stockNumber' path='/:stockNumber'>
+                    <State component={Step1} id='step-1' path='/step-1'>
                         <Transition event='continue' target='step-2'/>
                     </State>
-                    <State component={Step2} initial id='step-2' path='#step-2'>
+                    <State component={Step2} initial id='step-2' path='/step-2'>
                         <State component={SubStep} initial id='sub-step'/>
                         <Transition event='continue' target='step-3'/>
                     </State>
-                    <State component={Step3} id='step-3' path='#step-3'>
+                    <State component={Step3} id='step-3' path='/step-3'>
                         <Transition event='submit' target='submit'/>
                     </State>
                     <State component={Submitting} id='submitting'>

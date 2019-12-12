@@ -27,25 +27,28 @@ export const isDynamic = segment => paramRegExp.test(segment);
 export const isRootSemgent = url => url.slice(1) === '';
 export const segmentize = url => url.replace(/(^\/+|\/+$)/g, '').split('/');
 
-// export const injectUrlParameters = (path, params) => {
-//     const url = segmentize(path).map(seg => {
-//         if (isDynamic(seg)) {
-//             const segParam = seg.replace(':', '');
+export function injectUrlParameters(path, params) {
+    const url = segmentize(path).map(seg => {
+        if (isDynamic(seg)) {
+            const param = seg.replace(':', '');
 
-//             if (Object.keys(params).includes(segParam)) {
-//                 return params[segParam];
-//             } else {
-//                 console.error(`Cannot push to a dynamic URL without supplying the proper parameters: ${seg} parameter is missing.`);
-//             }
-//         }
+            if (Object.keys(params).includes(param)) {
+                return params[param].toString();
+            } else {
+                // console.error(`Cannot push to a dynamic URL without supplying the proper parameters: ${seg} parameter is missing.`);
+                return 'undefined';
+            }
+        }
 
-//         return seg;
-//     });
+        return seg;
+    });
 
-//     return '/' + url.join('/');
-// }
+    return '/' + url.join('/');
+}
 
-export function deriveStateFromUrl(url, normalized) {
+// TODO
+// Route doesn't parse params if complete route match is not found
+export function deriveStateFromUrl(url, normalized, rootId) {
     let match = {
         params: {},
         path: url,
@@ -57,27 +60,41 @@ export function deriveStateFromUrl(url, normalized) {
         return match;
     }
 
-    // 2. No exact match, compares to dynamic URLs for match
-    const dynamicPaths = normalized.filter(norm => norm.path && norm.path.match(/\/:/g))
-        .map(norm => norm.path);
+    // 1.1 Check if URL is root, return root stack
+    if (isRootSemgent(url)) {
+        match.stack = normalized.find(norm => norm.stack.match(/\./g).length === 1 && norm.initial).stack;
+        return match;
+    }
+
+    // 1.2 pre-emptively assume we don't find a match
+    // match.stack = '#' + rootId + '.*';
+    const notFound = normalized.find(norm => norm.id === '*');
+
+    if (notFound) {
+        match.stack = notFound.stack;
+    }
+
+    // 2. No exact match yet, compare to dynamic URLs for match
+    const dynamicPaths = normalized.filter(norm => norm.path && norm.path.match(/\/:/g)).map(norm => norm.path);
 
     if (dynamicPaths.length) {
         // 2.1 Split url && route map into arrays, compare 1 by 1
         const urlSegments = segmentize(url);
-        let params;
-        const path = dynamicPaths.find(p => {
+        // let params = {};
+        const route = dynamicPaths.find(p => {
             const pathSegments = segmentize(p);
-            params = {};
+            match.params = {};
 
             if (pathSegments.length !== urlSegments.length) {
                 return false;
             }
 
-            // 2.2 infer parameter from URL from first segment array that matches in length
             return !pathSegments.map((pathSegment, i) => {
+                // 2.2 infer parameter from URL from first segment array that matches in length
                 if (isDynamic(pathSegment)) {
-                    params[pathSegment.slice(1)] = urlSegments[i];
+                    match.params[pathSegment.slice(1)] = urlSegments[i];
                     return true;
+                // 2.3 if path segment matches url segment exactly, proceed
                 } else if (pathSegment === urlSegments[i]) {
                     return true;
                 }
@@ -86,17 +103,14 @@ export function deriveStateFromUrl(url, normalized) {
             }).includes(false);
         });
 
-        const currentStack = normalized.find(norm => norm.path === path).stack;
-        const { route, stack } = resolveInitial(currentStack, normalized);
-
-        return {
-            params,
-            route,
-            stack
+        if (route) {
+            // 3. finally, return the stack that corresponds to the URL
+            const currentStack = normalized.find(norm => norm.path === route).stack;
+            match.stack = currentStack;
         }
-    } else {
-        return null;
     }
+
+    return match;
 }
 
 function getAllStacks(stateNodes) {
@@ -184,8 +198,7 @@ export function normalizeChildStateProps(stateNodes, rootId) {
     });
 }
 
-export function resolveInitial(stack, normalized) {
-    // console.log(stack, normalized);
+export function resolveInitialStack(stack, normalized) {
     const { childStates, path, stack: nextStack } = normalized.find(norm => norm.stack === stack);
     let initial = {
         route: path,
@@ -197,7 +210,7 @@ export function resolveInitial(stack, normalized) {
         const initialChild = childStatesFull.find(child => child.initial) || childStatesFull[0];
 
         if (initialChild.childStates.length) {
-            return resolveInitial(initialChild.stack, normalized);
+            return resolveInitialStack(initialChild.stack, normalized);
         } else {
             initial.route = initialChild.path;
             initial.stack = initialChild.stack;

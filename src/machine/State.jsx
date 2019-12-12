@@ -21,8 +21,9 @@ function State(props) {
         path: stackPath,
         url: history.location.pathname
     } : false;
+    // console.log(id, match);
 
-    const { _type, initialChild } = useMemo(() => {
+    const _type = useMemo(() => {
         let _type = type;
         const childStates = getChildStateNodes(children);
         // const initialChild = childStates.find(c => c.props.initial) || childStates[0];
@@ -37,18 +38,15 @@ function State(props) {
             }
         }
 
-        return {
-            _type,
-            // initialChild
-        }
+        return _type;
     }, [ children ]);
 
-    useMemo(() => {
-        if (match && _type === 'atomic') {
-            console.log('resolvePath', stackPath);
-            // stackPath && resolvePath(stackPath);
-        }
-    }, [ current ]);
+    // useMemo(() => {
+    //     if (match && _type === 'atomic') {
+    //         console.log('resolvePath', stackPath);
+    //         stackPath && resolvePath(stackPath);
+    //     }
+    // }, [ current ]);
 
     // useEffect(() => {
     //     if (match) {
