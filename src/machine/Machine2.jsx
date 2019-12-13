@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createBrowserHistory } from 'history';
-import { deriveStateFromUrl, injectUrlParameters, isRootSemgent } from './util';
+import { deriveStateFromUrl, injectUrlParams, isRootSemgent } from './util';
 
 export const MachineContext = React.createContext();
 MachineContext.displayName = 'Machine';
@@ -28,7 +28,7 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
     }
 
     function resolvePath(path) {
-        const url = injectUrlParameters(path, urlParams);
+        const url = injectUrlParams(path, urlParams);
 
         if (url !== history.location.pathname) {
             console.log('resolvePath', history.location.pathname, 'to', url);

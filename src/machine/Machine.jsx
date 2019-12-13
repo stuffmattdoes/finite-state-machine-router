@@ -1,12 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createBrowserHistory } from 'history';
 import {
-    deriveStateFromUrl,
     getChildStateNodes,
     getInitialChildStateNode,
-    injectUrlParameters,
+    injectUrlParams,
     normalizeChildStateProps,
-    resolveInitialStack,
+    resolveInitial,
+    resolveToAtomic,
     selectTransition
 } from './util';
 
@@ -23,86 +23,69 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
     // Resolve from state -> input state ID -> get stack -> resolve to initial atomic
 
     const { childStates, normalized } = useMemo(() => {
-        let childStates = getChildStateNodes(machineChildren);
+        const childStates = getChildStateNodes(machineChildren);
         const normalized = normalizeChildStateProps(childStates, machineId);
 
         return {
             childStates,
-            normalized,
+            normalized
         }
     }, [ machineChildren ]);
 
     const { initialStack, params } = useMemo(() => {        
         let initialStack = '#' + machineId + '.' + getInitialChildStateNode(childStates).props.id;
-        let { pathname } = history.location;
-        const { params, path: currentPath, stack: currentStack } = deriveStateFromUrl(pathname, normalized, machineId);
-        const { route, stack } = resolveInitialStack(currentStack, normalized);
-        const initialRoute = injectUrlParameters(route, params);
-        // history.push(initialRoute);
+        const { params, path, stack, url } = resolveInitial(history.location.pathname, normalized, machineId);
 
         return {
             initialStack: stack || initialStack,
             params
         }
-    }, [ ]);
+    }, []);
 
-    const [ state, setState ] = useState(initialStack);
+    const [ state, setState ] = useState({
+        current: initialStack,
+        params
+    });
 
     function resolvePath(path) {
-        console.log('resolvePath', path);
-        const url = injectUrlParameters(path, params);
+        const url = injectUrlParams(path, state.params);
 
         if (url !== history.location.pathname) {
             // console.log('resolvePath', history.location.pathname, 'to', url);
-            history.push(url, { stack: state });
+            history.push(url, { stack: state.current });
         }
     }
 
-    function resolveState(stateId) {
-        const { route, stack } = resolveInitialStack(
-            normalized.find(norm => norm.id === stateId).stack,
-            normalized
-        );
-        // console.log('resolveState', state, '->', stack);
-        setState(stack);
-    }
-
     function send(event, data = null) {
-        const targetState = selectTransition(event, state, normalized);
+        const targetState = selectTransition(event, state.current, normalized);
 
         if (targetState) {
-            const { cond, event: transitionEvent, target } = targetState;
-            console.log('send', event, data, target);
-            resolveState(target);
+            const params = data && data.params || state.params;
+            const { cond, event: transitionEvent, target: stateId } = targetState;
+            const { path, stack } = resolveToAtomic(
+                normalized.find(norm => norm.id === stateId).stack,
+                normalized
+            );
+                
+            // console.log('send', event, data, stateId, path);
+            setState({ current: stack, params });    
+            // resolveState(target);
         }
     }
 
     useEffect(() => history.listen((location, action) => {
-        const { pathname } = location;
-        const { params, path: currentPath, stack: currentStack } = deriveStateFromUrl(pathname, normalized, machineId);
-        const { route, stack } = resolveInitialStack(currentStack, normalized);
+        const { params, path, stack, url } = resolveInitial(location.pathname, normalized, machineId);
 
-        if (stack !== state) {
-            setState(stack);
+        if (stack !== state.current) {
+            setState({ current: stack, params });
         }
-
-        resolvePath(route);
     }));
 
-    // useEffect(() => {
-    //     console.log('useEffect', state);
-    // });
-    
-    // console.log('render', machineId);
-
     const providerValue = {
-        current: state,
-        // event,
+        ...state,
         history,
         id: machineId,
-        params,
         resolvePath,
-        // resolveState,
         send
     }
 

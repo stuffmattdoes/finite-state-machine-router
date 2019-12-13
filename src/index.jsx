@@ -13,7 +13,7 @@ const Generic = (title) => ({ children, history, machine, match }) => (
 );
 const GenericWithLinks = (title) => ({ children, history, machine, match }) => (
     <div className={title && title.toLowerCase().replace(/\s/g, '')}>
-        <h1>{title}</h1>
+        <h1>{title} {match.params.stockNumber}</h1>
         {children}
         <Link event='reload'>Reload (State event)</Link>
         <br/>
@@ -46,9 +46,12 @@ const SubStep = Generic('Sub-Step');
 const Submitting = Generic('Submitting');
 
 const fetchData = ({ send }) => new Promise((resolve, reject) => {
-    const rng = Math.random() >= 0.5 ? true : false;
-    setTimeout(() => rng ? resolve(8675309) : reject(), 1500);
-    send('fetch');
+    setTimeout(() => {
+        Math.random() >= 0.5
+            ? resolve(Math.round(Math.random() * 10000))
+            : reject();
+    }, 1000);
+    // send('fetch');
 }).then(res => send('resolve', { params: { stockNumber: res }}))
 .catch(err => send('reject'));
 
@@ -56,7 +59,7 @@ ReactDOM.render(
     <div className='container'>
         <Machine id='checkout' path='/checkout'>
             <State component={App} id='app' invoke={fetchData}>
-                <Transition event='fetch' target='loading'/>
+                <Transition event='invoke.app' target='loading'/>
                 <Transition event='reject' target='error'/>
                 <Transition event='resolve' target='stockNumber'/>
                 <State component={Loading} id='loading'/>

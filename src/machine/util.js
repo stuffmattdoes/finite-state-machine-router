@@ -28,8 +28,8 @@ export const isRootSemgent = url => url.slice(1) === '';
 export const isRootStack = stack => !stack.match(/\./g);
 export const segmentize = url => url.replace(/(^\/+|\/+$)/g, '').split('/');
 
-export function injectUrlParameters(path, params) {
-    // console.log('injectUrlParameters', path, params);
+export function injectUrlParams(path, params) {
+    // console.log('injectUrlParams', path, params);
     const url = segmentize(path).map(seg => {
         if (isDynamic(seg)) {
             const param = seg.replace(':', '');
@@ -53,7 +53,7 @@ export function deriveStateFromUrl(url, normalized, rootId) {
     let match = {
         params: {},
         path: url,
-        stack: normalized.find(route => route.path === url)
+        stack: normalized.find(norm => norm.path === url)
     }
 
     // 1. Exact match, no dynamic URL needed
@@ -212,10 +212,10 @@ export function normalizeChildStateProps(stateNodes, rootId) {
     });
 }
 
-export function resolveInitialStack(stack, normalized) {
+export function resolveToAtomic(stack, normalized) {
     const { childStates, path, stack: nextStack } = normalized.find(norm => norm.stack === stack);
     let initial = {
-        route: path,
+        path,
         stack: nextStack
     }
 
@@ -224,14 +224,27 @@ export function resolveInitialStack(stack, normalized) {
         const initialChild = childStatesFull.find(child => child.initial) || childStatesFull[0];
 
         if (initialChild.childStates.length) {
-            return resolveInitialStack(initialChild.stack, normalized);
+            return resolveToAtomic(initialChild.stack, normalized);
         } else {
-            initial.route = initialChild.path;
+            initial.path = initialChild.path || '/';
             initial.stack = initialChild.stack;
         }
     }
     
     return initial;
+}
+
+export function resolveInitial(pathname, normalized, machineId) {
+    const { params, path: currentPath, stack: currentStack } = deriveStateFromUrl(pathname, normalized, machineId);
+    const { path, stack } = resolveToAtomic(currentStack, normalized);
+    const url = injectUrlParams(path, params);
+
+    return {
+        params,
+        path,
+        stack,
+        url
+    }
 }
 
 export function selectTransition(event, stack, normalized) {

@@ -51,7 +51,7 @@ function State(props) {
     useEffect(() => {
         if (match) {
             if (_type === 'atomic') {
-                console.log('resolvepath');
+                // console.log('resolvepath');
                 stackPath ? resolvePath(stackPath) : resolvePath('/');
             }
         }
@@ -59,7 +59,7 @@ function State(props) {
 
     useMemo(() => {
         if (match && invoke) {
-            console.log('invoke');
+            machineSend('invoke.' + id);
             invoke && invoke(machineContext);
         }
     }, []);
