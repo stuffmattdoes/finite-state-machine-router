@@ -104,3 +104,117 @@ matches({
     </State>
 </Machine>
 ```
+
+import { abTest } from "./src/CarMax.Online.CustomerProgression.Site/Scripts/v2/selectors/ab-test-selectors";
+
+// A
+<Machine>
+    <State component={App}>
+        <State id='a' render={({ text }) => <div>
+            <Button>{text}</Button>
+        </div>}/>
+    </State>
+</Machine>
+
+
+
+const Finance = props => (
+    <State path={props.path}>
+
+    </State>
+);
+
+<Machine id='checkout' path='/checkout'>
+    <State component={Checkout} id='stockNumber' path='/:stockNumber'>
+        <Transition event='finance.start' target='finance' />
+        <Transition event='finance.start' target='finance' />
+        <Transition event='finance.start' target='finance' />
+
+        <State component={FinanceMachine} id='finance' path='/finance'>
+            <Transition event='finance.done' target='stockNumber' />
+        </State>
+        <State id='maxcare' path='/maxcare'/>
+        <State id='history' component={History} path='/history'>
+            <Transition event='history.done' target='stockNumber' />
+        </State>
+    </State>
+</Machine>
+/*
+    * Duplicate component when A/B testing
+    * Prop check when change is smaller than container
+*/
+
+const Step1 = ({ showBanner }) => (<div>
+    {showBanner && <Banner>{text}</Banner>}
+    <h1>Component B</h1>
+</div>);
+
+<Machine>
+    <State id='app' component={App}>
+        <TradeIn id='trade-in'>
+            {({ abTest }) => <>
+                <Transition cond={abTest.control} event='start.finance' target='step-1-a'/>
+                <Transition cond={abTest.variant} event='start.finance' target='step-1-b'/>
+            </>}
+        </TradeIn>
+        <State id='step-1-a' render={ctx => <Step1 />}/>
+        <State id='step-1-b' render={ctx => <Step1 showBanner />}/>
+    </State>
+</Machine>
+
+
+
+
+// NO, elevates per-container data to global context
+<Machine>
+    <State id='app' component={App}>
+        <TradeIn id='trade-in'>
+            {/* 
+            
+                send('start.finance', { showBanner: abTest.variant });
+            
+            */}
+            <Transition event='start.finance' target='step-1'/>
+        </TradeIn>
+        <State id='step-1' component={Step1}/>
+    </State>
+</Machine>
+
+
+
+const hasCompletedFinance = [...financeCtx];
+const hasCompletedTradeIn = [...tradeInCtx];
+
+const Step1 = ({ hasCompletedFinance, hasCompletedTradeIn }) => (<div>
+    {showBanner && <Banner>{text}</Banner>}
+    <h1>Component B</h1>
+</div>);
+
+
+<Machine>
+    <State id='app' component={App}>
+        <TradeIn id='trade-in'>
+            {/* 
+                send('start.finance');
+            */}
+            <Transition event='start.finance' target='step-1'/>
+        </TradeIn>
+        <State id='step-1' component={Step1}/>
+    </State>
+</Machine>
+
+
+
+
+const Step1 = ({ text }) => (
+    <div>
+        <Button>{text}</Button>
+    </div>
+);
+
+// B
+<Machine>
+    <State id='app' component={App}>
+        <State id='step-1' component={Step1}/>
+    </State>
+</Machine>

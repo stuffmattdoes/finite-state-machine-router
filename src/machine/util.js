@@ -53,11 +53,14 @@ export function deriveStateFromUrl(url, normalized, rootId) {
     let match = {
         params: {},
         path: url,
-        stack: normalized.find(norm => norm.path === url)
+        stack: null
     }
 
     // 1. Exact match, no dynamic URL needed
-    if (match.stack) {
+    const childMatch = normalized.find(norm => norm.path === url);
+
+    if (childMatch) {
+        match.stack = childMatch.stack;
         return match;
     }
 

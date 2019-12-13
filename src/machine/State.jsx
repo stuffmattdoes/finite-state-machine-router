@@ -57,12 +57,12 @@ function State(props) {
         }
     }, [ current ]);
 
-    useMemo(() => {
-        if (match && invoke) {
-            machineSend('invoke.' + id);
-            invoke && invoke(machineContext);
-        }
-    }, []);
+    // useMemo(() => {
+    //     if (match && invoke) {
+    //         machineSend('invoke.' + id);
+    //         invoke && invoke(machineContext);
+    //     }
+    // }, []);
 
     const initialContext = {
         id,
