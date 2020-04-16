@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { createBrowserHistory } from 'history';
 import {
     getChildStateNodes,
@@ -10,17 +10,24 @@ import {
     selectTransition
 } from './util';
 
-export const MachineContext = React.createContext();
+export const MachineContext = React.createContext({});
 MachineContext.displayName = 'Machine';
+
+/*
+    TODO:
+    - Prevent children state entry when making fetch request in parent
+    - also prevent URL from resolving on said fetch request
+*/
+
+// export const createMachine = (id, path) => (props) => Machine({ ...props, id, path });
+
+export const useMachine = () => useContext(MachineContext);
 
 export function Machine ({ children: machineChildren, history, id: machineId, path: machinePath }) {
     // Default history
     if (!history) {
         history = createBrowserHistory({ basename: machinePath });
     }
-
-    // Resolve from URL -> input URL -> get stack -> resolve to initial atomic
-    // Resolve from state -> input state ID -> get stack -> resolve to initial atomic
 
     const { childStates, normalized } = useMemo(() => {
         const childStates = getChildStateNodes(machineChildren);
@@ -29,17 +36,18 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
         return {
             childStates,
             normalized
-        }
+        };
     }, [ machineChildren ]);
 
-    const { initialStack, params } = useMemo(() => {        
+    const { initialStack, params } = useMemo(() => {
         let initialStack = '#' + machineId + '.' + getInitialChildStateNode(childStates).props.id;
         const { params, path, stack, url } = resolveInitial(history.location.pathname, normalized, machineId);
+        history.push(url);
 
         return {
             initialStack: stack || initialStack,
             params
-        }
+        };
     }, []);
 
     const [ state, setState ] = useState({
@@ -51,25 +59,45 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
         const url = injectUrlParams(path, state.params);
 
         if (url !== history.location.pathname) {
-            // console.log('resolvePath', history.location.pathname, 'to', url);
             history.push(url, { stack: state.current });
         }
     }
 
+    /*
+        Todo:
+        populate event queue and execute after render with useEffect, instead of immediately
+    */
     function send(event, data = null) {
         const targetState = selectTransition(event, state.current, normalized);
 
         if (targetState) {
             const params = data && data.params || state.params;
-            const { cond, event: transitionEvent, target: stateId } = targetState;
-            const { path, stack } = resolveToAtomic(
-                normalized.find(norm => norm.id === stateId).stack,
-                normalized
-            );
+            const { cond, event: transitionEvent, target: targetId } = targetState;
+            const targetNode = normalized.find(norm => norm.id === targetId);
+
+            if (targetNode) {
+                const { path, stack } = resolveToAtomic(
+                    targetNode.stack,
+                    normalized
+                );
+
+                //unable to redirect to yourself / loader doesn't dissapear
+                //if (stack === state.current) {
+                //    return;
+                //}
                 
-            // console.log('send', event, data, stateId, path);
-            setState({ current: stack, params });    
-            // resolveState(target);
+                let nextEvent = {
+                    event: event,
+                    data,
+                    targetId,
+                    path
+                };
+
+                console.log('Machine Event Sent:', nextEvent);
+                setState({ current: stack, params });
+            } else {
+                console.error(`Invalid transition target: No target State Node of id "${targetId}" exists.`);
+            }
         }
     }
 
@@ -87,9 +115,11 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
         id: machineId,
         resolvePath,
         send
-    }
+    };
 
     return <MachineContext.Provider value={providerValue}>
         {childStates}
     </MachineContext.Provider>;
 }
+
+export const createMachine = (props) => Machine(props);

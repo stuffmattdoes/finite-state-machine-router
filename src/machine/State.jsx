@@ -10,9 +10,10 @@ export const StateNodeContext = React.createContext({
 StateNodeContext.displayName = 'StateNode';
 
 function State(props) {
-    const { children, component: Component, id, initial, invoke, onEntry, onExit, path, type } = props;
+    const { children, component: Component, id, initial, onEntry, onExit, path, type } = props;
     const machineContext = useContext(MachineContext);
     const { event: machineEvent, current, history, id: machineId, params, resolvePath, send: machineSend } = machineContext;
+    // console.log('current', current, id);
     const { id: parentId, path: parentPath, stack: parentStack } = useContext(StateNodeContext);
     const stack = parentStack ? `${parentStack}.${id}` : `#${machineId}.${id}`;
     const stackPath = path ? parentPath ? parentPath + path : path : parentPath;
@@ -50,19 +51,19 @@ function State(props) {
 
     useEffect(() => {
         if (match) {
-            if (_type === 'atomic') {
-                // console.log('resolvepath');
+            if (_type === 'atomic' && id !== '*') {
                 stackPath ? resolvePath(stackPath) : resolvePath('/');
             }
         }
     }, [ current ]);
 
-    // useMemo(() => {
-    //     if (match && invoke) {
-    //         machineSend('invoke.' + id);
-    //         invoke && invoke(machineContext);
-    //     }
-    // }, []);
+    const interrupted = useMemo(() => {
+        if (match && onEntry) {
+            return !onEntry(machineContext);
+        }
+
+        return false;
+    }, [ match ]);
 
     const initialContext = {
         id,
@@ -83,7 +84,7 @@ function State(props) {
 
     return match ?
         <StateNodeContext.Provider value={initialContext}>
-            { Component ?
+            { Component && !interrupted ?
                 <Component {...componentProps}/>
             : children }
         </StateNodeContext.Provider>

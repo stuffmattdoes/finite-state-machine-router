@@ -1,37 +1,41 @@
 import React from 'react';
 
-export const logger = (state, event, target) => {
-    const { current, id } = state;
-    const date = new Date();
-    const time = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}.${date.getMilliseconds()}`;
+export const getChildStateNodes = (children) => {
+    if (children) {
+        const childrenArr = React.Children.toArray(children);
+        const childrenOfType = childrenArr.filter(c => c.type.name === 'State');
+        // console.log(1, childrenOfType);
+    
+        if (childrenOfType.length) {
+            return childrenOfType;
+        }
 
-    console.group(`%cFSM Router transition: %c${event} %c@ ${time}`, 'color: grey; font-weight: normal', 'font-weight: bold;', 'color: grey; font-weight: normal');
-    console.log(`%cprev state: %c${current}\n`, 'color: grey; font-weight: bold;', 'color: black;');
-    console.log(`%cevent: %c${event}\n`, 'color: blue; font-weight: bold;', 'color: black;');
-    console.log(`%cnext state: %c#${id}.${target}\n`, 'color: green; font-weight: bold;', 'color: black;');
-    console.groupEnd();
+        if (children.props && children.props.children) {
+            return children.props.children.reduce((acc, child) => {
+                acc = acc.concat(getChildrenOfType(child.props.children, 'State'));
+                return acc;
+            }, []);
+        }
+    }
+    
+    return [];
 }
-
-export const fakeUUID = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    let r = Math.random() * 16 | 0;
-    let v = c == 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-});
-
-const paramRegExp = /^:(.+)/;
 export const getChildrenOfType = (children, type) => React.Children.toArray(children).filter(c => c.type.name === type);
-export const getChildStateNodes = (children) => getChildrenOfType(children, 'State');
+export const getInitialChildStateNode = (stateNodes) => stateNodes.find(c => c.props.initial) || stateNodes[0];
 export const isCurrentStack = (id, stack) => !!stack.split('.').find(state => state === id);
 export const isExactStack = (id, stack) => stack.split('.').pop() === id;
-export const isDynamic = segment => paramRegExp.test(segment);
+export const isDynamicSegment = segment => /^:(.+)/.test(segment);
+export const isDynamicPath = segment => /\:/g.test(segment);
 export const isRootSemgent = url => url.slice(1) === '';
 export const isRootStack = stack => !stack.match(/\./g);
+export const isNotFound = stack => stack.split('.').pop() === '*';
 export const segmentize = url => url.replace(/(^\/+|\/+$)/g, '').split('/');
 
 export function injectUrlParams(path, params) {
     // console.log('injectUrlParams', path, params);
+
     const url = segmentize(path).map(seg => {
-        if (isDynamic(seg)) {
+        if (isDynamicSegment(seg)) {
             const param = seg.replace(':', '');
 
             if (Object.keys(params).includes(param)) {
@@ -43,9 +47,9 @@ export function injectUrlParams(path, params) {
         }
 
         return seg;
-    });
+    }).join('/');
 
-    return '/' + url.join('/');
+    return '/' + url + (window.location.search ? window.location.search : '');
 }
 
 export function deriveStateFromUrl(url, normalized, rootId) {
@@ -60,6 +64,7 @@ export function deriveStateFromUrl(url, normalized, rootId) {
     const childMatch = normalized.find(norm => norm.path === url);
 
     if (childMatch) {
+        match.path = childMatch.path;
         match.stack = childMatch.stack;
         return match;
     }
@@ -70,22 +75,14 @@ export function deriveStateFromUrl(url, normalized, rootId) {
         return match;
     }
 
-    // 1.2 pre-emptively assume we don't find a match
-    // match.stack = '#' + rootId + '.*';
-    const notFound = normalized.find(norm => norm.id === '*');
-
-    if (notFound) {
-        match.stack = notFound.stack;
-    }
-
     // 2. No exact match yet, compare to dynamic URLs for match
     const dynamicPaths = normalized.filter(norm => norm.path && norm.path.match(/\/:/g)).map(norm => norm.path);
 
     if (dynamicPaths.length) {
-        // 2.1 Split url && route map into arrays, compare 1 by 1
+        // 2.1 Split url && child paths into arrays, compare 1 by 1
         const urlSegments = segmentize(url);
         // let params = {};
-        const route = dynamicPaths.find(p => {
+        const dynamicPathMatch = dynamicPaths.find(p => {
             const pathSegments = segmentize(p);
             match.params = {};
 
@@ -94,10 +91,10 @@ export function deriveStateFromUrl(url, normalized, rootId) {
             }
 
             // TODO
-            // Route doesn't parse params if complete route match is not found
+            // path doesn't parse params if complete path match is not found
             return !pathSegments.map((pathSegment, i) => {
                 // 2.2 infer parameter from URL from first segment array that matches in length
-                if (isDynamic(pathSegment)) {
+                if (isDynamicSegment(pathSegment)) {
                     match.params[pathSegment.slice(1)] = urlSegments[i];
                     return true;
                 // 2.3 if path segment matches url segment exactly, proceed
@@ -109,11 +106,16 @@ export function deriveStateFromUrl(url, normalized, rootId) {
             }).includes(false);
         });
 
-        if (route) {
+        if (dynamicPathMatch) {
             // 3. finally, return the stack that corresponds to the URL
-            const currentStack = normalized.find(norm => norm.path === route).stack;
-            match.stack = currentStack;
+            match.path = dynamicPathMatch;
+            match.stack = normalized.find(norm => norm.path === dynamicPathMatch).stack;;
         }
+    }
+
+    // Finally, if no match, resolve to not found    
+    if (!match.stack) {
+        match.stack = '#' + rootId + '.*';
     }
 
     return match;
@@ -159,10 +161,6 @@ function getAllRoutes(stateNodes) {
     }, {});
 }
 
-export function getInitialChildStateNode(stateNodes) {
-    return stateNodes.find(c => c.props.initial) || stateNodes[0];
-}
-
 export function normalizeChildStateProps(stateNodes, rootId) {
     function normalizeLoop(stateNodes) {
         let initIndex = stateNodes.findIndex(s => s.props.initial);
@@ -170,6 +168,7 @@ export function normalizeChildStateProps(stateNodes, rootId) {
 
         return stateNodes.reduce((acc, stateNode, i) => {
             const childStates = getChildStateNodes(stateNode.props.children);
+            // console.log(stateNode.props.id, stateNode, childStates);
             const { id, path = null, type } = stateNode.props;
             const transitions = getChildrenOfType(stateNode.props.children, 'Transition')
                 .map(({ props }) => ({
@@ -237,17 +236,27 @@ export function resolveToAtomic(stack, normalized) {
     return initial;
 }
 
-export function resolveInitial(pathname, normalized, machineId) {
-    const { params, path: currentPath, stack: currentStack } = deriveStateFromUrl(pathname, normalized, machineId);
-    const { path, stack } = resolveToAtomic(currentStack, normalized);
-    const url = injectUrlParams(path, params);
-
-    return {
-        params,
-        path,
-        stack,
+export function resolveInitial(url, normalized, machineId) {
+    let initialProps = {
+        params: null,
+        path: null,
+        stack: null,
         url
     }
+
+    const { params, path: currentPath, stack: currentStack } = deriveStateFromUrl(url, normalized, machineId);
+    initialProps.params = params;
+    initialProps.path = currentPath;
+    initialProps.stack = currentStack;
+    const { path, stack } = resolveToAtomic(currentStack, normalized);
+    
+    if (!isNotFound(stack)) {
+        initialProps.path = path;
+        initialProps.stack = stack;
+        initialProps.url = injectUrlParams(path, params);
+    }
+
+    return initialProps;
 }
 
 export function selectTransition(event, stack, normalized) {
@@ -255,10 +264,10 @@ export function selectTransition(event, stack, normalized) {
         return null;
     }
 
-    const activeTransitions = normalized.find(norm => norm.stack === stack).transitions;
+    const availableTransitions = normalized.find(norm => norm.stack === stack).transitions;
 
-    if (activeTransitions.length) {
-        const activeTransition = activeTransitions.find(({ cond, event: transitionEvent, target }) => 
+    if (availableTransitions.length) {
+        const activeTransition = availableTransitions.find(({ cond, event: transitionEvent, target }) => 
             transitionEvent === event && cond === null || cond === true);
         if (activeTransition) {
             return activeTransition;
