@@ -3,7 +3,7 @@ import React, { useContext } from 'react';
 import { MachineContext } from './Machine';
 import { StateNodeContext } from './State';
 
-export default function Link({ children, className, disabled, event: machineEvent, href = '#', onClick, replace }) {
+function Link({ children, className, disabled, event: machineEvent, href = '#', onClick, replace }) {
     const { history } = useContext(MachineContext);
     const { send } = useContext(StateNodeContext);
 
@@ -33,3 +33,7 @@ export default function Link({ children, className, disabled, event: machineEven
         { 'disabled': disabled }
     ])} href={href} onClick={handleClick}>{children}</a>
 }
+
+Link.displayName = 'Link';
+
+export default Link;

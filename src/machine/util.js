@@ -3,8 +3,7 @@ import React from 'react';
 export const getChildStateNodes = (children) => {
     if (children) {
         const childrenArr = React.Children.toArray(children);
-        const childrenOfType = childrenArr.filter(c => c.type.name === 'State');
-        // console.log(1, childrenOfType);
+        const childrenOfType = childrenArr.filter(c => c.type.displayName === 'State');
     
         if (childrenOfType.length) {
             return childrenOfType;
@@ -20,7 +19,7 @@ export const getChildStateNodes = (children) => {
     
     return [];
 }
-export const getChildrenOfType = (children, type) => React.Children.toArray(children).filter(c => c.type.name === type);
+export const getChildrenOfType = (children, type) => React.Children.toArray(children).filter(c => c.type.displayName === type);
 export const getInitialChildStateNode = (stateNodes) => stateNodes.find(c => c.props.initial) || stateNodes[0];
 export const isCurrentStack = (id, stack) => !!stack.split('.').find(state => state === id);
 export const isExactStack = (id, stack) => stack.split('.').pop() === id;

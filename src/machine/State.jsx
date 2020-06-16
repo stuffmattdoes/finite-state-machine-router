@@ -91,4 +91,6 @@ function State(props) {
     : null;
 }
 
+State.displayName = 'State';
+
 export default State;

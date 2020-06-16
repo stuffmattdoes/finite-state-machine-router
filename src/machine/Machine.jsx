@@ -21,21 +21,24 @@ MachineContext.displayName = 'Machine';
 
 // export const createMachine = (id, path) => (props) => Machine({ ...props, id, path });
 
-export const useMachine = () => useContext(MachineContext);
+export const useMachine = () => {
+    const { current, history, id, params, send } = useContext(MachineContext);
+    return [{ current, history, id, params }, send ];
+}
 
-export function Machine ({ children: machineChildren, history, id: machineId, path: machinePath }) {
+function Machine ({ children: machineChildren, history, id: machineId, path: machinePath }) {
     // Default history
     if (!history) {
         history = createBrowserHistory({ basename: machinePath });
     }
 
     const { childStates, normalized } = useMemo(() => {
-        const childStates = getChildStateNodes(machineChildren);
-        const normalized = normalizeChildStateProps(childStates, machineId);
+        const _childStates = getChildStateNodes(machineChildren);
+        const _normalized = normalizeChildStateProps(_childStates, machineId);
 
         return {
-            childStates,
-            normalized
+            childStates: _childStates,
+            normalized: _normalized
         };
     }, [ machineChildren ]);
 
@@ -122,4 +125,7 @@ export function Machine ({ children: machineChildren, history, id: machineId, pa
     </MachineContext.Provider>;
 }
 
+Machine.displayName = 'Machine';
+
 export const createMachine = (props) => Machine(props);
+export default Machine;
