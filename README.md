@@ -153,3 +153,6 @@ const BrowseFetch = ({ children, history, machine: { send }, match }) => {
 ### Reference:
 - [WC4 SCXML Specification](https://www.w3.org/TR/scxml/)
 - [David Harel's "Statecharts: A Visual Formalism for Complex Systems](http://www.inf.ed.ac.uk/teaching/courses/seoc/2005_2006/resources/statecharts.pdf)
+
+## License
+MIT License Copyright (c) 2020-present, Matthew Morrison
