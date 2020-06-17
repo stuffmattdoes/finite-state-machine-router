@@ -26,31 +26,30 @@ export const useMachine = () => {
     return [{ current, history, id, params }, send ];
 }
 
-function Machine ({ children: machineChildren, history, id: machineId, path: machinePath }) {
-    // Default history
-    if (!history) {
-        history = createBrowserHistory({ basename: machinePath });
-    }
+function Machine ({ children: machineChildren, history: machineHistory, id: machineId, path: machinePath }) {
+    let history = useMemo(() => {
+        if (!machineHistory) {
+            return createBrowserHistory({ basename: machinePath });
+        }
+    }, [ machineHistory ]);
 
-    const { childStates, normalized } = useMemo(() => {
+    const [ childStates, normalized ] = useMemo(() => {
         const _childStates = getChildStateNodes(machineChildren);
         const _normalized = normalizeChildStateProps(_childStates, machineId);
 
-        return {
-            childStates: _childStates,
-            normalized: _normalized
-        };
+        return [ _childStates, _normalized ];
     }, [ machineChildren ]);
 
-    const { initialStack, params } = useMemo(() => {
+    const [ initialStack, params ] = useMemo(() => {
         let initialStack = '#' + machineId + '.' + getInitialChildStateNode(childStates).props.id;
-        const { params, path, stack, url } = resolveInitial(history.location.pathname, normalized, machineId);
-        history.push(url);
 
-        return {
-            initialStack: stack || initialStack,
-            params
-        };
+        const { params, path, stack, url } = resolveInitial(history.location.pathname, normalized, machineId);
+
+        if (history.location.pathname !== url) {
+            history.push(url);
+        }
+
+        return [ stack || initialStack, params ];
     }, []);
 
     const [ state, setState ] = useState({

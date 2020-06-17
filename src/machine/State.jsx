@@ -24,16 +24,16 @@ function State(props) {
         url: history.location.pathname
     } : false;
 
-    const [ _type, transitions ] = useMemo(() => {
+    const _type = useMemo(() => {
         let _type = type;
         const childStates = getChildStateNodes(children);
-        const transitions = getChildrenOfType(children, 'Transition').map(({ props }) => ({
-            cond: props.cond || null,
-            event: props.event,
-            sendid: id,
-            target: props.target,
-            type: 'internal'
-        }));
+        // const transitions = getChildrenOfType(children, 'Transition').map(({ props }) => ({
+        //     cond: props.cond || null,
+        //     event: props.event,
+        //     sendid: id,
+        //     target: props.target,
+        //     type: 'internal'
+        // }));
         // const initialChild = childStates.find(c => c.props.initial) || childStates[0];
 
         if (_type !== 'parallel') {
@@ -46,7 +46,7 @@ function State(props) {
             }
         }
 
-        return [ _type, transitions ];
+        return _type;
     }, [ children ]);
 
     useEffect(() => {
@@ -76,7 +76,6 @@ function State(props) {
         history,
         machine: {
             current,
-            // transitions,
             send: machineSend
         },
         match
