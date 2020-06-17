@@ -1,8 +1,12 @@
 {
   "name": "fsm-router",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "dependencies": {
     "history": "^4.10.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stuffmattdoes/finite-state-machine-router"
   },
   "scripts": {
     "test": "echo nothing to test!"

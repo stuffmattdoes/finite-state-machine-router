@@ -17,8 +17,9 @@ In front-end web development we'll use FSMs to render the proper user interface.
 ```jsx
 import { Link, Machine, State, Transition } from 'fsm-router';
 
-// index.jsx
 <Machine id='wood' path='/wood'>
+    <Transition event='error' target='error'/>
+    <Transition event='not-found' target='not-found'/>
     <State id='home' component={Home}>
         <Transition event='browse' target='browse'>
     </State>
@@ -30,7 +31,6 @@ import { Link, Machine, State, Transition } from 'fsm-router';
     <State id='not-found' component={NotFound}/>
 </Machine>
 
-// Home.jsx
 // `history`, `machine`, & `match` are fsm-router-specific
 const Home = ({ children, history, machine: { send }, match }) =>
     <div>
@@ -38,7 +38,6 @@ const Home = ({ children, history, machine: { send }, match }) =>
         <button onClick={event => send('browse')}>Browse Wood Selection</Button>
     </div>
 
-// Browse.jsx
 const Browse = ({ children, history, machine, match }) => {
     const selection = [
         {
@@ -70,7 +69,6 @@ const Browse = ({ children, history, machine, match }) => {
     </div>
 }
 
-// Species.jsx
 const Species = ({ childre, history, machine, match }) => {
     const [ species, set ] = useCustomStoreHook();
 
