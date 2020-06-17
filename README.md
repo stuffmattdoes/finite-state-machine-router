@@ -82,16 +82,3 @@ Simply prefix a semicolon onto your `path` attribute `:` like so:
 ### Reference:
 - [WC4 SCXML Specification](https://www.w3.org/TR/scxml/)
 - [David Harel's "Statecharts: A Visual Formalism for Complex Systems](http://www.inf.ed.ac.uk/teaching/courses/seoc/2005_2006/resources/statecharts.pdf)
-
-## Todo:
-Check out [proposals](./docs/Proposals.md).
-- [x] ~~Recursively render all sub `<State/>`~~
-- [x] ~~Resolve all `initial` states on first render. What to do if `initial` state is not also `atomic`?~~
-    * ~~Resolve all states until `atomic` is reached, as per SCXML W3C spec.~~
-- [x] ~~Update browser URL from state (if `path` prop exists on `<State/>` component)~~
-- [x] ~~Derive initial state from URL (direct nav, prev/next)~~
-- [ ] Figure out parallel states
-- [ ] Typescript
-- [ ] Deriving state from URL resolves to all states with matching `path` prop *except* for `atomic` state, which resolve to `initial`.
-- [ ] `Final` state types
-- [ ] `History` state types?
