@@ -4,10 +4,10 @@ A finite state machine router for React.
 ## Summary
 A **finite state machine (FSM)** is mathematical concept used to describe a flow of information from one layout (or *state*) to another according to a set of rules (or *transitions*). FSMs are described as "a limited number of states and corresponding transitions from these states into other states."
 
-In front-end web development we'll use FSMs to render the proper user interface. Furthermore, we'll integrate our FSM with a routing mechanism so our URLs and state resolution can be handled automatically - hence **Finite State Machine Router (FSMR)**!
+In front-end web development we'll use FSMs to render the proper user interface. Furthermore, we'll integrate our FSM with a routing mechanism so our URLs and state resolution can be handled automatically - hence **Finite State Machine Router**!
 
 ## Rules:
-1. **Always Atomic** - State machines always resolve to an *atomic node* (states that have no child states).
+1. **Always Atomic** - State machine always resolves to an *atomic node* (states that have no child states).
 2. **No Conditions** - State machine assumes all data is present to render a state it and its entire lineage (down to an *atomic node*, as per rule #1). Having no conditional rendering logic within components lends itself well to determinism, making our app more predictable.
 3. **Events Rule** - Favor even emission instead of URL pushes in order to change states. Deriving an atomic state lineage from a URL is achievable, but not favorable.
 4. **Order Matters** - When no `initial` state is declared, the first state in document order is rendered. Similarly, when multiple transitions may apply to an emitted event, the first one in document order is selected while discarding the rest.
