@@ -1,4 +1,4 @@
-# <Transition/>
+# `<Transition/>`
 `<Transition/>` component denotes the rules by which our state machine will allow changing of state. `<Transition/>` is a renderless component.
 
 ## Properties

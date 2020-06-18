@@ -1,4 +1,4 @@
-# <State/>
+# `<State/>`
 `<State/>` components are the building block of our application. Everything our user will see is a combination of states, with most supplied with React Components to render. `<State/>` components contain unique naming and routing information for the entire state machine to follow when applicable.
 
 ## Properties

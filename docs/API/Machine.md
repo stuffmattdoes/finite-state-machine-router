@@ -1,4 +1,4 @@
-# <Machine/>
+# `<Machine/>`
 `<Machine/>` component is the top-lever wrapper compnoent. It contains unique naming and routing information for the rest of the state machine. The `<Machine/>` component can only ever have one child active at a time.
 
 ## Properties
