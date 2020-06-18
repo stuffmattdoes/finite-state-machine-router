@@ -40,3 +40,4 @@ Check out [proposals](./docs/Proposals.md).
 - [ ] `History` state types?
 - [ ] `onEntry` & `onExit`
 - [ ] Simplify `type` to `parallel` since all other types are derived automatically
+- [ ] Unit tests!

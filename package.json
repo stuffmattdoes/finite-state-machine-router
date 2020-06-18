@@ -1,9 +1,10 @@
 {
   "name": "fsm-router",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "dependencies": {
     "history": "^4.10.1"
   },
+  "keywords": [ "finite state machine", "state machine", "finite state machine router", "fsm", "router", "react"],
   "repository": {
     "type": "git",
     "url": "https://github.com/stuffmattdoes/finite-state-machine-router"
