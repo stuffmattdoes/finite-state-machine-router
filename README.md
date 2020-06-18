@@ -21,7 +21,7 @@ import { Link, Machine, State, Transition } from 'fsm-router';
     <Transition event='error' target='error'/>
     <Transition event='not-found' target='not-found'/>
     <State id='home' component={Home}>
-        <Transition event='browse' target='browse'>
+        <Transition event='browse' target='browse'/>
     </State>
     <State id='browse-wrapper' path='/browse'>
         <State id='browse' component={Browse}/>
