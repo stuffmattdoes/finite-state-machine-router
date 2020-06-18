@@ -35,7 +35,7 @@ import { Link, Machine, State, Transition } from 'fsm-router';
 const Home = ({ children, history, machine: { send }, match }) =>
     <div>
         <h1>Intro Page!</h1>
-        <button onClick={event => send('browse')}>Browse Wood Selection</Button>
+        <button onClick={event => send('browse')}>Browse Wood Selection</button>
     </div>
 
 const Browse = ({ children, history, machine, match }) => {
