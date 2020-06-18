@@ -89,7 +89,10 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
                     path
                 };
 
-                // console.log('Machine Event Sent:', nextEvent);
+                if (process.env.NODE_ENV === 'development') {
+                    console.log('Machine Event Sent:', nextEvent);
+                }
+
                 setState({ current: stack, params });
             } else {
                 console.error(`Invalid transition target: No target State Node of id "${targetId}" exists.`);
