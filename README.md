@@ -86,8 +86,7 @@ Here's how we're going to organize our API requests:
 2. To re-dispatch the API request in `App.jsx`, we can click the "refresh" button.
 3. Once the user lands on `/browse`, we're going to make another API request in our `BrowseFetch` component.
 
-Because we don't want to include conditional render logic in our 
-To uphold our rules, we'll want to first display loaders within each component that we're fetching data. Once resolved, we'll simply `send` machine events to transition into our data-rich components.
+Because we don't want to include conditional render logic in our component (upholding **No Conditions** rule), we'll want to initially render loaders within each component that we're fetching data. Once resolved, we'll simply `send` machine events to transition from our loader components into our data-rich components.
 
 ```jsx
 <Machine id='wood' path='/wood'>
@@ -148,10 +147,10 @@ const BrowseFetch = ({ children, history, machine: { send }, match }) => {
 }
 ```
 ## API
-- [<Machine/>](./docs/API/Machine.md)
-- [<State/>](./docs/API/State.md)
-- [<Transition/>](./docs/API/Transition.md)
-- [<Link/>](./docs/API/Link.md)
+- [`<Machine/>`](./docs/API/Machine.md)
+- [`<State/>`](./docs/API/State.md)
+- [`<Transition/>`](./docs/API/Transition.md)
+- [`<Link/>`](./docs/API/Link.md)
 
 ## References:
 - [WC4 SCXML Specification](https://www.w3.org/TR/scxml/)
