@@ -49,7 +49,7 @@ const Home = ({ children, history, machine: { send }, match }) =>
         <button onClick={event => send('browse')}>Browse Wood Selection</button>
     </div>
 ```
-Notice the components props. You should be familiar with `children`, React's default argument for allowing hierarchy. What's new are `history`, `machine`, and `match`, which are all populated automatically when our component is supplied to `<State component={thisComponent}/>`.
+Notice the components props. You should be familiar with `children`, React's default argument for allowing hierarchy. What's new are `history`, `machine`, and `match`, which are all populated automatically when our component is supplied to `<State component={Home}/>`.
 
 Pay special attention to `machine.send()`. This is how we dispatch events to our state machine in order to activate transitions. In this particular example, `send('browse')` would cause our state machine to exit the `home` state and enter the `browse` state. The URL would update automatically according to our `path` attributes.
 
@@ -65,12 +65,12 @@ const Browse = ({ children, history, machine, match }) => {
         },
         {
             summary: 'Pine is a common softwood, often characterized as having many knots.',
-            id: 'pine,
+            id: 'pine',
             species: 'Pine'
         },
         {
             summary: 'Poplar wood is a lightweight, softwood and straight-grained, making it ideal for small kit projects.',
-            id: 'poplar,
+            id: 'poplar',
             species: 'Poplar'
         }
     ];
