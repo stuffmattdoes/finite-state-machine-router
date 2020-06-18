@@ -1,24 +1,25 @@
 # Machine flow:
 [x] Derive target state node from URL (including dynamic paths)
-    1. Normalize child tree
-        * Generate state node -> URL map
-        * Generate stack for all state nodes
-        * Derive initial stack
-    2. If match, resolve to corresponding state
-    3. If no match, begin to parse dynamic state node paths (prefixed with :) for match
-    4. If still no match, 404
-        *  If attemtping to resolve to a dynamic path without proper url param meta, throw error
+    [x] 1. Normalize child tree
+        [x] * Generate state node -> URL map
+        [x] * Generate stack for all state nodes
+        [x] * Derive initial stack
+    [x] 2. If match, resolve to corresponding state
+    [x] 3. If no match, begin to parse dynamic state node paths (prefixed with :) for match
+    [x] 4. If still no match, 404
+        [x] *  If attemtping to resolve to a dynamic path without proper url param meta, throw error
 [x] Resolve all initial children from target/active state node to atomic state node
-    1. Resolve to target state node from URL (steps listed above)
-    2. If target node is not atomic, resolve to every child marked "initial"
-    3. If no child is marked initial, resolve to first in document order
-[ ] Update URL from atomic node
-[ ] Resolve to target state upon event
-    1. First check most deeply-nested active atomic state for matching transition.
-    2. If no match, parse ancestors for matching target
-    3. If match, transition to target state node (& update URL). Otherwise, discard event
-        * If attemtping to resolve to a dynamic path without proper url param meta, throw error
-        * There are no limitations on transition targets. Any state can transition to any other state.
+    [x] 1. Resolve to target state node from URL (steps listed above)
+    [x] 2. If target node is not atomic, resolve to every child marked "initial"
+    [x] 3. If no child is marked initial, resolve to first in document order
+[x] Update URL from atomic node
+[x] Resolve to target state upon event
+    [x] 1. First check most deeply-nested active atomic state for matching transition.
+    [x] 2. If no match, parse ancestors for matching target
+    [x] 3. If match, transition to target state node (& update URL). Otherwise, discard event
+        [x] * If attemtping to resolve to a dynamic path without proper url param meta, throw error
+        [x] * There are no limitations on transition targets. Any state can transition to any other state.
+[ ] Emit event when Machine does stuff, like resolving to state from URL or resolving to atomic state
 
 Thought: If all the above steps were events:
 1. resolve.state_from_url
@@ -35,6 +36,7 @@ Check out [proposals](./docs/Proposals.md).
 - [x] ~~Derive initial state from URL (direct nav, prev/next)~~
 - [ ] Figure out parallel states
 - [ ] Typescript
-- [ ] Deriving state from URL resolves to all states with matching `path` prop *except* for `atomic` state, which resolve to `initial`.
 - [ ] `Final` state types?
 - [ ] `History` state types?
+- [ ] `onEntry` & `onExit`
+- [ ] Simplify `type` to `parallel` since all other types are derived automatically

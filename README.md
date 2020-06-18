@@ -147,6 +147,11 @@ const BrowseFetch = ({ children, history, machine: { send }, match }) => {
     return children;
 }
 ```
+## API
+- [<Machine/>](./docs/API/Machine.md)
+- [<State/>](./docs/API/State.md)
+- [<Transition/>](./docs/API/Transition.md)
+- [<Link/>](./docs/API/Link.md)
 
 ## References:
 - [WC4 SCXML Specification](https://www.w3.org/TR/scxml/)

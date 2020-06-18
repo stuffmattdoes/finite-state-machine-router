@@ -13,12 +13,6 @@ import {
 export const MachineContext = React.createContext({});
 MachineContext.displayName = 'Machine';
 
-/*
-    TODO:
-    - Prevent children state entry when making fetch request in parent
-    - also prevent URL from resolving on said fetch request
-*/
-
 // export const createMachine = (id, path) => (props) => Machine({ ...props, id, path });
 
 export const useMachine = () => {
@@ -83,7 +77,7 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
                     normalized
                 );
 
-                //unable to redirect to yourself / loader doesn't dissapear
+                // unable to redirect to yourself / loader doesn't dissapear
                 //if (stack === state.current) {
                 //    return;
                 //}

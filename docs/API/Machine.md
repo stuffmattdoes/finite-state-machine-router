@@ -1,19 +1,5 @@
-# Machine
-**Reference:** [SCXML W3C Specification - SCXML](https://www.w3.org/TR/scxml/#state)
-
->The top-level wrapper element, which carries version information. The actual state machine consists of its children. Note that only one of the children is active at any one time.
-
-## State resolution
-Upon initialization of our `Machine` wrapper component, the active child state is determined in this order:
-- If the URL pathname (such as `//localhost:3000/example/pathname)` is present (obtained from (History)[https://github.com/ReactTraining/history/blob/master/docs/GettingStarted.md#properties] package's `history.location.pathname`), the children states with matching `path` properties will be resolve until the URL pathname tree is depleted. If the resultant state is not of type `atomic`, then each `initial` child state is resolved.
-- If a URL pathname is not present or does not apply, each `initial` child state is resolved until a state of type `atomic` is reached.
-
-## Signature
-```jsx
-<Machine {...props}>
-    {children}
-</Machine>
-```
+# <Machine/>
+`<Machine/>` component is the top-lever wrapper compnoent. It contains unique naming and routing information for the rest of the state machine. The `<Machine/>` component can only ever have one child active at a time.
 
 ## Properties
 &ast; = Required property
@@ -38,5 +24,6 @@ Upon initialization of our `Machine` wrapper component, the active child state i
     </tr>
 </table>
 
-## Children
-- [<State ... />](./State.md)
+## Reference
+[SCXML W3C Specification - SCXML](https://www.w3.org/TR/scxml/#scxml)
+>The top-level wrapper element, which carries version information. The actual state machine consists of its children. Note that only one of the children is active at any one time.

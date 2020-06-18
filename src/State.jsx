@@ -56,13 +56,13 @@ function State(props) {
         }
     }, [ current ]);
 
-    const interrupted = useMemo(() => {
-        if (match && onEntry) {
-            return !onEntry(machineContext);
-        }
+    // const interrupted = useMemo(() => {
+    //     if (match && onEntry) {
+    //         return !onEntry(machineContext);
+    //     }
 
-        return false;
-    }, [ match ]);
+    //     return false;
+    // }, [ match ]);
 
     const initialContext = {
         id,
@@ -82,7 +82,8 @@ function State(props) {
 
     return match ?
         <StateNodeContext.Provider value={initialContext}>
-            { Component && !interrupted ?
+            {/* { Component && !interrupted ? */}
+            { Component ?
                 <Component {...componentProps}/>
             : children }
         </StateNodeContext.Provider>
