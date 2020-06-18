@@ -49,9 +49,9 @@ const Home = ({ children, history, machine: { send }, match }) =>
         <button onClick={event => send('browse')}>Browse Wood Selection</button>
     </div>
 ```
-Notice the components props. You should be familiar with `children`, React's default argument for allowing hierarchy. What's new are `history`, `machine`, and `match`, which are all populated automatically when supplied to `<State component={thisComponent}/>`.
+Notice the components props. You should be familiar with `children`, React's default argument for allowing hierarchy. What's new are `history`, `machine`, and `match`, which are all populated automatically when our component is supplied to `<State component={thisComponent}/>`.
 
-Pay special attention to `machine.send()`. This is how we dispatch events to our state machine in order to activate transitions. In this particular example, `send('browse')` would cause out state machine to exit the `home` state and enter the `browse` state. The URL would update automatically according to our `path` attributes.
+Pay special attention to `machine.send()`. This is how we dispatch events to our state machine in order to activate transitions. In this particular example, `send('browse')` would cause our state machine to exit the `home` state and enter the `browse` state. The URL would update automatically according to our `path` attributes.
 
 Let's keep going.
 ```jsx
