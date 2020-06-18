@@ -17,6 +17,7 @@ In front-end web development we'll use FSMs to render the proper user interface.
 
 First, let's compose our app in our standard `index.jsx`
 ```jsx
+// Index.jsx
 import { Link, Machine, State, Transition } from 'fsm-router';
 
 <Machine id='wood' path='/wood'>
@@ -41,7 +42,7 @@ What's going on here?
 
 Now, let's write some components.
 ```jsx
-// `history`, `machine`, & `match` are fsm-router-specific
+// Home.jsx
 const Home = ({ children, history, machine: { send }, match }) =>
     <div>
         <h1>Intro Page!</h1>
@@ -54,6 +55,7 @@ Pay special attention to `machine.send()`. This is how we dispatch events to our
 
 Let's keep going.
 ```jsx
+// Browse.jsx
 const Browse = ({ children, history, machine, match }) => {
     const selection = [
         {
@@ -88,6 +90,7 @@ const Browse = ({ children, history, machine, match }) => {
 Although we want to favor emitting events instead of pushign URLs, we can still push URLs. To do this, we'll use the `<Link/>` component. This is utlimately a wrapper for the native `<a/>` browser anchor tag, but uses `history.push` to update URls instead of replace. This is to prevent page reloads on URL changes.
 
 ```jsx
+// Species.jsx
 const Species = ({ childre, history, machine, match }) => {
     const [ species, set ] = useCustomStoreHook();
 
@@ -116,6 +119,7 @@ Here's how we're going to organize our API requests:
 Because we don't want to include conditional render logic in our component (upholding **No Conditions** rule), we'll want to initially render loaders within each component that we're fetching data. Once resolved, we'll simply `send` machine events to transition from our loader components into our data-rich components.
 
 ```jsx
+// Index.jsx
 <Machine id='wood' path='/wood'>
     <State id='app' component={App}>
         <Transition event='fetch' target='app-loader'/>
@@ -139,6 +143,7 @@ Because we don't want to include conditional render logic in our component (upho
     <State id='not-found' component={NotFound}/>
 </Machine>
 
+// App.jsx
 const App = ({ children, history, machine: { send }, match }) => {
     const _fetch = () => {
         fetchSomeData()
@@ -161,6 +166,7 @@ const App = ({ children, history, machine: { send }, match }) => {
     </div>
 }
 
+// BrowseFetch.jsx
 const BrowseFetch = ({ children, history, machine: { send }, match }) => {
     useEffect(() => {
         fetchSomeMoreData()
