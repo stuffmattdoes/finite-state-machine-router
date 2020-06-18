@@ -120,46 +120,6 @@ export function deriveStateFromUrl(url, normalized, rootId) {
     return match;
 }
 
-// Unused
-function getAllStacks(stateNodes) {
-    return stateNodes.reduce((acc, child) => {
-        const childStates = getChildStateNodes(child.props.children);
-        const grandChildStacks = getAllStacks(childStates);
-        const { id } = child.props;
-
-        acc.push('.' + id);
-        
-        if (grandChildStacks.length) {
-            grandChildStacks.forEach(gcs => acc.push('.' + id + gcs));
-        }
-
-        return acc;
-    }, []);
-}
-
-// Unused
-function getAllRoutes(stateNodes) {
-    return stateNodes.reduce((acc, child) => {
-        const childStates = getChildStateNodes(child.props.children);
-        const grandChildRoutes = getAllRoutes(childStates);
-        const grandChildRoutesArr = Object.keys(grandChildRoutes);
-        const { id, path } = child.props;
-
-        if (path) {
-            acc[path] = '.' + id;
-        }
-        
-        if (grandChildRoutesArr.length) {
-            grandChildRoutesArr.forEach(route => acc[path ?
-                path + route
-                : route] = '.' + id + grandChildRoutes[route]
-            );
-        }
-
-        return acc;
-    }, {});
-}
-
 export function normalizeChildStateProps(stateNodes, rootId) {
     function normalizeLoop(stateNodes) {
         let initIndex = stateNodes.findIndex(s => s.props.initial);

@@ -2,14 +2,29 @@
   "name": "fsm-router",
   "version": "0.2.14",
   "dependencies": {
-    "history": "^4.10.1"
+    "history": "^4.10.1",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
   },
-  "keywords": [ "finite state machine", "state machine", "finite state machine router", "fsm", "scxml", "router" ],
+  "keywords": [
+    "finite state machine",
+    "finite state machine router",
+    "fsm",
+    "router",
+    "scxml",
+    "state machine"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/stuffmattdoes/finite-state-machine-router"
   },
   "scripts": {
-    "test": "echo nothing to test!"
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.10.2",
+    "@babel/preset-react": "^7.10.1",
+    "babel-jest": "^26.0.1",
+    "jest": "^26.0.1"
   }
 }
