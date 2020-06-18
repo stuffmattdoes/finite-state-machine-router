@@ -7,7 +7,7 @@ import {
     isCurrentStack,
     isExactStack,
     isDynamicSegment,
-    isDynamicPath,
+    // isDynamicPath,
     isRootSemgent,
     isRootStack,
     isNotFound,
@@ -19,13 +19,5 @@ import {
 } from './util';
 
 describe('utility functions', () => {
-    describe('isDynamicSegment', () => {
-        test('Identifies dynamic URL segments', () => {
-            expect(isDynamicSegment(':isDynamic')).toBe(true);
-        });
-
-        test('Ignores static URL segments', () => {
-            expect(isDynamicSegment('is-not-dynamic')).toBe(false);
-        });
-    });
+    
 });
