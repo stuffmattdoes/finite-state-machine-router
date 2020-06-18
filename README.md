@@ -34,6 +34,11 @@ import { Link, Machine, State, Transition } from 'fsm-router';
 </Machine>
 ```
 
+What's going on here?
+- `<Machine/>` is our wrapper that contains unique naming & URL base pathing for our app.
+- `<State/>` conveys the UI components in a familiar tree hierarchy. Most of the time, you'll supply a `component` attribute which accepts a React component.
+- `<Transition/>` outline the rules on how we get from one `<State/>` to another. They are activated by emitting `events`, and are only valid when inside an active `<State/>` lineage.
+
 Now, let's write some components.
 ```jsx
 // `history`, `machine`, & `match` are fsm-router-specific
@@ -42,22 +47,28 @@ const Home = ({ children, history, machine: { send }, match }) =>
         <h1>Intro Page!</h1>
         <button onClick={event => send('browse')}>Browse Wood Selection</button>
     </div>
+```
+Notice the components props. You should be familiar with `children`, React's default argument for allowing hierarchy. What's new are `history`, `machine`, and `match`, which are all populated automatically when supplied to `<State component={thisComponent}/>`.
 
+Pay special attention to `machine.send()`. This is how we dispatch events to our state machine in order to activate transitions. In this particular example, `send('browse')` would cause out state machine to exit the `home` state and enter the `browse` state. The URL would update automatically according to our `path` attributes.
+
+Let's keep going.
+```jsx
 const Browse = ({ children, history, machine, match }) => {
     const selection = [
         {
             summary: 'Northern red oak is a hardwood with a pleasing aesthetic, making it ideal for sturdy home furniture.',
-            id: 100,
+            id: 'northern-red-oak',
             species: 'Northern Red Oak'
         },
         {
             summary: 'Pine is a common softwood, often characterized as having many knots.',
-            id: 101,
+            id: 'pine,
             species: 'Pine'
         },
         {
             summary: 'Poplar wood is a lightweight, softwood and straight-grained, making it ideal for small kit projects.',
-            id: 102,
+            id: 'poplar,
             species: 'Poplar'
         }
     ];
@@ -73,9 +84,19 @@ const Browse = ({ children, history, machine, match }) => {
         </ul>
     </div>
 }
+```
+Although we want to favor emitting events instead of pushign URLs, we can still push URLs. To do this, we'll use the `<Link/>` component. This is utlimately a wrapper for the native `<a/>` browser anchor tag, but uses `history.push` to update URls instead of replace. This is to prevent page reloads on URL changes.
 
+```jsx
 const Species = ({ childre, history, machine, match }) => {
     const [ species, set ] = useCustomStoreHook();
+
+    const {
+        exact,  // true
+        params, // { 'speciedId': 'northern-red-oak' }
+        path,   // '/:speciesId'
+        url     // '/browse/northern-red-oak'
+    } = match;
 
     return <div>
         <h1>Wood species: {species.name}</h1>
@@ -84,6 +105,7 @@ const Species = ({ childre, history, machine, match }) => {
     </div>
 }
 ```
+Finally, we have access to all the various routing parameters with `match`. This is most useful for when you need to obtain a dynamic URL variable - for example, we've declared `path='/:speciesId'` which may look like `/northern-red-oak` in the URL.
 
 ### With API fetching
 Here's how we're going to organize our API requests:
@@ -151,6 +173,15 @@ const BrowseFetch = ({ children, history, machine: { send }, match }) => {
     return children;
 }
 ```
+
+## `useMachine` hook
+If you need access to the state machine outside of a standard React component, you can use the `useMachine` hook.
+```jsx
+import { useMachine } from 'fsm-router';
+
+const [ machine: { current, history, id, params }, send ] = useMachine();
+```
+
 ## API
 - [`<Machine/>`](./docs/API/Machine.md)
 - [`<State/>`](./docs/API/State.md)
