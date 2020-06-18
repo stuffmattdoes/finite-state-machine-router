@@ -98,7 +98,7 @@ To uphold our rules, we'll want to first display loaders within each component t
             <Transition event='reject' target='error'/>
         </State>
         <State id='home' component={Home}>
-            <Transition event='browse' target='browse'>
+            <Transition event='browse' target='browse'/>
         </State>
         <State id='browse-wrapper' path='/browse' component={BrowseFetch}>
             <State id='browse-loader' component={Loader}>
@@ -118,12 +118,12 @@ const App = ({ children, history, machine: { send }, match }) => {
         fetchSomeData()
             .then(res => {
                 setState(res.data);
-                send('resolve'));
-            }.catch(err => send('reject'));
+                send('resolve');
+            }).catch(err => send('reject'));
     }
 
     useEffect(() => {
-        _fetch()
+        _fetch();
     });
 
     return <div>
