@@ -14,6 +14,8 @@ In front-end web development we'll use FSMs to render the proper user interface.
 
 ## Examples:
 ### Basic
+
+First, let's compose our app in our standard `index.jsx`
 ```jsx
 import { Link, Machine, State, Transition } from 'fsm-router';
 
@@ -30,7 +32,10 @@ import { Link, Machine, State, Transition } from 'fsm-router';
     <State id='error' component={Error}/>
     <State id='not-found' component={NotFound}/>
 </Machine>
+```
 
+Now, let's write some components.
+```jsx
 // `history`, `machine`, & `match` are fsm-router-specific
 const Home = ({ children, history, machine: { send }, match }) =>
     <div>
