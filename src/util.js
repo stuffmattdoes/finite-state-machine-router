@@ -19,6 +19,7 @@ export const getChildStateNodes = (children) => {
     
     return [];
 }
+export const classNames = (classnames) => classNames.filter(Boolean).join(' ');
 export const getChildrenOfType = (children, type) => React.Children.toArray(children).filter(c => c.type.displayName === type);
 export const getInitialChildStateNode = (stateNodes) => stateNodes.find(c => c.props.initial) || stateNodes[0];
 export const isCurrentStack = (id, stack) => !!stack.split('.').find(state => state === id);

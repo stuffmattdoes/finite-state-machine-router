@@ -1,5 +1,5 @@
-import classnames from 'classnames';
 import React, { useContext } from 'react';
+import { classNames } from './util';
 import { MachineContext } from './Machine';
 import { StateNodeContext } from './State';
 
@@ -26,11 +26,11 @@ function Link({ children, className, disabled, event: machineEvent, href = '#', 
         onClick && onClick(event);
     }
 
-    return <a className={classnames([
+    return <a className={classNames([
         className,
-        { 'link-exact': href === history.location.pathname },
-        { 'link-active': history.location.pathname.includes(href) && !disabled },
-        { 'disabled': disabled }
+        href === history.location.pathname && 'link-exact',
+        history.location.pathname.includes(href) && !disabled && 'link-active',
+        disabled && 'disabled'
     ])} href={href} onClick={handleClick}>{children}</a>
 }
 
