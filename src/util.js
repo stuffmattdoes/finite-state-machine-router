@@ -19,7 +19,20 @@ export const getChildStateNodes = (children) => {
     
     return [];
 }
-export const classNames = (classnames) => classNames.filter(Boolean).join(' ');
+export const classNames = (_classNames) => {
+    const next = _classNames.map(className => {
+        switch(typeof className) {
+            case 'string':
+                return className;
+            case 'object':
+                return Object.keys(className).filter(key => Boolean(className[key])).join( ' ').trim();
+            default:
+                return null;
+        }
+    }).join(' ').trim();
+
+    return Boolean(next) ? next : null;
+}
 export const getChildrenOfType = (children, type) => React.Children.toArray(children).filter(c => c.type.displayName === type);
 export const getInitialChildStateNode = (stateNodes) => stateNodes.find(c => c.props.initial) || stateNodes[0];
 export const isCurrentStack = (id, stack) => !!stack.split('.').find(state => state === id);
@@ -31,8 +44,7 @@ export const isRootStack = stack => !stack.match(/\./g);
 export const isNotFound = stack => stack.split('.').pop() === '*';
 export const segmentize = url => url.split('/').filter(Boolean);
 
-export function injectUrlParams(path, params) {
-    console.log('injectUrlParams', path, params);
+export const injectUrlParams = (path, params) => {
     const url = segmentize(path).map(seg => {
         if (isDynamicSegment(seg)) {
             const param = seg.replace(':', '');
@@ -40,7 +52,7 @@ export function injectUrlParams(path, params) {
             if (Object.keys(params).includes(param)) {
                 return params[param].toString();
             } else {
-                // console.error(`Cannot push to a dynamic URL without supplying the proper parameters: ${seg} parameter is missing.`);
+                console.error(`Cannot push to a dynamic URL without supplying the proper parameters: ${seg} parameter is missing.`);
                 return 'undefined';
             }
         }
@@ -51,9 +63,7 @@ export function injectUrlParams(path, params) {
     return '/' + url + (window.location.search ? window.location.search : '');
 }
 
-export function deriveStateFromUrl(url, normalized, rootId) {
-    console.log('deriveStateFromUrl', url);
-
+export const deriveStateFromUrl = (url, normalized, rootId) => {
     let match = {
         params: {},
         path: url,
@@ -121,8 +131,8 @@ export function deriveStateFromUrl(url, normalized, rootId) {
     return match;
 }
 
-export function normalizeChildStateProps(stateNodes, rootId) {
-    function normalizeLoop(stateNodes) {
+export const normalizeChildStateProps = (stateNodes, rootId) => {
+    const normalizeLoop = (stateNodes) => {
         let initIndex = stateNodes.findIndex(s => s.props.initial);
         initIndex = initIndex >= 0 ? initIndex : 0;
 
@@ -173,7 +183,7 @@ export function normalizeChildStateProps(stateNodes, rootId) {
     });
 }
 
-export function resolveToAtomic(stack, normalized) {
+export const resolveToAtomic = (stack, normalized) => {
     const { childStates, path, stack: nextStack } = normalized.find(norm => norm.stack === stack);
     let initial = {
         path,
@@ -195,7 +205,7 @@ export function resolveToAtomic(stack, normalized) {
     return initial;
 }
 
-export function resolveInitial(url, normalized, machineId) {
+export const resolveInitial = (url, normalized, machineId) => {
     let initialProps = {
         params: null,
         path: null,
@@ -212,14 +222,13 @@ export function resolveInitial(url, normalized, machineId) {
     if (!isNotFound(stack)) {
         initialProps.path = path;
         initialProps.stack = stack;
-        console.log('resolveInitial', path);
         initialProps.url = injectUrlParams(path, params);
     }
 
     return initialProps;
 }
 
-export function selectTransition(event, stack, normalized) {
+export const selectTransition = (event, stack, normalized) => {
     if (isRootStack(stack)) {
         return null;
     }
