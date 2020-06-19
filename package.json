@@ -4,12 +4,32 @@
   "dependencies": {
     "history": "^4.10.1"
   },
-  "keywords": [ "finite state machine", "state machine", "finite state machine router", "fsm", "scxml", "router" ],
+  "keywords": [
+    "finite state machine",
+    "state machine",
+    "finite state machine router",
+    "fsm",
+    "scxml",
+    "router"
+  ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/stuffmattdoes/finite-state-machine-router"
+    "url": "git+https://github.com/stuffmattdoes/finite-state-machine-router.git"
   },
   "scripts": {
     "test": "echo nothing to test!"
-  }
+  },
+  "description": "A finite state machine + declarative URL routing (for React).",
+  "bugs": {
+    "url": "https://github.com/stuffmattdoes/finite-state-machine-router/issues"
+  },
+  "homepage": "https://github.com/stuffmattdoes/finite-state-machine-router#readme",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "example": "examples"
+  },
+  "devDependencies": {},
+  "author": "",
+  "license": "ISC"
 }
