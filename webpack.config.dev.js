@@ -5,14 +5,15 @@ const webpack = require('webpack');
 
 module.exports = {
     devServer: {
-        contentBase: path.join(__dirname, 'public'),
+        contentBase: path.join(__dirname, 'examples', 'public'),
         // compress: true,
+        historyApiFallback: true,
         hot: true,
         // open: true,
         port: 9000
     },
-    devtool: 'inline-source-map',
-    entry: path.resolve(__dirname, 'src', 'index.jsx'),
+    devtool: 'source-map',
+    entry: path.resolve(__dirname, 'examples', 'index.jsx'),
     mode: 'development',
     module: {
         rules: [
@@ -63,7 +64,7 @@ module.exports = {
     },
     plugins: [
         new HtmlWebpackPlugin({
-            template: path.resolve(__dirname, 'public', 'index.html'),
+            template: path.resolve(__dirname, 'examples', 'public', 'index.html'),
             title: 'Finite State Machine Router Example'
         }),
         new webpack.HotModuleReplacementPlugin()

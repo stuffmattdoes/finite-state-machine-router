@@ -1,9 +1,9 @@
 const path = require('path');
-// const webpack = require('webpack');
 
 module.exports = {
     entry: path.resolve(__dirname, 'src', 'index.js'),
     mode: 'production',
+    devtool: 'source-map',
     module: {
         rules: [
             // Resolves & bundles all Javascript dependencies (.js and .jsx)
@@ -20,8 +20,9 @@ module.exports = {
     output: {
         filename: 'index.js',
         path: path.resolve(__dirname, 'dist'),
-        library: 'fsm-router',
-        // libraryTarget: 'umd'
+        library: 'FSMRouter',
+        libraryTarget: 'umd',
+        publicPath: '/dist/',
     },
     resolve: {
         extensions: [ '.js', '.jsx' ],

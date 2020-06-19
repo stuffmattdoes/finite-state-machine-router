@@ -29,11 +29,10 @@ export const isDynamicPath = segment => /\:/g.test(segment);
 export const isRootSemgent = url => url.slice(1) === '';
 export const isRootStack = stack => !stack.match(/\./g);
 export const isNotFound = stack => stack.split('.').pop() === '*';
-export const segmentize = url => url.replace(/(^\/+|\/+$)/g, '').split('/');
+export const segmentize = url => url.split('/').filter(Boolean);
 
 export function injectUrlParams(path, params) {
-    // console.log('injectUrlParams', path, params);
-
+    console.log('injectUrlParams', path, params);
     const url = segmentize(path).map(seg => {
         if (isDynamicSegment(seg)) {
             const param = seg.replace(':', '');
@@ -53,7 +52,8 @@ export function injectUrlParams(path, params) {
 }
 
 export function deriveStateFromUrl(url, normalized, rootId) {
-    // console.log('deriveStateFromUrl');
+    console.log('deriveStateFromUrl', url);
+
     let match = {
         params: {},
         path: url,
@@ -121,46 +121,6 @@ export function deriveStateFromUrl(url, normalized, rootId) {
     return match;
 }
 
-// Unused
-function getAllStacks(stateNodes) {
-    return stateNodes.reduce((acc, child) => {
-        const childStates = getChildStateNodes(child.props.children);
-        const grandChildStacks = getAllStacks(childStates);
-        const { id } = child.props;
-
-        acc.push('.' + id);
-        
-        if (grandChildStacks.length) {
-            grandChildStacks.forEach(gcs => acc.push('.' + id + gcs));
-        }
-
-        return acc;
-    }, []);
-}
-
-// Unused
-function getAllRoutes(stateNodes) {
-    return stateNodes.reduce((acc, child) => {
-        const childStates = getChildStateNodes(child.props.children);
-        const grandChildRoutes = getAllRoutes(childStates);
-        const grandChildRoutesArr = Object.keys(grandChildRoutes);
-        const { id, path } = child.props;
-
-        if (path) {
-            acc[path] = '.' + id;
-        }
-        
-        if (grandChildRoutesArr.length) {
-            grandChildRoutesArr.forEach(route => acc[path ?
-                path + route
-                : route] = '.' + id + grandChildRoutes[route]
-            );
-        }
-
-        return acc;
-    }, {});
-}
-
 export function normalizeChildStateProps(stateNodes, rootId) {
     function normalizeLoop(stateNodes) {
         let initIndex = stateNodes.findIndex(s => s.props.initial);
@@ -168,7 +128,6 @@ export function normalizeChildStateProps(stateNodes, rootId) {
 
         return stateNodes.reduce((acc, stateNode, i) => {
             const childStates = getChildStateNodes(stateNode.props.children);
-            // console.log(stateNode.props.id, stateNode, childStates);
             const { id, path = null, type } = stateNode.props;
             const transitions = getChildrenOfType(stateNode.props.children, 'Transition')
                 .map(({ props }) => ({
@@ -253,6 +212,7 @@ export function resolveInitial(url, normalized, machineId) {
     if (!isNotFound(stack)) {
         initialProps.path = path;
         initialProps.stack = stack;
+        console.log('resolveInitial', path);
         initialProps.url = injectUrlParams(path, params);
     }
 

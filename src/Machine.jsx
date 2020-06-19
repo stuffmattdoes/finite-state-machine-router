@@ -37,6 +37,8 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
     const [ initialStack, params ] = useMemo(() => {
         let initialStack = '#' + machineId + '.' + getInitialChildStateNode(childStates).props.id;
 
+        console.log('machine', history.location.pathname);
+
         const { params, path, stack, url } = resolveInitial(history.location.pathname, normalized, machineId);
 
         if (history.location.pathname !== url) {
