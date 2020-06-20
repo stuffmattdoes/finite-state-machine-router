@@ -43,8 +43,8 @@
     "url": "https://github.com/stuffmattdoes/finite-state-machine-router/issues"
   },
   "homepage": "https://github.com/stuffmattdoes/finite-state-machine-router#readme",
-  "main": "dist/index.js",
-  "module": "src/index.js",
+  "module": "dist/index.js",
+  "main": "src/index.js",
   "directories": {
     "doc": "docs",
     "example": "examples"

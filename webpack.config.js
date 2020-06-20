@@ -22,7 +22,7 @@ module.exports = {
         path: path.resolve(__dirname, 'dist'),
         library: 'FSMRouter',
         libraryTarget: 'umd',
-        publicPath: '/dist/',
+        publicPath: '/dist/'
     },
     resolve: {
         extensions: [ '.js', '.jsx' ],
