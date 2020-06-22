@@ -148,9 +148,9 @@ const normalizeChildStateProps = (stateNodes, rootId) => {
 
             acc.push({
                 childStates: childStates.map(child => child.props.id),
-                id: id,
+                id,
                 initial: i === initIndex,
-                path: path,
+                path,
                 stack: '.' + id,
                 transitions,
                 type: type === 'parallel' ? 'parallel'
@@ -210,14 +210,14 @@ const resolveInitial = (url, normalized, machineId) => {
         path: null,
         stack: null,
         url
-    }
+    };
 
     const { params, path: currentPath, stack: currentStack } = deriveStateFromUrl(url, normalized, machineId);
     initialProps.params = params;
     initialProps.path = currentPath;
     initialProps.stack = currentStack;
     const { path, stack } = resolveToAtomic(currentStack, normalized);
-    
+
     if (!isNotFound(stack)) {
         initialProps.path = path;
         initialProps.stack = stack;

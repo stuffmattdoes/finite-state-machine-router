@@ -41,3 +41,4 @@ Check out [proposals](./docs/Proposals.md).
 - [ ] `onEntry` & `onExit`
 - [ ] Simplify `type` to `parallel` since all other types are derived automatically
 - [ ] Unit tests!
+- [ ] Should util accept React components outright? Or should they be transformed into arrays ahead of time? via (`React.Children.toArray`);
