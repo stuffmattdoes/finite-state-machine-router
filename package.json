@@ -1,15 +1,54 @@
 {
   "name": "fsm-router",
-  "version": "0.2.14",
+  "version": "0.2.18",
   "dependencies": {
     "history": "^4.10.1"
   },
-  "keywords": [ "finite state machine", "state machine", "finite state machine router", "fsm", "scxml", "router" ],
+  "devDependencies": {
+    "@babel/cli": "^7.10.1",
+    "@babel/core": "^7.10.2",
+    "@babel/preset-env": "^7.10.2",
+    "@babel/preset-react": "^7.10.1",
+    "babel-loader": "^8.1.0",
+    "html-webpack-plugin": "^4.3.0",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
+  },
+  "peerDependencies": {
+    "react": ">=16.x",
+    "react-dom": ">=16.x"
+  },
+  "keywords": [
+    "finite state machine",
+    "state machine",
+    "finite state machine router",
+    "fsm",
+    "scxml",
+    "router"
+  ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/stuffmattdoes/finite-state-machine-router"
+    "url": "git+https://github.com/stuffmattdoes/finite-state-machine-router.git"
   },
   "scripts": {
+    "build": "webpack",
+    "dev": "webpack-dev-server --config webpack.config.dev.js",
     "test": "echo nothing to test!"
-  }
+  },
+  "description": "A finite state machine + declarative URL routing (for React).",
+  "bugs": {
+    "url": "https://github.com/stuffmattdoes/finite-state-machine-router/issues"
+  },
+  "homepage": "https://github.com/stuffmattdoes/finite-state-machine-router#readme",
+  "module": "dist/index.js",
+  "main": "src/index.js",
+  "directories": {
+    "doc": "docs",
+    "example": "examples"
+  },
+  "author": "Matthew Morrison",
+  "license": "MIT"
 }

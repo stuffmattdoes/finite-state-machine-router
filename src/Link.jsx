@@ -1,9 +1,9 @@
-import classnames from 'classnames';
 import React, { useContext } from 'react';
+import { classNames } from './util';
 import { MachineContext } from './Machine';
 import { StateNodeContext } from './State';
 
-function Link({ children, className, disabled, event: machineEvent, href = '#', onClick, replace }) {
+function Link({ children, className, disabled = false, event: machineEvent, href = '#', onClick, replace = false }) {
     const { history } = useContext(MachineContext);
     const { send } = useContext(StateNodeContext);
 
@@ -26,11 +26,13 @@ function Link({ children, className, disabled, event: machineEvent, href = '#', 
         onClick && onClick(event);
     }
 
-    return <a className={classnames([
+    return <a className={classNames([
         className,
-        { 'link-exact': href === history.location.pathname },
-        { 'link-active': history.location.pathname.includes(href) && !disabled },
-        { 'disabled': disabled }
+        { 
+            'link-exact': href === history.location.pathname,
+            'link-active': history.location.pathname.includes(href) && !disabled,
+            'disabled': disabled
+        }
     ])} href={href} onClick={handleClick}>{children}</a>
 }
 
