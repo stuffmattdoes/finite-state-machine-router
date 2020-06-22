@@ -19,20 +19,31 @@ const getChildStateNodes = (children) => {
     
     return [];
 }
+const classNames = (_classNames) => {
+    const next = _classNames.map(className => {
+        switch(typeof className) {
+            case 'string':
+                return className;
+            case 'object':
+                return Object.keys(className).filter(key => Boolean(className[key])).join( ' ').trim();
+            default:
+                return null;
+        }
+    }).join(' ').trim();
+
+    return Boolean(next) ? next : null;
+}
 const getChildrenOfType = (children, type) => React.Children.toArray(children).filter(c => c.type.displayName === type);
 const getInitialChildStateNode = (stateNodes) => stateNodes.find(c => c.props.initial) || stateNodes[0];
 const isCurrentStack = (id, stack) => !!stack.split('.').find(state => state === id);
 const isExactStack = (id, stack) => stack.split('.').pop() === id;
 const isDynamicSegment = segment => /^:(.+)/.test(segment);
-// const isDynamicPath = segment => /\:/g.test(segment);
 const isRootSemgent = url => url.slice(1) === '';
 const isRootStack = stack => !stack.match(/\./g);
 const isNotFound = stack => stack.split('.').pop() === '*';
-const segmentize = url => url.replace(/(^\/+|\/+$)/g, '').split('/');
+const segmentize = url => url.split('/').filter(Boolean);
 
-function injectUrlParams(path, params) {
-    // console.log('injectUrlParams', path, params);
-
+const injectUrlParams = (path, params) => {
     const url = segmentize(path).map(seg => {
         if (isDynamicSegment(seg)) {
             const param = seg.replace(':', '');
@@ -40,7 +51,7 @@ function injectUrlParams(path, params) {
             if (Object.keys(params).includes(param)) {
                 return params[param].toString();
             } else {
-                // console.error(`Cannot push to a dynamic URL without supplying the proper parameters: ${seg} parameter is missing.`);
+                console.error(`Cannot push to a dynamic URL without supplying the proper parameters: ${seg} parameter is missing.`);
                 return 'undefined';
             }
         }
@@ -51,8 +62,7 @@ function injectUrlParams(path, params) {
     return '/' + url + (window.location.search ? window.location.search : '');
 }
 
-function deriveStateFromUrl(url, normalized, rootId) {
-    // console.log('deriveStateFromUrl');
+const deriveStateFromUrl = (url, normalized, rootId) => {
     let match = {
         params: {},
         path: url,
@@ -120,14 +130,13 @@ function deriveStateFromUrl(url, normalized, rootId) {
     return match;
 }
 
-function normalizeChildStateProps(stateNodes, rootId) {
-    function normalizeLoop(stateNodes) {
+const normalizeChildStateProps = (stateNodes, rootId) => {
+    const normalizeLoop = (stateNodes) => {
         let initIndex = stateNodes.findIndex(s => s.props.initial);
         initIndex = initIndex >= 0 ? initIndex : 0;
 
         return stateNodes.reduce((acc, stateNode, i) => {
             const childStates = getChildStateNodes(stateNode.props.children);
-            // console.log(stateNode.props.id, stateNode, childStates);
             const { id, path = null, type } = stateNode.props;
             const transitions = getChildrenOfType(stateNode.props.children, 'Transition')
                 .map(({ props }) => ({
@@ -173,7 +182,7 @@ function normalizeChildStateProps(stateNodes, rootId) {
     });
 }
 
-function resolveToAtomic(stack, normalized) {
+const resolveToAtomic = (stack, normalized) => {
     const { childStates, path, stack: nextStack } = normalized.find(norm => norm.stack === stack);
     let initial = {
         path,
@@ -195,7 +204,7 @@ function resolveToAtomic(stack, normalized) {
     return initial;
 }
 
-function resolveInitial(url, normalized, machineId) {
+const resolveInitial = (url, normalized, machineId) => {
     let initialProps = {
         params: null,
         path: null,
@@ -218,7 +227,7 @@ function resolveInitial(url, normalized, machineId) {
     return initialProps;
 }
 
-function selectTransition(event, stack, normalized) {
+const selectTransition = (event, stack, normalized) => {
     if (isRootStack(stack)) {
         return null;
     }
@@ -238,6 +247,7 @@ function selectTransition(event, stack, normalized) {
 }
 
 export {
+    classNames,
     getChildrenOfType,
     getChildStateNodes,
     getInitialChildStateNode,
