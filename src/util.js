@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const getChildStateNodes = (children) => {
+const getChildStateNodes = (children) => {
     if (children) {
         const childrenArr = React.Children.toArray(children);
         const childrenOfType = childrenArr.filter(c => c.type.displayName === 'State');
@@ -19,7 +19,7 @@ export const getChildStateNodes = (children) => {
     
     return [];
 }
-export const classNames = (_classNames) => {
+const classNames = (_classNames) => {
     const next = _classNames.map(className => {
         switch(typeof className) {
             case 'string':
@@ -33,18 +33,17 @@ export const classNames = (_classNames) => {
 
     return Boolean(next) ? next : null;
 }
-export const getChildrenOfType = (children, type) => React.Children.toArray(children).filter(c => c.type.displayName === type);
-export const getInitialChildStateNode = (stateNodes) => stateNodes.find(c => c.props.initial) || stateNodes[0];
-export const isCurrentStack = (id, stack) => !!stack.split('.').find(state => state === id);
-export const isExactStack = (id, stack) => stack.split('.').pop() === id;
-export const isDynamicSegment = segment => /^:(.+)/.test(segment);
-export const isDynamicPath = segment => /\:/g.test(segment);
-export const isRootSemgent = url => url.slice(1) === '';
-export const isRootStack = stack => !stack.match(/\./g);
-export const isNotFound = stack => stack.split('.').pop() === '*';
-export const segmentize = url => url.split('/').filter(Boolean);
+const getChildrenOfType = (children, type) => React.Children.toArray(children).filter(c => c.type.displayName === type);
+const getInitialChildStateNode = (stateNodes) => stateNodes.find(c => c.props.initial) || stateNodes[0];
+const isCurrentStack = (id, stack) => !!stack.split('.').find(state => state === id);
+const isExactStack = (id, stack) => stack.split('.').pop() === id;
+const isDynamicSegment = segment => /^:(.+)/.test(segment);
+const isRootSemgent = url => url.slice(1) === '';
+const isRootStack = stack => !stack.match(/\./g);
+const isNotFound = stack => stack.split('.').pop() === '*';
+const segmentize = url => url.split('/').filter(Boolean);
 
-export const injectUrlParams = (path, params) => {
+const injectUrlParams = (path, params) => {
     const url = segmentize(path).map(seg => {
         if (isDynamicSegment(seg)) {
             const param = seg.replace(':', '');
@@ -63,7 +62,7 @@ export const injectUrlParams = (path, params) => {
     return '/' + url + (window.location.search ? window.location.search : '');
 }
 
-export const deriveStateFromUrl = (url, normalized, rootId) => {
+const deriveStateFromUrl = (url, normalized, rootId) => {
     let match = {
         params: {},
         path: url,
@@ -131,7 +130,7 @@ export const deriveStateFromUrl = (url, normalized, rootId) => {
     return match;
 }
 
-export const normalizeChildStateProps = (stateNodes, rootId) => {
+const normalizeChildStateProps = (stateNodes, rootId) => {
     const normalizeLoop = (stateNodes) => {
         let initIndex = stateNodes.findIndex(s => s.props.initial);
         initIndex = initIndex >= 0 ? initIndex : 0;
@@ -149,9 +148,9 @@ export const normalizeChildStateProps = (stateNodes, rootId) => {
 
             acc.push({
                 childStates: childStates.map(child => child.props.id),
-                id: id,
+                id,
                 initial: i === initIndex,
-                path: path,
+                path,
                 stack: '.' + id,
                 transitions,
                 type: type === 'parallel' ? 'parallel'
@@ -183,7 +182,7 @@ export const normalizeChildStateProps = (stateNodes, rootId) => {
     });
 }
 
-export const resolveToAtomic = (stack, normalized) => {
+const resolveToAtomic = (stack, normalized) => {
     const { childStates, path, stack: nextStack } = normalized.find(norm => norm.stack === stack);
     let initial = {
         path,
@@ -205,20 +204,20 @@ export const resolveToAtomic = (stack, normalized) => {
     return initial;
 }
 
-export const resolveInitial = (url, normalized, machineId) => {
+const resolveInitial = (url, normalized, machineId) => {
     let initialProps = {
         params: null,
         path: null,
         stack: null,
         url
-    }
+    };
 
     const { params, path: currentPath, stack: currentStack } = deriveStateFromUrl(url, normalized, machineId);
     initialProps.params = params;
     initialProps.path = currentPath;
     initialProps.stack = currentStack;
     const { path, stack } = resolveToAtomic(currentStack, normalized);
-    
+
     if (!isNotFound(stack)) {
         initialProps.path = path;
         initialProps.stack = stack;
@@ -228,7 +227,7 @@ export const resolveInitial = (url, normalized, machineId) => {
     return initialProps;
 }
 
-export const selectTransition = (event, stack, normalized) => {
+const selectTransition = (event, stack, normalized) => {
     if (isRootStack(stack)) {
         return null;
     }
@@ -245,4 +244,18 @@ export const selectTransition = (event, stack, normalized) => {
 
     const nextStack = stack.split('.').slice(0, -1).join('.');
     return selectTransition(event, nextStack, normalized);
+}
+
+export {
+    classNames,
+    getChildrenOfType,
+    getChildStateNodes,
+    getInitialChildStateNode,
+    injectUrlParams,
+    isCurrentStack, 
+    isExactStack,
+    normalizeChildStateProps,
+    resolveInitial,
+    resolveToAtomic,
+    selectTransition
 }

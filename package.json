@@ -2,15 +2,19 @@
   "name": "fsm-router",
   "version": "0.2.18",
   "dependencies": {
-    "history": "^4.10.1"
+    "history": "^4.10.1",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.10.1",
     "@babel/core": "^7.10.2",
     "@babel/preset-env": "^7.10.2",
     "@babel/preset-react": "^7.10.1",
+    "babel-jest": "^26.0.1",
     "babel-loader": "^8.1.0",
     "html-webpack-plugin": "^4.3.0",
+    "jest": "^26.0.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "webpack": "^4.43.0",
@@ -36,7 +40,7 @@
   "scripts": {
     "build": "webpack",
     "dev": "webpack-dev-server --config webpack.config.dev.js",
-    "test": "echo nothing to test!"
+    "test": "jest"
   },
   "description": "A finite state machine + declarative URL routing (for React).",
   "bugs": {

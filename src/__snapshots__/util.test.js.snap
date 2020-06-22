@@ -1,0 +1,95 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`utility functions normalizeChildStateProps 1`] = `
+Array [
+  Object {
+    "childStates": Array [
+      "child-1",
+      "child-2",
+    ],
+    "id": "parent",
+    "initial": true,
+    "path": "/:parent",
+    "stack": "#home.parent",
+    "transitions": Array [],
+    "type": "compound",
+  },
+  Object {
+    "childStates": Array [
+      "grand-child",
+    ],
+    "id": "child-1",
+    "initial": true,
+    "path": "/:parent/child-1",
+    "stack": "#home.parent.child-1",
+    "transitions": Array [
+      Object {
+        "cond": null,
+        "event": "test-event",
+        "sendId": "child-1",
+        "target": "child-2",
+      },
+    ],
+    "type": "default",
+  },
+  Object {
+    "childStates": Array [],
+    "id": "grand-child",
+    "initial": true,
+    "path": "/:parent/child-1",
+    "stack": "#home.parent.child-1.grand-child",
+    "transitions": Array [],
+    "type": "atomic",
+  },
+  Object {
+    "childStates": Array [],
+    "id": "child-2",
+    "initial": false,
+    "path": "/:parent",
+    "stack": "#home.parent.child-2",
+    "transitions": Array [],
+    "type": "atomic",
+  },
+]
+`;
+
+exports[`utility functions resolveInitial 1`] = `
+Object {
+  "params": Object {
+    "parent": "parent-id",
+  },
+  "path": "/:parent/child-1",
+  "stack": "#home.parent.child-1.grand-child",
+  "url": "/parent-id/child-1",
+}
+`;
+
+exports[`utility functions resolveToAtomic 1`] = `
+Object {
+  "path": "/:parent/child-1",
+  "stack": "#home.parent.child-1.grand-child",
+}
+`;
+
+exports[`utility functions resolveToAtomic 2`] = `
+Object {
+  "path": "/:parent/child-1",
+  "stack": "#home.parent.child-1.grand-child",
+}
+`;
+
+exports[`utility functions resolveToAtomic 3`] = `
+Object {
+  "path": "/:parent",
+  "stack": "#home.parent.child-2",
+}
+`;
+
+exports[`utility functions selectTransition 1`] = `
+Object {
+  "cond": null,
+  "event": "test-event",
+  "sendId": "child-1",
+  "target": "child-2",
+}
+`;
