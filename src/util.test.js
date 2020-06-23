@@ -1,7 +1,5 @@
 import React from 'react';
-import Machine from './Machine';
-import State from './State';
-import Transition from './Transition';
+import { Machine, State, Transition } from './';
 import {
     // getChildrenOfType,
     classNames,
