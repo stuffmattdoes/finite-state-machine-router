@@ -1,5 +1,5 @@
 import React from 'react';
-import { Machine, State, Transition } from './';
+import { Machine, State, Transition } from '.';
 import {
     // getChildrenOfType,
     classNames,
@@ -15,16 +15,37 @@ import {
 } from './util';
 
 describe('utility functions', () => {
-    const machine = <Machine id='home' path='/home'>
-            <State id='parent' path='/:parent'>
+    const machineSimple = <Machine id='home'>
+        <State id='child'/>
+    </Machine>;
+    const machineComplex = <Machine id='home'>
+        <State id='parent'>
+            <State id='child-1'>
+                <Transition event='test-event' target='child-2'/>
+                <State id='grand-child'/>
+            </State>
+            <State id='child-2'/>
+        </State>
+        <State id='parent-2'>
+            <State id='child-3'/>
+        </State>
+    </Machine>;
+
+    const machineWithPaths = <Machine id='home' path='/home'>
+        <State id='parent' path='/:parent'>
             <State id='child-1' path='/child-1'>
                 <Transition event='test-event' target='child-2'/>
                 <State id='grand-child'/>
             </State>
             <State id='child-2'/>
         </State>
+        <State id='parent-2'>
+            <State id='child-3'/>
+        </State>
     </Machine>;
-    const normalized = normalizeChildStateProps(React.Children.toArray(machine.props.children), 'home');
+    const normalizedSimple = normalizeChildStateProps(React.Children.toArray(machineSimple.props.children), 'home');
+    const normalizedComplex = normalizeChildStateProps(React.Children.toArray(machineComplex.props.children), 'home');
+    const normalizedPaths = normalizeChildStateProps(React.Children.toArray(machineWithPaths.props.children), 'home');
 
     test('classNames', () => { 
         const className = [
@@ -42,8 +63,16 @@ describe('utility functions', () => {
     });
 
     test('getChildStateNodes', () => {
-        const childStates = getChildStateNodes(machine.props.children).every(child => child.type.displayName === 'State');
-        expect(childStates).toBe(true);
+        const childrenSimple = getChildStateNodes(React.Children.toArray(machineSimple.props.children))
+            .every(child => child.type.displayName === 'State');
+        const childrenComplex = getChildStateNodes(React.Children.toArray(machineComplex.props.children))
+            .every(child => child.type.displayName === 'State');
+        const childrenPaths = getChildStateNodes(React.Children.toArray(machineWithPaths.props.children))
+            .every(child => child.type.displayName === 'State');
+        
+        expect(childrenSimple).toBe(true);
+        expect(childrenComplex).toBe(true);
+        expect(childrenPaths).toBe(true);
     });
 
     test('getInitialChildStateNode', () => {
@@ -57,8 +86,8 @@ describe('utility functions', () => {
             <State id='child-2' initial/>
         ];
 
-        const result1 = getInitialChildStateNode(getChildStateNodes(machineWithoutInitial)).props.id;
-        const result2 = getInitialChildStateNode(getChildStateNodes(machineWithInitial)).props.id;
+        const result1 = getInitialChildStateNode(getChildStateNodes(React.Children.toArray(machineWithoutInitial))).props.id;
+        const result2 = getInitialChildStateNode(getChildStateNodes(React.Children.toArray(machineWithInitial))).props.id;
 
         expect(result1).toBe('child-1');
         expect(result2).toBe('child-2');
@@ -90,20 +119,26 @@ describe('utility functions', () => {
         expect(isExactStack('grand-child', '#home.parent.child-1.grand-child')).toBe(true);
     });
 
-    test('normalizeChildStateProps', () => expect(normalized).toMatchSnapshot());
+    test('normalizeChildStateProps', () => {
+        expect(normalizedSimple).toMatchSnapshot();
+        expect(normalizedComplex).toMatchSnapshot();
+        expect(normalizedPaths).toMatchSnapshot();
+    });
 
     test('resolveInitial', () => {
-        expect(resolveInitial('/parent-id/child-1', normalized, 'home')).toMatchSnapshot();
+        expect(resolveInitial('/', normalizedSimple, 'home')).toMatchSnapshot();
+        expect(resolveInitial('/', normalizedComplex, 'home')).toMatchSnapshot();
+        expect(resolveInitial('/parent-id/child-1', normalizedPaths, 'home')).toMatchSnapshot();
     })
 
     test('resolveToAtomic', () => {
-        expect(resolveToAtomic('#home.parent', normalized)).toMatchSnapshot();
-        expect(resolveToAtomic('#home.parent.child-1', normalized)).toMatchSnapshot();
-        expect(resolveToAtomic('#home.parent.child-2', normalized)).toMatchSnapshot();
+        expect(resolveToAtomic('#home.child', normalizedSimple)).toMatchSnapshot();
+        expect(resolveToAtomic('#home.parent.child-1', normalizedComplex)).toMatchSnapshot();
+        expect(resolveToAtomic('#home.parent.child-2', normalizedPaths)).toMatchSnapshot();
     });
 
     test('selectTransition', () => {
-        expect(selectTransition('no-matching-event', '#home.parent.child-1', normalized)).toBe(null);
-        expect(selectTransition('test-event', '#home.parent.child-1', normalized)).toMatchSnapshot();
+        expect(selectTransition('no-matching-event', '#home.parent.child-1', normalizedComplex)).toBe(null);
+        expect(selectTransition('test-event', '#home.parent.child-1', normalizedComplex)).toMatchSnapshot();
     });
 });

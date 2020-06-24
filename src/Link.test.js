@@ -1,8 +1,8 @@
 import React from 'react';
-import { Link, Machine, State, Transition } from './';
+import { Link, Machine, State, Transition } from '.';
 
 describe('<Link/>', () => {
-    const Child = <div>
+    const Child = (props) => <div>
         <Link event='link-event'>Link Event</Link>
         <Link href='/home'>Link Event</Link>
     </div>

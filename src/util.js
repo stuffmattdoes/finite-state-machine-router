@@ -1,9 +1,10 @@
 import React from 'react';
 
 const getChildStateNodes = (children) => {
-    if (children) {
-        const childrenArr = React.Children.toArray(children);
-        const childrenOfType = childrenArr.filter(c => c.type.displayName === 'State');
+    // console.log(children);
+
+    if (children.length) {
+        const childrenOfType = getChildrenOfType(React.Children.toArray(children), 'State');
     
         if (childrenOfType.length) {
             return childrenOfType;
@@ -11,7 +12,7 @@ const getChildStateNodes = (children) => {
 
         if (children.props && children.props.children) {
             return children.props.children.reduce((acc, child) => {
-                acc = acc.concat(getChildrenOfType(child.props.children, 'State'));
+                acc = acc.concat(getChildrenOfType(React.Children.toArray(child.props.children), 'State'));
                 return acc;
             }, []);
         }
@@ -33,11 +34,12 @@ const classNames = (_classNames) => {
 
     return Boolean(next) ? next : null;
 }
-const getChildrenOfType = (children, type) => React.Children.toArray(children).filter(c => c.type.displayName === type);
+const getChildrenOfType = (children, type) => children.filter(c => c.type.displayName === type);
 const getInitialChildStateNode = (stateNodes) => stateNodes.find(c => c.props.initial) || stateNodes[0];
 const isCurrentStack = (id, stack) => !!stack.split('.').find(state => state === id);
 const isExactStack = (id, stack) => stack.split('.').pop() === id;
 const isDynamicSegment = segment => /^:(.+)/.test(segment);
+const isRootPath = (path) => path === '/';
 const isRootSemgent = url => url.slice(1) === '';
 const isRootStack = stack => !stack.match(/\./g);
 const isNotFound = stack => stack.split('.').pop() === '*';
@@ -89,7 +91,8 @@ const deriveStateFromUrl = (url, normalized, rootId) => {
 
     if (dynamicPaths.length) {
         // 2.1 Split url && child paths into arrays, compare 1 by 1
-        const urlSegments = segmentize(url);
+        const urlSegments = segmentize(url);;
+    
         // let params = {};
         const dynamicPathMatch = dynamicPaths.find(p => {
             const pathSegments = segmentize(p);
@@ -132,13 +135,13 @@ const deriveStateFromUrl = (url, normalized, rootId) => {
 
 const normalizeChildStateProps = (stateNodes, rootId) => {
     const normalizeLoop = (stateNodes) => {
-        let initIndex = stateNodes.findIndex(s => s.props.initial);
-        initIndex = initIndex >= 0 ? initIndex : 0;
+        let initialIndex = stateNodes.findIndex(s => s.props.initial);
+        initialIndex = initialIndex >= 0 ? initialIndex : 0;
 
         return stateNodes.reduce((acc, stateNode, i) => {
-            const childStates = getChildStateNodes(stateNode.props.children);
-            const { id, path = null, type } = stateNode.props;
-            const transitions = getChildrenOfType(stateNode.props.children, 'Transition')
+            const { children, id, path = '/', type } = stateNode.props;
+            const childStates = getChildStateNodes(React.Children.toArray(children));
+            const transitions = getChildrenOfType(React.Children.toArray(children), 'Transition')
                 .map(({ props }) => ({
                     cond: props.cond || null,
                     event: props.event,
@@ -146,10 +149,11 @@ const normalizeChildStateProps = (stateNodes, rootId) => {
                     target: props.target
                 }));
 
+            // Add current state node to array
             acc.push({
                 childStates: childStates.map(child => child.props.id),
                 id,
-                initial: i === initIndex,
+                initial: initialIndex === i,
                 path,
                 stack: '.' + id,
                 transitions,
@@ -158,14 +162,13 @@ const normalizeChildStateProps = (stateNodes, rootId) => {
                     : childStates.length > 1 ? 'compound' : 'default'
             });
 
+            // Add children state nodes to array, recursively
             if (childStates.length) {
-                const normChildStates = normalizeLoop(childStates);
-
-                normChildStates.forEach((gcs, j) => acc.push({
+                normalizeLoop(childStates).forEach((gcs, j) => acc.push({
                     childStates: gcs.childStates,
                     id: gcs.id,
                     initial: gcs.initial,
-                    path: path ? gcs.path ? path + gcs.path : path : gcs.path,
+                    path: !isRootPath(path) ? !isRootPath(gcs.path) ? path + gcs.path : path : gcs.path,
                     stack: '.' + id + gcs.stack,
                     transitions: gcs.transitions,
                     type: gcs.type
@@ -183,7 +186,9 @@ const normalizeChildStateProps = (stateNodes, rootId) => {
 }
 
 const resolveToAtomic = (stack, normalized) => {
-    const { childStates, path, stack: nextStack } = normalized.find(norm => norm.stack === stack);
+    const { childStates, path, stack: nextStack } = normalized.find(norm => {
+        return norm.stack === stack;
+    });
     let initial = {
         path,
         stack: nextStack
@@ -200,7 +205,7 @@ const resolveToAtomic = (stack, normalized) => {
             initial.stack = initialChild.stack;
         }
     }
-    
+
     return initial;
 }
 
