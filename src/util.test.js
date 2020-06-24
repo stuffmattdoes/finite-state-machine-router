@@ -15,10 +15,10 @@ import {
 } from './util';
 
 describe('utility functions', () => {
-    const machineSimple = <Machine id='home'>
+    const MachineSimple = <Machine id='home'>
         <State id='child'/>
     </Machine>;
-    const machineComplex = <Machine id='home'>
+    const MachineComplex = <Machine id='home'>
         <State id='parent'>
             <State id='child-1'>
                 <Transition event='test-event' target='child-2'/>
@@ -31,7 +31,7 @@ describe('utility functions', () => {
         </State>
     </Machine>;
 
-    const machineWithPaths = <Machine id='home' path='/home'>
+    const MachineWithPaths = <Machine id='home' path='/home'>
         <State id='parent' path='/:parent'>
             <State id='child-1' path='/child-1'>
                 <Transition event='test-event' target='child-2'/>
@@ -43,9 +43,9 @@ describe('utility functions', () => {
             <State id='child-3'/>
         </State>
     </Machine>;
-    const normalizedSimple = normalizeChildStateProps(React.Children.toArray(machineSimple.props.children), 'home');
-    const normalizedComplex = normalizeChildStateProps(React.Children.toArray(machineComplex.props.children), 'home');
-    const normalizedPaths = normalizeChildStateProps(React.Children.toArray(machineWithPaths.props.children), 'home');
+    const normalizedSimple = normalizeChildStateProps(React.Children.toArray(MachineSimple.props.children), 'home');
+    const normalizedComplex = normalizeChildStateProps(React.Children.toArray(MachineComplex.props.children), 'home');
+    const normalizedPaths = normalizeChildStateProps(React.Children.toArray(MachineWithPaths.props.children), 'home');
 
     test('classNames', () => { 
         const className = [
@@ -63,11 +63,11 @@ describe('utility functions', () => {
     });
 
     test('getChildStateNodes', () => {
-        const childrenSimple = getChildStateNodes(React.Children.toArray(machineSimple.props.children))
+        const childrenSimple = getChildStateNodes(React.Children.toArray(MachineSimple.props.children))
             .every(child => child.type.displayName === 'State');
-        const childrenComplex = getChildStateNodes(React.Children.toArray(machineComplex.props.children))
+        const childrenComplex = getChildStateNodes(React.Children.toArray(MachineComplex.props.children))
             .every(child => child.type.displayName === 'State');
-        const childrenPaths = getChildStateNodes(React.Children.toArray(machineWithPaths.props.children))
+        const childrenPaths = getChildStateNodes(React.Children.toArray(MachineWithPaths.props.children))
             .every(child => child.type.displayName === 'State');
         
         expect(childrenSimple).toBe(true);

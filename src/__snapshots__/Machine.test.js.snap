@@ -1,24 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`<Machine/> Renders <Machine/> content at '/' 1`] = `
-<div>
-  <a
-    className={null}
-    href="#"
-    onClick={[Function]}
-  >
-    Link Event
-  </a>
-  <a
-    className={null}
-    href="/home"
-    onClick={[Function]}
-  >
-    Link Event
-  </a>
-</div>
-`;
-
 exports[`<Machine/> Renders <Machine/> content that does not contain any URLs 1`] = `
 <div>
   <a
@@ -37,3 +18,5 @@ exports[`<Machine/> Renders <Machine/> content that does not contain any URLs 1`
   </a>
 </div>
 `;
+
+exports[`<Machine/> Renders the minimum necessary components for a valid <Machine/> 1`] = `null`;
