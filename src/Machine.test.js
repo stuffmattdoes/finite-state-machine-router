@@ -1,9 +1,11 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 // import ReactTestUtils from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
 import renderer, { act } from 'react-test-renderer';
 import { Link, Machine, State, Transition } from '.';
+
+import { render, fireEvent, waitFor, screen } from '@testing-library/react'
 
 describe('<Machine/>', () => {
     const Child1 = (props) => <div>
@@ -138,58 +140,61 @@ describe('<Machine/>', () => {
         global.console.warn = consoleWarn;  // Restore console.warn
     });
 
-    // test('Transitions from one <State/> to another upon even emission', () => {
-    //     const consoleLog = console.log;
-    //     global.console.log = jest.fn();
-    //     let machine;
-
-    //     act(() => {
-    //         machine = renderer.create(<Machine id='home'>
-    //             <State id='child-1' component={({ machine }) => <div>Child 1
-    //                     <button id='click-me' onClick={event => machine.send('test-event')}>Click</button>
-    //                 </div>}>
-    //                 <Transition event='test-event' target='child-2'/>
-    //             </State>
-    //             <State id='child-2' component={(props) => <div>Child 2</div>}/>
-    //         </Machine>);
-    //     });
-
-    //     expect(machine.toJSON()).toMatchSnapshot();
-    //     expect(console.log.mock.calls[0][0]).toMatch('Machine Event Sent:');
-    //     global.console.log = consoleLog;
-    // });
-
-    test.skip('Transitions from one <State/> to another upon even emission', () => {
-        const consoleLog = console.log;
-        global.console.log = jest.fn();
-        const div = document.createElement('div');
-
-        ReactDOM.render(<Machine id='home'>
-                <State id='child-1' component={({ machine }) => <div>Child 1
-                        <button id='click-me' onClick={event => machine.send('test-event')}>Click</button>
-                    </div>}>
-                    <Transition event='test-event' target='child-2'/>
-                </State>
-                <State id='child-2' component={(props) => <div>Child 2</div>}/>
-            </Machine>,
-            div
-        );
-
-        // expect(machine.toJSON()).toMatchSnapshot();
-        // expect(console.log.mock.calls[0][0]).toMatch('Machine Event Sent:');
-        global.console.log = consoleLog;
-    });
-
-    test.skip('Transitions from one <State/> to another without disruption from URL change', () => {
+    test('Transitions from one <State/> to another upon even emission', () => {
+        // const consoleLog = console.log;
+        // global.console.log = jest.fn();
         const initialUrl = '/';
         const testHistory = createMemoryHistory({ initialEntries: [ initialUrl ] });
-        const machine = renderer.create(<Machine history={testHistory} id='home' path={initialUrl}>
-            <State id='child-1' component={({ machine }) => <div>Child 1
-                    <button id='click-me' onClick={event => machine.send('test-event')}>Click</button>
+        const { container } = render(<Machine history={testHistory} id='home' path={initialUrl}>
+            <State id='child-1' path='/child-1' component={({ machine }) => <div>
+                    <h1>Child 1</h1>
+                    <button id='click-me' onClick={event => machine.send('test-event')}>Fire event</button>
                 </div>}>
                 <Transition event='test-event' target='child-2'/>
             </State>
-            <State id='child-2' component={(props) => <div>Child 2</div>}/>
+            <State id='child-2' path='/child-2' component={(props) => <div><h1>Child 2</h1></div>}/>
         </Machine>);
+
+        expect(container).toMatchSnapshot();
+        expect(testHistory.location.pathname).toBe('/child-1');
+        fireEvent.click(screen.getByText(/Fire event/i));
+        // await waitFor(() => screen.getByText(/Child 2/i));
+        expect(container).toMatchSnapshot();
+        expect(testHistory.location.pathname).toBe('/child-2');
+        // expect(console.log.mock.calls[0][0]).toMatch('Machine Event Sent:');
+        // global.console.log = consoleLog;
     });
+
+    // test('Transitions from one <State/> to another upon even emission', () => {
+    //     const consoleLog = console.log;
+    //     global.console.log = jest.fn();
+    //     const div = document.createElement('div');
+
+    //     ReactDOM.render(<Machine id='home'>
+    //         <State id='child-1' component={({ machine }) => <div>Child 1
+    //                 <button id='click-me' onClick={event => machine.send('test-event')}>Click</button>
+    //             </div>}>
+    //             <Transition event='test-event' target='child-2'/>
+    //         </State>
+    //         <State id='child-2' component={(props) => <div>Child 2</div>}/>
+    //     </Machine>,
+    //     div);
+
+    //     // expect(machine.toJSON()).toMatchSnapshot();
+    //     // expect(console.log.mock.calls[0][0]).toMatch('Machine Event Sent:');
+    //     global.console.log = consoleLog;
+    // });
+
+    // test.skip('Transitions from one <State/> to another without disruption from URL change', () => {
+    //     const initialUrl = '/';
+    //     const testHistory = createMemoryHistory({ initialEntries: [ initialUrl ] });
+    //     const machine = renderer.create(<Machine history={testHistory} id='home' path={initialUrl}>
+    //         <State id='child-1' component={({ machine }) => <div>Child 1
+    //                 <button id='click-me' onClick={event => machine.send('test-event')}>Click</button>
+    //             </div>}>
+    //             <Transition event='test-event' target='child-2'/>
+    //         </State>
+    //         <State id='child-2' component={(props) => <div>Child 2</div>}/>
+    //     </Machine>);
+    // });
 });

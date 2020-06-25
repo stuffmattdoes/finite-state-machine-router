@@ -98,3 +98,28 @@ exports[`<Machine/> Resolves to wildcard route when no <State/> matches URL 1`] 
 `;
 
 exports[`<Machine/> Returns "null" instead of crashing when no <State/> matches URL 1`] = `null`;
+
+exports[`<Machine/> Transitions from one <State/> to another upon even emission 1`] = `
+<div>
+  <div>
+    <h1>
+      Child 1
+    </h1>
+    <button
+      id="click-me"
+    >
+      Fire event
+    </button>
+  </div>
+</div>
+`;
+
+exports[`<Machine/> Transitions from one <State/> to another upon even emission 2`] = `
+<div>
+  <div>
+    <h1>
+      Child 2
+    </h1>
+  </div>
+</div>
+`;
