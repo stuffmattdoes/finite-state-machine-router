@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import ReactDOM from 'react-dom';
+// import ReactTestUtils from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import renderer from 'react-test-renderer';
+import renderer, { act } from 'react-test-renderer';
 import { Link, Machine, State, Transition } from '.';
 
 describe('<Machine/>', () => {
@@ -39,19 +41,19 @@ describe('<Machine/>', () => {
     // </Machine>;
 
     test('Renders the minimum necessary components for a valid <Machine/>', () => {
-        const wrapper = renderer.create(MachineSimple);
-        expect(wrapper.toJSON()).toMatchSnapshot();
+        const machine = renderer.create(MachineSimple);
+        expect(machine.toJSON()).toMatchSnapshot();
     });
 
     test('Renders <Machine/> content that does not contain any URLs', () => {
-        const wrapper = renderer.create(MachineComplex);
-        expect(wrapper.toJSON()).toMatchSnapshot();
+        const machine = renderer.create(MachineComplex);
+        expect(machine.toJSON()).toMatchSnapshot();
     });
 
     test('Renders <Machine/> content at \'/\'', () => {
         const initialUrl = '/';
         const testHistory = createMemoryHistory({ initialEntries: [ initialUrl ] });
-        const wrapper = renderer.create(<Machine history={testHistory} id='home' path={initialUrl}>
+        const machine = renderer.create(<Machine history={testHistory} id='home' path={initialUrl}>
             <State id='child-1' path='/child-1' component={Child1}>
                 <State id='grand-child'>
                     <State id='great-grand-child'/>
@@ -60,11 +62,11 @@ describe('<Machine/>', () => {
             <State id='child-2' component={Child2} path='/child-2'/>
         </Machine>);
 
-        expect(wrapper.toJSON()).toMatchSnapshot();
+        expect(machine.toJSON()).toMatchSnapshot();
     });
 
-    test('Resolves ito nitial <State/> node lineage', () => {
-        const wrapper = renderer.create(<Machine id='home'>
+    test('Resolves into nitial <State/> node lineage', () => {
+        const machine = renderer.create(<Machine id='home'>
             <State id='parent'>
                 <State id='child-1' component={Child1}>
                     <Transition event='test-event' target='child-2'/>
@@ -77,7 +79,7 @@ describe('<Machine/>', () => {
             </State>
         </Machine>);
 
-        const wrapper2 = renderer.create(<Machine id='home'>
+        const machine2 = renderer.create(<Machine id='home'>
             <State id='parent'>
                 <State id='child-1' component={Child1}>
                     <Transition event='test-event' target='child-2'/>
@@ -90,14 +92,14 @@ describe('<Machine/>', () => {
             </State>
         </Machine>);
 
-        expect(wrapper.toJSON()).toMatchSnapshot();
-        expect(wrapper2.toJSON()).toMatchSnapshot();
+        expect(machine.toJSON()).toMatchSnapshot();
+        expect(machine2.toJSON()).toMatchSnapshot();
     });
 
-    test('Resolves to an atomic <State/> form a URL', () => {
+    test('Resolves to an atomic <State/> from a URL', () => {
         const initialUrl = '/child-2';
         const testHistory = createMemoryHistory({ initialEntries: [ initialUrl ] });
-        const wrapper = renderer.create(<Machine history={testHistory} id='home' path={initialUrl}>
+        const machine = renderer.create(<Machine history={testHistory} id='home' path={initialUrl}>
             <State id='child-1' path='/child-1' component={Child1}>
                 <State id='grand-child'>
                     <State id='great-grand-child-1'/>
@@ -108,18 +110,18 @@ describe('<Machine/>', () => {
             </State>
         </Machine>);
 
-        expect(wrapper.toJSON()).toMatchSnapshot();
+        expect(machine.toJSON()).toMatchSnapshot();
     });
 
     test('Resolves to wildcard route when no <State/> matches URL', () => {
         const initialUrl = '/no-route-found';
         const testHistory = createMemoryHistory({ initialEntries: [ initialUrl ] });
-        const wrapper = renderer.create(<Machine history={testHistory} id='home' path={initialUrl}>
+        const machine = renderer.create(<Machine history={testHistory} id='home' path={initialUrl}>
             <State id='parent' path='/parent'/>
             <State id='*' component={(props) => <div>Wildcard Route</div>}/>
         </Machine>);
 
-        expect(wrapper.toJSON()).toMatchSnapshot();
+        expect(machine.toJSON()).toMatchSnapshot();
     });
 
     test('Returns "null" instead of crashing when no <State/> matches URL', () => {
@@ -127,12 +129,67 @@ describe('<Machine/>', () => {
         global.console.warn = jest.fn();
         const initialUrl = '/no-route-found';
         const testHistory = createMemoryHistory({ initialEntries: [ initialUrl ] });
-        const wrapper = renderer.create(<Machine history={testHistory} id='home' path={initialUrl}>
+        const machine = renderer.create(<Machine history={testHistory} id='home' path={initialUrl}>
             <State id='parent' path='/parent'/>
         </Machine>);
 
-        expect(wrapper.toJSON()).toMatchSnapshot();
+        expect(machine.toJSON()).toMatchSnapshot();
         expect(console.warn).toHaveBeenCalledWith('No <State/> configuration matches URL "/no-route-found, and no catch-all <State id=\'*\' path=\'/404\'/> exists. Consider adding one.');
         global.console.warn = consoleWarn;  // Restore console.warn
+    });
+
+    // test('Transitions from one <State/> to another upon even emission', () => {
+    //     const consoleLog = console.log;
+    //     global.console.log = jest.fn();
+    //     let machine;
+
+    //     act(() => {
+    //         machine = renderer.create(<Machine id='home'>
+    //             <State id='child-1' component={({ machine }) => <div>Child 1
+    //                     <button id='click-me' onClick={event => machine.send('test-event')}>Click</button>
+    //                 </div>}>
+    //                 <Transition event='test-event' target='child-2'/>
+    //             </State>
+    //             <State id='child-2' component={(props) => <div>Child 2</div>}/>
+    //         </Machine>);
+    //     });
+
+    //     expect(machine.toJSON()).toMatchSnapshot();
+    //     expect(console.log.mock.calls[0][0]).toMatch('Machine Event Sent:');
+    //     global.console.log = consoleLog;
+    // });
+
+    test.skip('Transitions from one <State/> to another upon even emission', () => {
+        const consoleLog = console.log;
+        global.console.log = jest.fn();
+        const div = document.createElement('div');
+
+        ReactDOM.render(<Machine id='home'>
+                <State id='child-1' component={({ machine }) => <div>Child 1
+                        <button id='click-me' onClick={event => machine.send('test-event')}>Click</button>
+                    </div>}>
+                    <Transition event='test-event' target='child-2'/>
+                </State>
+                <State id='child-2' component={(props) => <div>Child 2</div>}/>
+            </Machine>,
+            div
+        );
+
+        // expect(machine.toJSON()).toMatchSnapshot();
+        // expect(console.log.mock.calls[0][0]).toMatch('Machine Event Sent:');
+        global.console.log = consoleLog;
+    });
+
+    test.skip('Transitions from one <State/> to another without disruption from URL change', () => {
+        const initialUrl = '/';
+        const testHistory = createMemoryHistory({ initialEntries: [ initialUrl ] });
+        const machine = renderer.create(<Machine history={testHistory} id='home' path={initialUrl}>
+            <State id='child-1' component={({ machine }) => <div>Child 1
+                    <button id='click-me' onClick={event => machine.send('test-event')}>Click</button>
+                </div>}>
+                <Transition event='test-event' target='child-2'/>
+            </State>
+            <State id='child-2' component={(props) => <div>Child 2</div>}/>
+        </Machine>);
     });
 });

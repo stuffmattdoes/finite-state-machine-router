@@ -57,13 +57,13 @@ exports[`<Machine/> Renders the minimum necessary components for a valid <Machin
 </div>
 `;
 
-exports[`<Machine/> Resolves ito nitial <State/> node lineage 1`] = `
+exports[`<Machine/> Resolves into nitial <State/> node lineage 1`] = `
 <div>
   Child 2 
 </div>
 `;
 
-exports[`<Machine/> Resolves ito nitial <State/> node lineage 2`] = `
+exports[`<Machine/> Resolves into nitial <State/> node lineage 2`] = `
 <div>
   <a
     className={null}
@@ -82,7 +82,7 @@ exports[`<Machine/> Resolves ito nitial <State/> node lineage 2`] = `
 </div>
 `;
 
-exports[`<Machine/> Resolves to an atomic <State/> form a URL 1`] = `
+exports[`<Machine/> Resolves to an atomic <State/> from a URL 1`] = `
 <div>
   Child 2 
   <div>
