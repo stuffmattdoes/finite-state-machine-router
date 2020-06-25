@@ -27,14 +27,18 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
         const _childStates = getChildStateNodes(React.Children.toArray(machineChildren));
 
         if (_childStates.length === 0) {
-            throw '<Machine/> has no children <State/> nodes! You need at least one to be considered a valid state machine.';
+            throw new Error('<Machine/> has no children <State/> nodes! At least one is required to be considered a valid state machine.');
         }
 
         const _normalized = normalizeChildStateProps(_childStates, machineId);
-    
+
+        // Check for a wildcard state
+        // if (!_normalized.find(({ id }) => id === '*')) {
+        //     _childStates.push(<State id='*' component={props => <div>Not found</div>}/>)
+        // }
+
         return [ _childStates, _normalized ];
     }, [ machineChildren ]);
-
 
     const [ initialStack, params ] = useMemo(() => {
         let initialStack = '#' + machineId + '.' + getInitialChildStateNode(childStates).props.id;
@@ -99,7 +103,7 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
                 setState({ current: stack, event: event, params });
                 // console.log('machine setState', 2, state, stack);
             } else {
-                console.error(`Invalid transition target: No target State Node of id "${targetId}" exists.`);
+                console.error(`Invalid transition target: No target State Node of id "${targetId}" exists. event ${event} will be discarded.`);
             }
         }
     }

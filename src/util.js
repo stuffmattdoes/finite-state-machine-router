@@ -1,8 +1,6 @@
 import React from 'react';
 
 const getChildStateNodes = (children) => {
-    // console.log(children);
-
     if (children.length) {
         const childrenOfType = getChildrenOfType(React.Children.toArray(children), 'State');
     
@@ -80,7 +78,7 @@ const deriveStateFromUrl = (url, normalized, rootId) => {
         return match;
     }
 
-    // 1.1 Check if URL is root, return root stack
+    // 1.1 Check if URL is root, return initial stack
     if (isRootSemgent(url)) {
         match.stack = normalized.find(norm => norm.stack.match(/\./g).length === 1 && norm.initial).stack;
         return match;
@@ -92,12 +90,13 @@ const deriveStateFromUrl = (url, normalized, rootId) => {
     if (dynamicPaths.length) {
         // 2.1 Split url && child paths into arrays, compare 1 by 1
         const urlSegments = segmentize(url);;
-    
+        
         // let params = {};
         const dynamicPathMatch = dynamicPaths.find(p => {
             const pathSegments = segmentize(p);
             match.params = {};
 
+            // Can't be a match if our path segments is not the same length as our URL segments
             if (pathSegments.length !== urlSegments.length) {
                 return false;
             }
@@ -125,9 +124,14 @@ const deriveStateFromUrl = (url, normalized, rootId) => {
         }
     }
 
-    // Finally, if no match, resolve to not found    
+    // Finally, if no match, resolve to *
     if (!match.stack) {
+        const notFoundState = normalized.find(norm => norm.id === '*');
         match.stack = '#' + rootId + '.*';
+
+        if (!notFoundState) {
+            console.warn(`No <State/> configuration matches URL "${url}, and no catch-all <State id='*' path='/404'/> exists. Consider adding one.`);
+        }
     }
 
     return match;
@@ -186,9 +190,7 @@ const normalizeChildStateProps = (stateNodes, rootId) => {
 }
 
 const resolveToAtomic = (stack, normalized) => {
-    const { childStates, path, stack: nextStack } = normalized.find(norm => {
-        return norm.stack === stack;
-    });
+    const { childStates, path, stack: nextStack } = normalized.find(norm =>  norm.stack === stack);
     let initial = {
         path,
         stack: nextStack
@@ -221,9 +223,12 @@ const resolveInitial = (url, normalized, machineId) => {
     initialProps.params = params;
     initialProps.path = currentPath;
     initialProps.stack = currentStack;
-    const { path, stack } = resolveToAtomic(currentStack, normalized);
 
-    if (!isNotFound(stack)) {
+    if (isNotFound(currentStack)) {
+
+    } else {
+        const { path, stack } = resolveToAtomic(currentStack, normalized);
+
         initialProps.path = path;
         initialProps.stack = stack;
         initialProps.url = injectUrlParams(path, params);
