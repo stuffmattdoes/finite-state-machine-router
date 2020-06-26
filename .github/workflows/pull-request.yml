@@ -2,7 +2,7 @@ name: Plull Request
 on: pull_request
 jobs:
   test:
-  # name: Run tests
+  name: Run tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
