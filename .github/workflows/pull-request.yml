@@ -1,11 +1,8 @@
-name: Publish Node.js Package
-
-on:
-  pull-request:
-    types: [created]
-
+name: Plull Request
+on: pull_request
 jobs:
-  build:
+  test:
+  # name: Run tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
