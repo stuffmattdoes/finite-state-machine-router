@@ -1,6 +1,4 @@
-# This workflow will run tests using node and then publish a package to NPM when a release is created
-# For more information see: https://help.github.com/actions/language-and-framework-guides/publishing-nodejs-packages
-# For the GitHub Actions API, see: https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions
+# This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
 
 name: Publish NPM Package    # (Required) name of the workflow
 
@@ -41,7 +39,7 @@ jobs:
   #     - uses: actions/setup-node@v1
   #       with:
   #         node-version: 12
-  #         registry-url: https://npm.pkg.github.com/fsm-router
+  #         registry-url: https://npm.pkg.github.com/
   #     - run: npm ci
   #     - run: npm publish
   #       env:
