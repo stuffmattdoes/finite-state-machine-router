@@ -3,6 +3,93 @@
 exports[`utility functions normalizeChildStateProps 1`] = `
 Array [
   Object {
+    "childStates": Array [],
+    "id": "child",
+    "initial": true,
+    "path": "/",
+    "stack": "#home.child",
+    "transitions": Array [],
+    "type": "atomic",
+  },
+]
+`;
+
+exports[`utility functions normalizeChildStateProps 2`] = `
+Array [
+  Object {
+    "childStates": Array [
+      "child-1",
+      "child-2",
+    ],
+    "id": "parent",
+    "initial": true,
+    "path": "/",
+    "stack": "#home.parent",
+    "transitions": Array [],
+    "type": "compound",
+  },
+  Object {
+    "childStates": Array [
+      "grand-child",
+    ],
+    "id": "child-1",
+    "initial": true,
+    "path": "/",
+    "stack": "#home.parent.child-1",
+    "transitions": Array [
+      Object {
+        "cond": null,
+        "event": "test-event",
+        "sendId": "child-1",
+        "target": "child-2",
+      },
+    ],
+    "type": "default",
+  },
+  Object {
+    "childStates": Array [],
+    "id": "grand-child",
+    "initial": true,
+    "path": "/",
+    "stack": "#home.parent.child-1.grand-child",
+    "transitions": Array [],
+    "type": "atomic",
+  },
+  Object {
+    "childStates": Array [],
+    "id": "child-2",
+    "initial": false,
+    "path": "/",
+    "stack": "#home.parent.child-2",
+    "transitions": Array [],
+    "type": "atomic",
+  },
+  Object {
+    "childStates": Array [
+      "child-3",
+    ],
+    "id": "parent-2",
+    "initial": false,
+    "path": "/",
+    "stack": "#home.parent-2",
+    "transitions": Array [],
+    "type": "default",
+  },
+  Object {
+    "childStates": Array [],
+    "id": "child-3",
+    "initial": true,
+    "path": "/",
+    "stack": "#home.parent-2.child-3",
+    "transitions": Array [],
+    "type": "atomic",
+  },
+]
+`;
+
+exports[`utility functions normalizeChildStateProps 3`] = `
+Array [
+  Object {
     "childStates": Array [
       "child-1",
       "child-2",
@@ -50,10 +137,48 @@ Array [
     "transitions": Array [],
     "type": "atomic",
   },
+  Object {
+    "childStates": Array [
+      "child-3",
+    ],
+    "id": "parent-2",
+    "initial": false,
+    "path": "/",
+    "stack": "#home.parent-2",
+    "transitions": Array [],
+    "type": "default",
+  },
+  Object {
+    "childStates": Array [],
+    "id": "child-3",
+    "initial": true,
+    "path": "/",
+    "stack": "#home.parent-2.child-3",
+    "transitions": Array [],
+    "type": "atomic",
+  },
 ]
 `;
 
 exports[`utility functions resolveInitial 1`] = `
+Object {
+  "params": Object {},
+  "path": "/",
+  "stack": "#home.child",
+  "url": "/",
+}
+`;
+
+exports[`utility functions resolveInitial 2`] = `
+Object {
+  "params": Object {},
+  "path": "/",
+  "stack": "#home.parent.child-1.grand-child",
+  "url": "/",
+}
+`;
+
+exports[`utility functions resolveInitial 3`] = `
 Object {
   "params": Object {
     "parent": "parent-id",
@@ -66,14 +191,14 @@ Object {
 
 exports[`utility functions resolveToAtomic 1`] = `
 Object {
-  "path": "/:parent/child-1",
-  "stack": "#home.parent.child-1.grand-child",
+  "path": "/",
+  "stack": "#home.child",
 }
 `;
 
 exports[`utility functions resolveToAtomic 2`] = `
 Object {
-  "path": "/:parent/child-1",
+  "path": "/",
   "stack": "#home.parent.child-1.grand-child",
 }
 `;

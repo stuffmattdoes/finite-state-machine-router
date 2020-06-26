@@ -25,7 +25,7 @@ function State(props) {
 
     const _type = useMemo(() => {
         let _type = type;
-        const childStates = getChildStateNodes(children);
+        const childStates = getChildStateNodes(React.Children.toArray(children));
         // const transitions = getChildrenOfType(children, 'Transition').map(({ props }) => ({
         //     cond: props.cond || null,
         //     event: props.event,

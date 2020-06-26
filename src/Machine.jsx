@@ -21,22 +21,27 @@ export const useMachine = () => {
 }
 
 function Machine ({ children: machineChildren, history: machineHistory, id: machineId, path: machinePath }) {
-    let history = useMemo(() => {
-        if (!machineHistory) {
-            return createBrowserHistory({ basename: machinePath });
-        }
-    }, [ machineHistory ]);
+    let history = machineHistory || createBrowserHistory({ basename: machinePath });
 
     const [ childStates, normalized ] = useMemo(() => {
-        const _childStates = getChildStateNodes(machineChildren);
+        const _childStates = getChildStateNodes(React.Children.toArray(machineChildren));
+
+        if (_childStates.length === 0) {
+            throw new Error('<Machine/> has no children <State/> nodes! At least one is required to be considered a valid state machine.');
+        }
+
         const _normalized = normalizeChildStateProps(_childStates, machineId);
+
+        // Check for a wildcard state
+        // if (!_normalized.find(({ id }) => id === '*')) {
+        //     _childStates.push(<State id='*' component={props => <div>Not found</div>}/>)
+        // }
 
         return [ _childStates, _normalized ];
     }, [ machineChildren ]);
 
     const [ initialStack, params ] = useMemo(() => {
         let initialStack = '#' + machineId + '.' + getInitialChildStateNode(childStates).props.id;
-
         const { params, path, stack, url } = resolveInitial(history.location.pathname, normalized, machineId);
 
         if (history.location.pathname !== url) {
@@ -48,6 +53,7 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
 
     const [ state, setState ] = useState({
         current: initialStack,
+        event: null,
         params
     });
 
@@ -55,7 +61,9 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
         const url = injectUrlParams(path, state.params);
 
         if (url !== history.location.pathname) {
+            // console.log('machine resolvePath', 1, history.location.pathname + ' -> ' + url, state);
             history.push(url, { stack: state.current });
+            // console.log('machine resolvePath', 2, history.location.pathname + ' -> ' + url, state);
         }
     }
 
@@ -81,32 +89,55 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
                 //if (stack === state.current) {
                 //    return;
                 //}
-                
-                let nextEvent = {
-                    event: event,
-                    data,
-                    targetId,
-                    path
-                };
 
-                if (process.env.NODE_ENV === 'development') {
-                    console.log('Machine Event Sent:', nextEvent);
-                }
+                // if (process.env.NODE_ENV === 'development') {
+                    console.log('Machine Event Sent:', {
+                        event: event,
+                        data,
+                        targetId,
+                        path
+                    });
+                // }
 
-                setState({ current: stack, params });
+                // console.log('machine setState', 1, state.current, stack);
+                setState({ current: stack, event: event, params });
+                // console.log('machine setState', 2, state, stack);
             } else {
-                console.error(`Invalid transition target: No target State Node of id "${targetId}" exists.`);
+                console.error(`Invalid transition target: No target State Node of id "${targetId}" exists. event ${event} will be discarded.`);
             }
         }
     }
 
-    useEffect(() => history.listen((location, action) => {
-        const { params, path, stack, url } = resolveInitial(location.pathname, normalized, machineId);
+    // useEffect(() => console.log('machine current', state, history.location.pathname));
 
-        if (stack !== state.current) {
-            setState({ current: stack, params });
-        }
-    }));
+    useEffect(() => {
+        const { current, event } = state;
+        // console.log('machine history listen', 0, state, history.location.pathname);
+
+        return history.listen((location, action) => {
+            const { params, path, stack, url } = resolveInitial(location.pathname, normalized, machineId);
+            // console.log('machine history listen', 1, event, current, stack);
+
+            if (stack !== current) {
+                // console.log('machine history listen', 2, event, current, stack);
+                setState({ current: stack, params });
+            }
+        });
+    }, [ state.current ]);
+
+    // useEffect(() => {
+    //     const handler = (state) => (location, action) => {
+    //         const { params, path, stack, url } = resolveInitial(location.pathname, normalized, machineId);
+    //         console.log('machine history listen', 2, state, stack);
+    //     }
+
+    //     const unlisten =  history.listen(handler(state));
+
+    //     return () => {
+    //         console.log('machine history cleanup');
+    //         unlisten();
+    //     }
+    // });
 
     const providerValue = {
         ...state,

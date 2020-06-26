@@ -1,0 +1,125 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<Machine/> Renders <Machine/> content at '/' 1`] = `
+<div>
+  <a
+    className={null}
+    href="#"
+    onClick={[Function]}
+  >
+    Link Event
+  </a>
+  <a
+    className={null}
+    href="/home"
+    onClick={[Function]}
+  >
+    Link Event
+  </a>
+</div>
+`;
+
+exports[`<Machine/> Renders <Machine/> content that does not contain any URLs 1`] = `
+<div>
+  <a
+    className={null}
+    href="#"
+    onClick={[Function]}
+  >
+    Link Event
+  </a>
+  <a
+    className={null}
+    href="/home"
+    onClick={[Function]}
+  >
+    Link Event
+  </a>
+</div>
+`;
+
+exports[`<Machine/> Renders the minimum necessary components for a valid <Machine/> 1`] = `
+<div>
+  <a
+    className={null}
+    href="#"
+    onClick={[Function]}
+  >
+    Link Event
+  </a>
+  <a
+    className={null}
+    href="/home"
+    onClick={[Function]}
+  >
+    Link Event
+  </a>
+</div>
+`;
+
+exports[`<Machine/> Resolves into nitial <State/> node lineage 1`] = `
+<div>
+  Child 2 
+</div>
+`;
+
+exports[`<Machine/> Resolves into nitial <State/> node lineage 2`] = `
+<div>
+  <a
+    className={null}
+    href="#"
+    onClick={[Function]}
+  >
+    Link Event
+  </a>
+  <a
+    className={null}
+    href="/home"
+    onClick={[Function]}
+  >
+    Link Event
+  </a>
+</div>
+`;
+
+exports[`<Machine/> Resolves to an atomic <State/> from a URL 1`] = `
+<div>
+  Child 2 
+  <div>
+    Child 2 
+  </div>
+</div>
+`;
+
+exports[`<Machine/> Resolves to wildcard route when no <State/> matches URL 1`] = `
+<div>
+  Wildcard Route
+</div>
+`;
+
+exports[`<Machine/> Returns "null" instead of crashing when no <State/> matches URL 1`] = `null`;
+
+exports[`<Machine/> Transitions from one <State/> to another upon even emission 1`] = `
+<div>
+  <div>
+    <h1>
+      Child 1
+    </h1>
+    <button
+      id="click-me"
+    >
+      Fire event
+    </button>
+  </div>
+</div>
+`;
+
+exports[`<Machine/> Transitions from one <State/> to another upon even emission 2`] = `
+<div>
+  <div>
+    <h1>
+      Child 2
+    </h1>
+  </div>
+</div>
+`;
