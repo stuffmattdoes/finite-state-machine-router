@@ -1,6 +1,6 @@
 {
   "name": "fsm-router",
-  "version": "0.2.18",
+  "version": "0.2.19",
   "dependencies": {
     "history": "^4.10.1",
     "react": "^16.13.1",
