@@ -1,7 +1,7 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
-import { Link, Machine, State, Transition } from '.';
-import { render, fireEvent, waitFor, screen } from '@testing-library/react'
+import { Machine, State, Transition } from '.';
+import { render, fireEvent } from '@testing-library/react'
 // import '@testing-library/jest-dom';
 
 describe('<Machine/>', () => {
@@ -23,6 +23,11 @@ describe('<Machine/>', () => {
     });
 
     const generic = name => ({ children }) => <div><h1>{name}</h1>{children}</div>;
+    const renderWithNavigation = (path, element) => {
+        const testHistory = createMemoryHistory({ initialEntries: [ path ] });
+        const machine = <Machine history={testHistory} id='home' path={path}>{element}</Machine>;
+        return [ testHistory, machine ];
+    }
 
     test('Renders the minimum necessary components for a valid <Machine/>', () => {
         const { getByText } = render(<Machine id='home'>
@@ -50,37 +55,35 @@ describe('<Machine/>', () => {
     });
 
     test('Renders <Machine/> content at \'/\'', () => {
-        const initialUrl = '/';
-        const testHistory = createMemoryHistory({ initialEntries: [ initialUrl ] });
-        const { getByText } = render(<Machine history={testHistory} id='home' path={initialUrl}>
-            <State id='child-1' path='/child-1' component={generic('Child 1')}>
-                <State id='grand-child'>
-                    <State id='great-grand-child'/>
+        const [ history, machine ] = renderWithNavigation('/',
+            <State id='parent'>
+                <State id='child-1' path='/child-1' component={generic('Child 1')}>
+                    <State id='grand-child'>
+                        <State id='great-grand-child'/>
+                    </State>
                 </State>
-            </State>
-            <State id='child-2' component={generic('Child 2')} path='/child-2'/>
-        </Machine>);
+                <State id='child-2' component={generic('Child 2')} path='/child-2'/>
+            </State>);
+        const { getByText } = render(machine);
 
         expect(getByText('Child 1')).toBeTruthy;
     });
 
     test('Resolves nitial <State/> node lineage', () => {
-        // render(<Machine id='home'>
-        //     <State id='parent'>
-        //         <State id='child-1' component={(props) => <div>Child 1</div>}>
-        //             <Transition event='test-event' target='child-2'/>
-        //             <State id='grand-child'/>
-        //         </State>
-        //         <State id='child-2' initial component={(props) => <div>Child 2</div>}/>
-        //     </State>
-        //     <State id='parent-2'>
-        //         <State id='child-3'/>
-        //     </State>
-        // </Machine>);
+        const [ history, machine ] = renderWithNavigation('/',
+            <State id='parent'>
+                <State id='child-1' component={generic('Child 1')}>
+                    <Transition event='test-event' target='child-2'/>
+                    <State id='grand-child'/>
+                </State>
+                <State id='child-2' initial component={generic('Child 2')}/>
+            </State>
+        );
+        const { getByText } = render(machine);
 
-        // expect(screen.getByText('Child 2')).toBeTruthy();
+        expect(getByText('Child 2')).toBeTruthy();
 
-        const { getByText } = render(<Machine id='home'>
+        const [ history2, machine2 ] = renderWithNavigation('/',
             <State id='parent'>
                 <State id='child-1' component={generic('Child 1')}>
                     <Transition event='test-event' target='child-2'/>
@@ -89,74 +92,68 @@ describe('<Machine/>', () => {
                 <State id='child-2' initial>
                     <State id='gren-child-2' component={generic('Grand Child 2')}/>
                 </State>
-            </State>
-        </Machine>);
+            </State>);
+        const { getByText: getByText2 } = render(machine2);
 
-        expect(getByText('Grand Child 2')).toBeTruthy();
+        expect(getByText2('Grand Child 2')).toBeTruthy();
     });
 
     test('Resolves to an atomic <State/> from a URL', () => {
-        const initialUrl = '/child-2';
-        const testHistory = createMemoryHistory({ initialEntries: [ initialUrl ] });
-        const { getByText } = render(<Machine history={testHistory} id='home' path={initialUrl}>
-            <State id='child-1' path='/child-1' component={generic('Child 1')}>
-                <State id='grand-child-1' component={generic('Grand Child 1')}/>
-            </State>
-            <State id='child-2' component={generic('Child 2')} path='/child-2'>
-                <State id='grand-child-2' component={generic('Grand Child 2')}/>
-            </State>
-        </Machine>);
+        const [ history, machine ] = renderWithNavigation('/child-2',
+            <State id='parent'>
+                <State id='child-1' path='/child-1' component={generic('Child 1')}>
+                    <State id='grand-child-1' component={generic('Grand Child 1')}/>
+                </State>
+                <State id='child-2' component={generic('Child 2')} path='/child-2'>
+                    <State id='grand-child-2' component={generic('Grand Child 2')}/>
+                </State>
+            </State>);
+        const { getByText } = render(machine);
 
         expect(getByText('Grand Child 2')).toBeTruthy();
     });
 
     test('Resolves to wildcard route when no <State/> matches URL', () => {
-        const initialUrl = '/no-route-found';
-        const testHistory = createMemoryHistory({ initialEntries: [ initialUrl ] });
-        const { getByText } = render(<Machine history={testHistory} id='home' path={initialUrl}>
-            <State id='parent' path='/parent'/>
-            <State id='*' component={generic('Wildcard Route')}/>
-        </Machine>);
+        const [ history, machine ] = renderWithNavigation('/no-route-found', [
+                <State key='1' id='parent' path='/parent'/>,
+                <State key='2' id='*' component={generic('Wildcard Route')}/>
+        ]);
+        const { getByText } = render(machine);
 
         expect(getByText('Wildcard Route')).toBeTruthy();
     });
 
     test('renders nothing instead of crashing when no <State/> matches URL', () => {
-        const initialUrl = '/no-route-found';
-        const testHistory = createMemoryHistory({ initialEntries: [ initialUrl ] });
-        render(<Machine history={testHistory} id='home' path={initialUrl}>
-            <State id='parent' path='/parent'/>
-        </Machine>);
-
+        const [ history, machine ] = renderWithNavigation('/no-route-found', <State id='parent' path='/parent'/>);
+        const { getByText} = render(machine);
         expect(console.warn).toHaveBeenCalledWith(expect.stringMatching(/No <State\/> configuration matches URL/));
     });
 
     test('Transitions state & resolves URL upon even emission', () => {
-        const initialUrl = '/';
-        const testHistory = createMemoryHistory({ initialEntries: [ initialUrl ] });
-        const { getByText } = render(<Machine history={testHistory} id='home' path={initialUrl}>
-            <State id='child-1' path='/child-1' component={({ machine }) => <div>
-                    <h1>Child 1</h1>
-                    <button onClick={event => machine.send('test-event-1')}>Fire event</button>
-                </div>}>
-                <Transition event='test-event-1' target='child-2'/>
+        const [ history, machine ] = renderWithNavigation('/', 
+            <State id='parent'>
+                <State id='child-1' path='/child-1' component={({ machine }) => <div>
+                        <h1>Child 1</h1>
+                        <button onClick={event => machine.send('test-event-1')}>Fire event</button>
+                    </div>}>
+                    <Transition event='test-event-1' target='child-2'/>
+                </State>
+                <State id='child-2' path='/child-2' component={generic('Child 2')}/>
             </State>
-            <State id='child-2' path='/child-2' component={generic('Child 2')}/>
-        </Machine>);
+        );
+        const { getByText } = render(machine);
 
-        expect(testHistory.location.pathname).toBe('/child-1');
+        expect(history.location.pathname).toBe('/child-1');
         expect(getByText('Child 1')).toBeTruthy();
         expect(getByText('Fire event')).toBeTruthy();
-        fireEvent.click(screen.getByText(/Fire event/i));
+        fireEvent.click(getByText(/Fire event/i));
         // expect(console.log).toHaveBeenCalledWith(expect.stringMatching(/Machine Event Sent/), expect.any(Object));
-        expect(testHistory.location.pathname).toBe('/child-2');
+        expect(history.location.pathname).toBe('/child-2');
         expect(getByText('Child 2')).toBeTruthy();
     });
 
     test('Transitions state & resolves URL upon event emission, even if the <Transition/> is an ancestor', () => {
-        const initialUrl = '/';
-        const testHistory = createMemoryHistory({ initialEntries: [ initialUrl ] });
-        const { getByText } = render(<Machine history={testHistory} id='home' path={initialUrl}>
+        const [ history, machine ] = renderWithNavigation('/', 
             <State id='parent'>
                 <Transition event='test-event-1' target='child-2'/>
                 <State id='child-1' path='/child-1' component={({ machine }) => <div>
@@ -164,21 +161,19 @@ describe('<Machine/>', () => {
                     <button onClick={event => machine.send('test-event-1')}>Fire event</button>
                 </div>}/>
                 <State id='child-2' path='/child-2' component={generic('Child 2')}/>
-            </State>
-        </Machine>);
+            </State>);
+        const { getByText } = render(machine);
 
         expect(getByText('Child 1')).toBeTruthy();
-        expect(testHistory.location.pathname).toBe('/child-1');
-        fireEvent.click(screen.getByText(/Fire event/i));
+        expect(history.location.pathname).toBe('/child-1');
+        fireEvent.click(getByText(/Fire event/i));
         // expect(console.log).toHaveBeenCalledWith(expect.stringMatching(/Machine Event Sent/), expect.any(Object));
         expect(getByText('Child 2')).toBeTruthy();
-        expect(testHistory.location.pathname).toBe('/child-2');
+        expect(history.location.pathname).toBe('/child-2');
     });
 
     test('Selects proper transition when multiple transitions exist', () => {
-        const initialUrl = '/';
-        const testHistory = createMemoryHistory({ initialEntries: [ initialUrl ] });
-        const { getByText } = render(<Machine history={testHistory} id='home' path={initialUrl}>
+        const [ history, machine ] = renderWithNavigation('/',
             <State id='parent'>
                 <Transition event='test-event-1' target='child-2'/>
                 <State id='child-1' path='/child-1' component={({ machine }) => <div>
@@ -189,21 +184,19 @@ describe('<Machine/>', () => {
                 </State>
                 <State id='child-2' path='/child-2' component={generic('Child 2')}/>
                 <State id='child-3' path='/child-3' component={generic('Child 3')}/>
-            </State>
-        </Machine>);
+            </State>);
+        const { getByText } = render(machine);
 
         expect(getByText('Child 1')).toBeTruthy();
-        expect(testHistory.location.pathname).toBe('/child-1');
-        fireEvent.click(screen.getByText(/Fire event/i));
+        expect(history.location.pathname).toBe('/child-1');
+        fireEvent.click(getByText(/Fire event/i));
         // expect(console.log).toHaveBeenCalledWith(expect.stringMatching(/Machine Event Sent/), expect.any(Object));
         expect(getByText('Child 3')).toBeTruthy();
-        expect(testHistory.location.pathname).toBe('/child-3');
+        expect(history.location.pathname).toBe('/child-3');
     });
 
     test('Transitions state & resolves URL when target state is descendant, while "path" attribute is in ascestor', () => {
-        const initialUrl = '/';
-        const testHistory = createMemoryHistory({ initialEntries: [ initialUrl ] });
-        const { getByText } = render(<Machine history={testHistory} id='home' path={initialUrl}>
+        const [ history, machine ] = renderWithNavigation('/',
             <State id='parent'>
                 <State id='child-1' path='/child-1' component={({ machine }) => <div>
                     Child 1
@@ -214,21 +207,19 @@ describe('<Machine/>', () => {
                 <State id='child-2' path='/child-2'>
                     <State id='grand-child-2' component={generic('Grand Child 2')}/>
                 </State>
-            </State>
-        </Machine>);
+            </State>);
+        const { getByText } = render(machine);
 
         expect(getByText('Child 1')).toBeTruthy();
-        expect(testHistory.location.pathname).toBe('/child-1');
-        fireEvent.click(screen.getByText(/Fire event/i));
+        expect(history.location.pathname).toBe('/child-1');
+        fireEvent.click(getByText(/Fire event/i));
         // expect(console.log).toHaveBeenCalledWith(expect.stringMatching(/Machine Event Sent/), expect.any(Object));
         expect(getByText('Grand Child 2')).toBeTruthy();
-        expect(testHistory.location.pathname).toBe('/child-2');
+        expect(history.location.pathname).toBe('/child-2');
     });
 
     test.skip('Transitions state & resolves URL when target state is descendant & NOT initial state, while "path" attribute is in ascestor', () => {
-        const initialUrl = '/';
-        const testHistory = createMemoryHistory({ initialEntries: [ initialUrl ] });
-        const { getByText } = render(<Machine history={testHistory} id='home' path={initialUrl}>
+        const [ history, machine ] = renderWithNavigation('/',
             <State id='parent'>
                 <State id='child-1' path='/child-1' component={({ machine }) => <div>
                     Child 1
@@ -240,15 +231,15 @@ describe('<Machine/>', () => {
                     <State id='grand-child-2' component={generic('Grand Child 2')}/>
                     <State id='grand-child-2-2' component={generic('Grand Child 2-2')}/>
                 </State>
-            </State>
-        </Machine>);
+            </State>);
+        const { getByText } = render(machine);
 
         expect(getByText('Child 1')).toBeTruthy();
-        expect(testHistory.location.pathname).toBe('/child-1');
-        fireEvent.click(screen.getByText(/Fire event/i));
+        expect(history.location.pathname).toBe('/child-1');
+        fireEvent.click(getByText(/Fire event/i));
         // expect(console.log).toHaveBeenCalledWith(expect.stringMatching(/Machine Event Sent/), expect.any(Object));
         expect(getByText('Grand Child 2-2')).toBeTruthy();
-        expect(testHistory.location.pathname).toBe('/child-2');
+        expect(history.location.pathname).toBe('/child-2');
     });
 
     // test.skip('Discards events that result in mo matching transition', () => {
