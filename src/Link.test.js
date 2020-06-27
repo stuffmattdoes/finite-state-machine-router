@@ -56,7 +56,6 @@ describe('<Link/>', () => {
         expect(history.location.pathname).toBe('/child-1');
         expect(getByText(/Child 1/)).toBeTruthy();
         fireEvent.click(getByText(/URL Replace/));
-        console.log(history);
         expect(history.location.pathname).toBe('/child-2');
         expect(history.action).toBe('REPLACE');
         expect(getByText('Grand Child 2')).toBeTruthy();
@@ -75,14 +74,16 @@ describe('<Link/>', () => {
     // });
 
     test('Ignores clicks when disabled', () => {
+        const mockFn = jest.fn();
         const [ history, machine ] = renderWithNavigation((props) => <div>
             <h1>{name}</h1>
-            <Link href='/child-2' disabled>URL Disabled</Link>
+            <Link href='/child-2' disabled onClick={mockFn}>URL Disabled</Link>
         </div>);
         const { getByText } = render(machine);
         expect(history.location.pathname).toBe('/child-1');
         fireEvent.click(getByText('URL Disabled'));
         expect(history.location.pathname).toBe('/child-1');
+        expect(mockFn).not.toHaveBeenCalled();
         expect(history.length).toBe(2);
     });
 });
