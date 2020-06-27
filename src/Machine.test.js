@@ -1,7 +1,7 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
 import { Machine, State, Transition } from '.';
-import { render, fireEvent } from '@testing-library/react'
+import { cleanup, render, fireEvent } from '@testing-library/react'
 // import '@testing-library/jest-dom';
 
 describe('<Machine/>', () => {
@@ -20,6 +20,8 @@ describe('<Machine/>', () => {
             ...global.console,
             ..._console
         }
+
+        cleanup();
     });
 
     const generic = name => ({ children }) => <div><h1>{name}</h1>{children}</div>;
