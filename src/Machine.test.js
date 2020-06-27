@@ -2,7 +2,6 @@ import React from 'react';
 import { createMemoryHistory } from 'history';
 import { Machine, State, Transition } from '.';
 import { cleanup, render, fireEvent } from '@testing-library/react'
-// import '@testing-library/jest-dom';
 
 describe('<Machine/>', () => {
     let _console = {
