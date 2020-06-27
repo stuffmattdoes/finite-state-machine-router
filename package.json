@@ -2,7 +2,7 @@
   "name": "fsm-router",
   "version": "0.2.20",
   "dependencies": {
-    "history": "^4.10.1"
+    "history": "^5.0.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.10.3",
