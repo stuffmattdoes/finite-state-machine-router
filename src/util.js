@@ -38,7 +38,7 @@ const isCurrentStack = (id, stack) => !!stack.split('.').find(state => state ===
 const isExactStack = (id, stack) => stack.split('.').pop() === id;
 const isDynamicSegment = segment => /^:(.+)/.test(segment);
 const isRootPath = (path) => path === '/';
-const isRootSemgent = url => url.slice(1) === '';
+const isRootSegment = url => url.slice(1) === '';
 const isRootStack = stack => !stack.match(/\./g);
 const isNotFound = stack => stack.split('.').pop() === '*';
 const segmentize = url => url.split('/').filter(Boolean);
@@ -79,7 +79,7 @@ const deriveStateFromUrl = (url, normalized, rootId) => {
     }
 
     // 1.1 Check if URL is root, return initial stack
-    if (isRootSemgent(url)) {
+    if (isRootSegment(url)) {
         match.stack = normalized.find(norm => norm.stack.match(/\./g).length === 1 && norm.initial).stack;
         return match;
     }

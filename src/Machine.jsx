@@ -61,9 +61,7 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
         const url = injectUrlParams(path, state.params);
 
         if (url !== history.location.pathname) {
-            // console.log('machine resolvePath', 1, history.location.pathname + ' -> ' + url, state);
             history.push(url, { stack: state.current });
-            // console.log('machine resolvePath', 2, history.location.pathname + ' -> ' + url, state);
         }
     }
 
@@ -112,32 +110,15 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
 
     useEffect(() => {
         const { current, event } = state;
-        // console.log('machine history listen', 0, state, history.location.pathname);
 
-        return history.listen((location, action) => {
+        return history.listen(({ action, location }) => {
             const { params, path, stack, url } = resolveInitial(location.pathname, normalized, machineId);
-            // console.log('machine history listen', 1, event, current, stack);
 
             if (stack !== current) {
-                // console.log('machine history listen', 2, event, current, stack);
                 setState({ current: stack, params });
             }
         });
     }, [ state.current ]);
-
-    // useEffect(() => {
-    //     const handler = (state) => (location, action) => {
-    //         const { params, path, stack, url } = resolveInitial(location.pathname, normalized, machineId);
-    //         console.log('machine history listen', 2, state, stack);
-    //     }
-
-    //     const unlisten =  history.listen(handler(state));
-
-    //     return () => {
-    //         console.log('machine history cleanup');
-    //         unlisten();
-    //     }
-    // });
 
     const providerValue = {
         ...state,

@@ -243,7 +243,7 @@ describe('<Machine/>', () => {
         expect(history.location.pathname).toBe('/child-2');
     });
 
-    // test.skip('Discards events that result in mo matching transition', () => {
+    // test('Discards events that result in mo matching transition', () => {
 
     // });
 });
