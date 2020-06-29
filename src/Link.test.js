@@ -1,5 +1,5 @@
 import React from 'react';
-import { createMemoryHistory } from 'history';
+import { createBrowserHistory, createMemoryHistory } from 'history';
 import { Link, Machine, State, Transition } from '.';
 import { cleanup, render, fireEvent } from '@testing-library/react';
 
@@ -48,12 +48,13 @@ describe('<Link/>', () => {
         expect(getByText('Grand Child 2')).toBeTruthy();
     });
 
-    test.skip('Replaces URL in history if "replace" attribute is true and is clicked', () => {
+    test('Replaces URL in history if "replace" attribute is true and is clicked', () => {
         const [ history, machine ] = renderWithNavigation('/', genericWithLinks('Child 1'));
         const { getByText } = render(machine);
-        // const assign = jest.spyOn(window.location, 'assign');
-        // const replace = window.location.replace;
-        // window.location.replace = jest.fn();
+        // const assignMock = jest.fn();
+        // const location = { ...window.location };
+        // delete window.location;
+        // window.location = { assign: assignMock };
 
         expect(history.location.pathname).toBe('/child-1');
         expect(getByText(/Child 1/)).toBeTruthy();
@@ -62,7 +63,8 @@ describe('<Link/>', () => {
         expect(history.action).toBe('REPLACE');
         expect(getByText('Grand Child 2')).toBeTruthy();
 
-        // window.location.replace = replace;
+        // assignMock.mockClear();
+        // window.location = location;
     });
 
     // test('Replaces URL when link for current path is clicked without state', () => {
@@ -80,7 +82,7 @@ describe('<Link/>', () => {
     test('Ignores clicks when disabled', () => {
         const mockFn = jest.fn();
         const [ history, machine ] = renderWithNavigation('/', (props) => <div>
-            <h1>{name}</h1>
+            <h1>Child 1</h1>
             <Link href='/child-2' disabled onClick={mockFn}>URL Disabled</Link>
         </div>);
         const { getByText } = render(machine);

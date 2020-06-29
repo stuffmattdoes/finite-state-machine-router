@@ -25,6 +25,7 @@ function Link({ children, className, disabled = false, event: machineEvent, href
                 history.push(href);
             }
         } else {
+            event.preventDefault();
             history.replace(href);
         }
 
