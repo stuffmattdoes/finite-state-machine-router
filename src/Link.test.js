@@ -52,6 +52,9 @@ describe('<Link/>', () => {
     test.skip('Replaces URL in history if "replace" attribute is true and is clicked', () => {
         const [ history, machine ] = renderWithNavigation(genericWithLinks('Child 1'));
         const { getByText } = render(machine);
+        // const assign = jest.spyOn(window.location, 'assign');
+        // const replace = window.location.replace;
+        // window.location.replace = jest.fn();
 
         expect(history.location.pathname).toBe('/child-1');
         expect(getByText(/Child 1/)).toBeTruthy();
@@ -59,6 +62,8 @@ describe('<Link/>', () => {
         expect(history.location.pathname).toBe('/child-2');
         expect(history.action).toBe('REPLACE');
         expect(getByText('Grand Child 2')).toBeTruthy();
+
+        // window.location.replace = replace;
     });
 
     // test('Replaces URL when link for current path is clicked without state', () => {
