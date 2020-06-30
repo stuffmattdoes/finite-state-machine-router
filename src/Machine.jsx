@@ -89,12 +89,12 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
     }
 
     useEffect(() =>  history.listen(({ action, location }) => {
-            const { shouldgetAtomic } = location.state || true;
-            const { params, path, stack, url } = resolveSeed(location.pathname, normalized, machineId);
+        const { shouldgetAtomic } = location.state || true;
+        const { params, path, stack, url } = resolveSeed(location.pathname, normalized, machineId);
 
-            if (shouldgetAtomic) {
-                setState({ current: stack, params });
-            }
+        if (shouldgetAtomic) {
+            setState({ current: stack, params });
+        }
     }), [ state.current ]);
 
     const providerValue = {

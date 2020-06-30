@@ -41,7 +41,6 @@ function State(props) {
 
     return match ?
         <StateNodeContext.Provider value={initialContext}>
-            {/* { Component && !interrupted ? */}
             { Component ?
                 <Component {...componentProps}/>
             : children }

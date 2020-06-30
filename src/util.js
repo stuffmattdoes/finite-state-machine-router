@@ -225,7 +225,12 @@ const resolveSeed = (url, normalized, machineId) => {
     initialProps.stack = currentStack;
 
     if (isNotFound(currentStack)) {
-
+        // if (isRootPath(url)) {
+        //     const { path, stack } = normalized[0];
+        //     initialProps.path = path;
+        //     initialProps.stack = stack;
+        //     initialProps.url = injectUrlParams(path, params);
+        // }
     } else {
         const { path, stack } = getAtomic(currentStack, normalized);
 
