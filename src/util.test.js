@@ -9,7 +9,7 @@ import {
     isCurrentStack,
     isExactStack,
     normalizeChildStateProps,
-    resolveSeed,
+    resolveSeedToAtomic,
     getAtomic,
     selectTransition
 } from './util';
@@ -125,10 +125,10 @@ describe('utility functions', () => {
         expect(normalizedPaths).toMatchSnapshot();
     });
 
-    test('resolveSeed', () => {
-        expect(resolveSeed('/', normalizedSimple, 'home')).toMatchSnapshot();
-        expect(resolveSeed('/', normalizedComplex, 'home')).toMatchSnapshot();
-        expect(resolveSeed('/parent-id/child-1', normalizedPaths, 'home')).toMatchSnapshot();
+    test('resolveSeedToAtomic', () => {
+        expect(resolveSeedToAtomic('/', normalizedSimple, 'home')).toMatchSnapshot();
+        expect(resolveSeedToAtomic('/', normalizedComplex, 'home')).toMatchSnapshot();
+        expect(resolveSeedToAtomic('/parent-id/child-1', normalizedPaths, 'home')).toMatchSnapshot();
     })
 
     test('getAtomic', () => {
