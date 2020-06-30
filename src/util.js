@@ -219,24 +219,24 @@ const resolveSeed = (url, normalized, machineId) => {
         url
     };
 
-    const { params, path: currentPath, stack: currentStack } = deriveStateFromUrl(url, normalized, machineId);
-    initialProps.params = params;
-    initialProps.path = currentPath;
-    initialProps.stack = currentStack;
-
-    if (isNotFound(currentStack)) {
-        // if (isRootPath(url)) {
-        //     const { path, stack } = normalized[0];
-        //     initialProps.path = path;
-        //     initialProps.stack = stack;
-        //     initialProps.url = injectUrlParams(path, params);
-        // }
+    if (isRootPath(url)) {
+        const { path, stack } = normalized[0];
+        const { path: atomicPath, stack: atomicStack } = getAtomic(stack, normalized);
+        initialProps.path = atomicPath;
+        initialProps.stack = atomicStack;
+        initialProps.url = injectUrlParams(atomicPath, {});
     } else {
-        const { path, stack } = getAtomic(currentStack, normalized);
+        const { params, path: currentPath, stack: currentStack } = deriveStateFromUrl(url, normalized, machineId);
+        initialProps.params = params;
+        initialProps.path = currentPath;
+        initialProps.stack = currentStack;
 
-        initialProps.path = path;
-        initialProps.stack = stack;
-        initialProps.url = injectUrlParams(path, params);
+        if (!isNotFound(currentStack)) {
+            const { path: atomicPath, stack: atomicStack } = getAtomic(currentStack, normalized);
+            initialProps.path = atomicPath;
+            initialProps.stack = atomicStack;
+            initialProps.url = injectUrlParams(atomicPath, params);
+        }
     }
 
     return initialProps;

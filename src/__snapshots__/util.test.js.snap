@@ -1,5 +1,26 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`utility functions getAtomic 1`] = `
+Object {
+  "path": "/",
+  "stack": "#home.child",
+}
+`;
+
+exports[`utility functions getAtomic 2`] = `
+Object {
+  "path": "/",
+  "stack": "#home.parent.child-1.grand-child",
+}
+`;
+
+exports[`utility functions getAtomic 3`] = `
+Object {
+  "path": "/:parent",
+  "stack": "#home.parent.child-2",
+}
+`;
+
 exports[`utility functions normalizeChildStateProps 1`] = `
 Array [
   Object {
@@ -162,7 +183,7 @@ Array [
 
 exports[`utility functions resolveSeed 1`] = `
 Object {
-  "params": Object {},
+  "params": null,
   "path": "/",
   "stack": "#home.child",
   "url": "/",
@@ -171,7 +192,7 @@ Object {
 
 exports[`utility functions resolveSeed 2`] = `
 Object {
-  "params": Object {},
+  "params": null,
   "path": "/",
   "stack": "#home.parent.child-1.grand-child",
   "url": "/",
@@ -186,27 +207,6 @@ Object {
   "path": "/:parent/child-1",
   "stack": "#home.parent.child-1.grand-child",
   "url": "/parent-id/child-1",
-}
-`;
-
-exports[`utility functions getAtomic 1`] = `
-Object {
-  "path": "/",
-  "stack": "#home.child",
-}
-`;
-
-exports[`utility functions getAtomic 2`] = `
-Object {
-  "path": "/",
-  "stack": "#home.parent.child-1.grand-child",
-}
-`;
-
-exports[`utility functions getAtomic 3`] = `
-Object {
-  "path": "/:parent",
-  "stack": "#home.parent.child-2",
 }
 `;
 
