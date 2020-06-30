@@ -143,7 +143,7 @@ const normalizeChildStateProps = (stateNodes, rootId) => {
         initialIndex = initialIndex >= 0 ? initialIndex : 0;
 
         return stateNodes.reduce((acc, stateNode, i) => {
-            const { children, id, path = '/', type } = stateNode.props;
+            const { children, id, parallel, path = '/' } = stateNode.props;
             const childStates = getChildStateNodes(React.Children.toArray(children));
             const transitions = getChildrenOfType(React.Children.toArray(children), 'Transition')
                 .map(({ props }) => ({
@@ -161,7 +161,7 @@ const normalizeChildStateProps = (stateNodes, rootId) => {
                 path,
                 stack: '.' + id,
                 transitions,
-                type: type === 'parallel' ? 'parallel'
+                type: parallel ? 'parallel'
                     : childStates.length === 0 ? 'atomic'
                     : childStates.length > 1 ? 'compound' : 'default'
             });
