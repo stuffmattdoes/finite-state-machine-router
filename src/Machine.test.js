@@ -55,7 +55,7 @@ describe('<Machine/>', () => {
         expect(queryByText('Child 1')).toBeTruthy;
     });
 
-    test('Renders <Machine/> content at \'/\'', () => {
+    test('Renders <Machine/> content when no "path" attribute is supplied', () => {
         const [ history, machine ] = renderWithNavigation(null,
             <State id='parent'>
                 <State id='child-1' path='/child-1' component={generic('Child 1')}>
@@ -70,7 +70,7 @@ describe('<Machine/>', () => {
         expect(queryByText('Child 1')).toBeTruthy;
     });
 
-    test('Resolves nitial <State/> node lineage', () => {
+    test('Resolves initial <State/> node lineage', () => {
         const [ history, machine ] = renderWithNavigation(null,
             <State id='parent'>
                 <State id='child-1' component={generic('Child 1')}>
@@ -102,7 +102,23 @@ describe('<Machine/>', () => {
         expect(queryByText2('Great Grand Child 2')).toBeTruthy();
     });
 
-    test('Resolves to an atomic <State/> from a URL', () => {
+    test('Resolves to an atomic <State/> & updates URL from root URL "/"', () => {
+        const [ history, machine ] = renderWithNavigation('/',
+            <State id='parent'>
+                <State id='child-1' path='/child-1' component={generic('Child 1')}>
+                    <State id='grand-child-1' component={generic('Grand Child 1')}>
+                        <State id='great-grand-child-1' path='/great-grand-child-1' component={generic('Great Grand Child 1')}>
+                        </State>
+                    </State>
+                </State>
+            </State>);
+        const { queryByText } = render(machine);
+
+        expect(history.location.pathname).toBe('/child-1/great-grand-child-1');
+        expect(queryByText('Great Grand Child 1')).toBeTruthy();
+    });
+
+    test('Resolves to an atomic <State/> & updates URL from non-root URL', () => {
         const [ history, machine ] = renderWithNavigation('/child-2',
             <State id='parent'>
                 <State id='child-1' path='/child-1' component={generic('Child 1')}>
