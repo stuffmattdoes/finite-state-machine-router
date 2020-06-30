@@ -18,9 +18,15 @@ function Link({ children, className, disabled = false, event: machineEvent, href
             send(machineEvent);
         }
 
-        if (!replace && !machineEvent) {
+        if (!replace) {
             event.preventDefault();
-            history.push(href);
+
+            if (!machineEvent) {
+                history.push(href, { shouldgetAtomic: true });
+            }
+        } else {
+            event.preventDefault();
+            history.replace(href, { shouldgetAtomic: true });
         }
 
         onClick && onClick(event);

@@ -160,7 +160,7 @@ Array [
 ]
 `;
 
-exports[`utility functions resolveInitial 1`] = `
+exports[`utility functions resolveSeed 1`] = `
 Object {
   "params": Object {},
   "path": "/",
@@ -169,7 +169,7 @@ Object {
 }
 `;
 
-exports[`utility functions resolveInitial 2`] = `
+exports[`utility functions resolveSeed 2`] = `
 Object {
   "params": Object {},
   "path": "/",
@@ -178,7 +178,7 @@ Object {
 }
 `;
 
-exports[`utility functions resolveInitial 3`] = `
+exports[`utility functions resolveSeed 3`] = `
 Object {
   "params": Object {
     "parent": "parent-id",
@@ -189,21 +189,21 @@ Object {
 }
 `;
 
-exports[`utility functions resolveToAtomic 1`] = `
+exports[`utility functions getAtomic 1`] = `
 Object {
   "path": "/",
   "stack": "#home.child",
 }
 `;
 
-exports[`utility functions resolveToAtomic 2`] = `
+exports[`utility functions getAtomic 2`] = `
 Object {
   "path": "/",
   "stack": "#home.parent.child-1.grand-child",
 }
 `;
 
-exports[`utility functions resolveToAtomic 3`] = `
+exports[`utility functions getAtomic 3`] = `
 Object {
   "path": "/:parent",
   "stack": "#home.parent.child-2",

@@ -1,15 +1,16 @@
 import React from 'react';
 import { Link } from '../src';
 
-export const App = ({ children }) => <main>
+export const App = ({ children, machine }) => <main>
     <header>Example | Finite State Machine Router</header>
+    <ul>
+        <li onClick={event => machine.send('test-event-1')}>Child 1</li>
+        <li onClick={event => machine.send('test-event-2')}>Grand Child 2</li>
+    </ul>
     {children}
-    <nav>
-        <Link className='custom-class' href='/parent/child'>Link</Link>
-        <Link className='custom-class' href='/parent/child-2'>Link</Link>
-    </nav>
 </main>;
 
-export const Child = (props) => <div><h1>Child</h1></div>;
-export const Error = (props) => <div><h1>Error</h1></div>
-export const NotFound = (props) => <div><h1>Not Found</h1></div>
+export const generic = (name) => ({ children }) => <div>
+    <p>{name}</p>
+    {children}
+</div>
