@@ -91,12 +91,15 @@ describe('<Machine/>', () => {
                     <State id='grand-child'/>
                 </State>
                 <State id='child-2' initial>
-                    <State id='gren-child-2' component={generic('Grand Child 2')}/>
+                    <State id='grand-child-2' component={generic('Grand Child 2')}>
+                        <State id='great-grand-child-2' component={generic('Great Grand Child 2')}/>
+                    </State>
                 </State>
             </State>);
         const { queryByText: queryByText2 } = render(machine2);
 
         expect(queryByText2('Grand Child 2')).toBeTruthy();
+        expect(queryByText2('Great Grand Child 2')).toBeTruthy();
     });
 
     test('Resolves to an atomic <State/> from a URL, with or without trailing slash', () => {
@@ -106,25 +109,15 @@ describe('<Machine/>', () => {
                     <State id='grand-child-1' component={generic('Grand Child 1')}/>
                 </State>
                 <State id='child-2' component={generic('Child 2')} path='/child-2'>
-                    <State id='grand-child-2' component={generic('Grand Child 2')}/>
+                    <State id='grand-child-2' component={generic('Grand Child 2')} path='/grand-child-2'>
+                        <State id='great-grand-child-2' component={generic('Great Grand Child 2')}/>
+                    </State>
                 </State>
             </State>);
         const { queryByText } = render(machine);
 
-        expect(queryByText('Grand Child 2')).toBeTruthy();
-
-        const [ history2, machine2 ] = renderWithNavigation('/child-2/',
-            <State id='parent'>
-                <State id='child-1' path='/child-1' component={generic('Child 1')}>
-                    <State id='grand-child-1' component={generic('Grand Child 1')}/>
-                </State>
-                <State id='child-2' component={generic('Child 2')} path='/child-2'>
-                    <State id='grand-child-2' component={generic('Grand Child 2')}/>
-                </State>
-            </State>);
-        const { queryByText: queryByText2 } = render(machine2);
-
-        expect(queryByText2('Grand Child 2')).toBeTruthy();
+        expect(history.location.pathname).toBe('/child-2/grand-child-2');
+        expect(queryByText('Great Grand Child 2')).toBeTruthy();
     });
 
     test('Resolves to wildcard route when no <State/> matches URL', () => {
