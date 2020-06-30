@@ -52,7 +52,7 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
         params
     });
 
-    function resolvePath(path) {
+    const resolvePath = (path) => {
         const url = injectUrlParams(path, state.params);
 
         if (url !== history.location.pathname) {
@@ -60,7 +60,7 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
         }
     }
 
-    function send(event, data = null) {
+    const send = (event, data = null) => {
         const targetState = selectTransition(event, state.current, normalized);
 
         if (targetState) {

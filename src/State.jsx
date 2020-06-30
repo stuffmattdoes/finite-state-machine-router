@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useContext } from 'react';
 import { MachineContext } from './Machine';
-import { getChildrenOfType, getChildStateNodes, isCurrentStack, isExactStack } from './util';
+import { isCurrentStack, isExactStack } from './util';
 
 export const StateNodeContext = React.createContext({
     id: null,
@@ -10,7 +10,7 @@ export const StateNodeContext = React.createContext({
 StateNodeContext.displayName = 'StateNode';
 
 function State(props) {
-    const { children, component: Component, id, initial, onEntry, onExit, path } = props;
+    const { children, component: Component, id, initial, path } = props;
     const machineContext = useContext(MachineContext);
     const { event: machineEvent, current, history, id: machineId, params, resolvePath, send: machineSend } = machineContext;
     const { id: parentId, path: parentPath, stack: parentStack } = useContext(StateNodeContext);
