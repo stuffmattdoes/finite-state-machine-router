@@ -219,19 +219,43 @@ const resolveSeed = (url, normalized, machineId) => {
         url
     };
 
-    const { params, path: currentPath, stack: currentStack } = deriveStateFromUrl(url, normalized, machineId);
-    initialProps.params = params;
-    initialProps.path = currentPath;
-    initialProps.stack = currentStack;
+    // let { params, path, stack } = deriveStateFromUrl(url, normalized, machineId);
+    // initialProps.path = initial.path;
+    // initialProps.stack = stack;
+    // initialProps.params = params;
 
-    if (isNotFound(currentStack)) {
+    // if (isRootPath(url)) {
+    //     if (!isNotFound(stack)) {
+    //         const initial = normalized[0];
+    //         initialProps.path = initial.path;
+    //         initialProps.stack = initial.stack;
+    //     }
 
+    //     let { path: atomicPath, stack: atomicStack } = getAtomic(initialProps.stack, normalized);
+    //     initialProps.path = atomicPath;
+    //     initialProps.stack = atomicStack;
+    // }
+
+    // initialProps.url = injectUrlParams(initialProps.stack, params);
+
+    if (isRootPath(url)) {
+        const { path, stack } = normalized[0];
+        const { path: atomicPath, stack: atomicStack } = getAtomic(stack, normalized);
+        initialProps.path = atomicPath;
+        initialProps.stack = atomicStack;
+        initialProps.url = injectUrlParams(atomicPath, {});
     } else {
-        const { path, stack } = getAtomic(currentStack, normalized);
+        const { params, path: currentPath, stack: currentStack } = deriveStateFromUrl(url, normalized, machineId);
+        initialProps.params = params;
+        initialProps.path = currentPath;
+        initialProps.stack = currentStack;
 
-        initialProps.path = path;
-        initialProps.stack = stack;
-        initialProps.url = injectUrlParams(path, params);
+        if (!isNotFound(currentStack)) {
+            const { path: atomicPath, stack: atomicStack } = getAtomic(currentStack, normalized);
+            initialProps.path = atomicPath;
+            initialProps.stack = atomicStack;
+            initialProps.url = injectUrlParams(atomicPath, params);
+        }
     }
 
     return initialProps;

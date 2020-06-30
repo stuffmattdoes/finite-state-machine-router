@@ -28,7 +28,7 @@ describe('<Link/>', () => {
     }
 
     test('Build verification', () => {
-        const [ history, machine ] = renderWithNavigation('/', genericWithLinks('Child 1'));
+        const [ history, machine ] = renderWithNavigation(null, genericWithLinks('Child 1'));
         const { queryByText } = render(machine);
 
         expect(history.location.pathname).toBe('/child-1');
@@ -37,7 +37,7 @@ describe('<Link/>', () => {
     });
 
     test('Pushes URL to history by default', () => {
-        const [ history, machine ] = renderWithNavigation('/', genericWithLinks('Child 1'));
+        const [ history, machine ] = renderWithNavigation(null, genericWithLinks('Child 1'));
         const { queryByText } = render(machine);
 
         expect(history.location.pathname).toBe('/child-1');
@@ -49,7 +49,7 @@ describe('<Link/>', () => {
     });
 
     test('Replaces URL in history if "replace" attribute is true and is clicked', () => {
-        const [ history, machine ] = renderWithNavigation('/', genericWithLinks('Child 1'));
+        const [ history, machine ] = renderWithNavigation(null, genericWithLinks('Child 1'));
         const { queryByText } = render(machine);
         // const assignMock = jest.fn();
         // const location = { ...window.location };
@@ -81,7 +81,7 @@ describe('<Link/>', () => {
 
     test('Ignores clicks when disabled', () => {
         const mockFn = jest.fn();
-        const [ history, machine ] = renderWithNavigation('/', (props) => <div>
+        const [ history, machine ] = renderWithNavigation(null, (props) => <div>
             <h1>Child 1</h1>
             <Link href='/child-2' disabled onClick={mockFn}>URL Disabled</Link>
         </div>);

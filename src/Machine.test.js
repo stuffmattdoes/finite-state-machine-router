@@ -30,7 +30,7 @@ describe('<Machine/>', () => {
         return [ testHistory, machine ];
     }
 
-    test('Renders the minimum necessary components for a valid <Machine/>', () => {
+    test('Build verification', () => {
         const { queryByText } = render(<Machine id='home'>
             <State id='child' component={generic('Child 1')}/>
         </Machine>);
@@ -55,8 +55,8 @@ describe('<Machine/>', () => {
         expect(queryByText('Child 1')).toBeTruthy;
     });
 
-    test('Renders <Machine/> content at \'/\'', () => {
-        const [ history, machine ] = renderWithNavigation('/',
+    test('Renders <Machine/> content when no "path" attribute is supplied', () => {
+        const [ history, machine ] = renderWithNavigation(null,
             <State id='parent'>
                 <State id='child-1' path='/child-1' component={generic('Child 1')}>
                     <State id='grand-child'>
@@ -70,8 +70,8 @@ describe('<Machine/>', () => {
         expect(queryByText('Child 1')).toBeTruthy;
     });
 
-    test('Resolves nitial <State/> node lineage', () => {
-        const [ history, machine ] = renderWithNavigation('/',
+    test('Resolves initial <State/> node lineage', () => {
+        const [ history, machine ] = renderWithNavigation(null,
             <State id='parent'>
                 <State id='child-1' component={generic('Child 1')}>
                     <Transition event='test-event' target='child-2'/>
@@ -84,7 +84,7 @@ describe('<Machine/>', () => {
 
         expect(queryByText('Child 2')).toBeTruthy();
 
-        const [ history2, machine2 ] = renderWithNavigation('/',
+        const [ history2, machine2 ] = renderWithNavigation(null,
             <State id='parent'>
                 <State id='child-1' component={generic('Child 1')}>
                     <Transition event='test-event' target='child-2'/>
@@ -102,7 +102,23 @@ describe('<Machine/>', () => {
         expect(queryByText2('Great Grand Child 2')).toBeTruthy();
     });
 
-    test('Resolves to an atomic <State/> from a URL, with or without trailing slash', () => {
+    test('Resolves to an atomic <State/> & updates URL from root URL "/"', () => {
+        const [ history, machine ] = renderWithNavigation('/',
+            <State id='parent'>
+                <State id='child-1' path='/child-1' component={generic('Child 1')}>
+                    <State id='grand-child-1' component={generic('Grand Child 1')}>
+                        <State id='great-grand-child-1' path='/great-grand-child-1' component={generic('Great Grand Child 1')}>
+                        </State>
+                    </State>
+                </State>
+            </State>);
+        const { queryByText } = render(machine);
+
+        expect(history.location.pathname).toBe('/child-1/great-grand-child-1');
+        expect(queryByText('Great Grand Child 1')).toBeTruthy();
+    });
+
+    test('Resolves to an atomic <State/> & updates URL from non-root URL', () => {
         const [ history, machine ] = renderWithNavigation('/child-2',
             <State id='parent'>
                 <State id='child-1' path='/child-1' component={generic('Child 1')}>
@@ -137,7 +153,7 @@ describe('<Machine/>', () => {
     });
 
     test('Transitions state & resolves URL upon even emission', () => {
-        const [ history, machine ] = renderWithNavigation('/', 
+        const [ history, machine ] = renderWithNavigation(null, 
             <State id='parent'>
                 <State id='child-1' path='/child-1' component={({ machine }) => <div>
                         <h1>Child 1</h1>
@@ -160,7 +176,7 @@ describe('<Machine/>', () => {
     });
 
     test('Transitions state & resolves URL upon event emission, even if the <Transition/> is an ancestor', () => {
-        const [ history, machine ] = renderWithNavigation('/', 
+        const [ history, machine ] = renderWithNavigation(null, 
             <State id='parent'>
                 <Transition event='test-event-1' target='child-2'/>
                 <State id='child-1' path='/child-1' component={({ machine }) => <div>
@@ -180,7 +196,7 @@ describe('<Machine/>', () => {
     });
 
     test('Selects proper transition when multiple transitions exist', () => {
-        const [ history, machine ] = renderWithNavigation('/',
+        const [ history, machine ] = renderWithNavigation(null,
             <State id='parent'>
                 <Transition event='test-event-1' target='child-2'/>
                 <State id='child-1' path='/child-1' component={({ machine }) => <div>
@@ -203,7 +219,7 @@ describe('<Machine/>', () => {
     });
 
     test('Transitions state & resolves URL when target state is descendant, while "path" attribute is in ascestor', () => {
-        const [ history, machine ] = renderWithNavigation('/',
+        const [ history, machine ] = renderWithNavigation(null,
             <State id='parent'>
                 <State id='child-1' path='/child-1' component={({ machine }) => <div>
                     Child 1
@@ -226,7 +242,7 @@ describe('<Machine/>', () => {
     });
 
     test('Transitions state & resolves URL when target state is descendant & NOT initial state, while "path" attribute is in ascestor', () => {
-        const [ history, machine ] = renderWithNavigation('/',
+        const [ history, machine ] = renderWithNavigation(null,
             <State id='parent'>
                 <State id='child-1' path='/child-1'>
                     <Transition event='test-event-1' target='grand-child-2-2'/>

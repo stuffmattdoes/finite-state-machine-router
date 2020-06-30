@@ -4,7 +4,7 @@ import { Link, Machine, State, Transition } from '../src';
 import { App, generic } from './components';
 
 ReactDOM.render(
-    <Machine id='home' path='/home'>
+    <Machine id='home'>
         <State id='parent' component={App} path='/parent'>
             <State id='child-1' path='/child-1'>
                 <Transition event='test-event-2' target='grand-child-2-2'/>
