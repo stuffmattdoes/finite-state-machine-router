@@ -39,7 +39,7 @@ Check out [proposals](./docs/Proposals.md).
 - [ ] `Final` state types?
 - [ ] `History` state types?
 - [ ] `onEntry` & `onExit`
-- [ ] Simplify `type` to `parallel` since all other types are derived automatically
-- [ ] Unit tests!
-- [ ] Should `util.js` accept React components outright? Or should they be transformed into arrays ahead of time? via (`React.Children.toArray`);
+- [x] Simplify `type` to `parallel` since all other types are derived automatically
+- [x] Unit tests!
+- [x] Arguments passed into `util.js` should already be formatted with `React.Children.toArray`
 - [ ] Implement `microStep` (the executin of a single transition) and `macroStep` (execution of multiple microSteps after which Machien is in a stable state i.e. depleted internal event queue).
