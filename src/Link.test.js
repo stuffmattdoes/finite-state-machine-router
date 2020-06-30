@@ -1,5 +1,5 @@
 import React from 'react';
-import { createBrowserHistory, createMemoryHistory } from 'history';
+import { createMemoryHistory } from 'history';
 import { Link, Machine, State, Transition } from '.';
 import { cleanup, render, fireEvent } from '@testing-library/react';
 
@@ -19,7 +19,7 @@ describe('<Link/>', () => {
                 <State id='child' component={element} path='/child-1'>
                 </State>
                 <State id='child-2' component={generic('Child 2')} path='/child-2'>
-                    <State id='granc-child-2' component={generic('Grand Child 2')}/>
+                    <State id='grand-child-2' component={generic('Grand Child 2')}/>
                 </State>
             </State>
         </Machine>;
@@ -29,39 +29,39 @@ describe('<Link/>', () => {
 
     test('Build verification', () => {
         const [ history, machine ] = renderWithNavigation('/', genericWithLinks('Child 1'));
-        const { getByText } = render(machine);
+        const { queryByText } = render(machine);
 
         expect(history.location.pathname).toBe('/child-1');
-        expect(getByText('URL Push')).toBeTruthy();
-        expect(getByText('URL Replace')).toBeTruthy();
+        expect(queryByText('URL Push')).toBeTruthy();
+        expect(queryByText('URL Replace')).toBeTruthy();
     });
 
     test('Pushes URL to history by default', () => {
         const [ history, machine ] = renderWithNavigation('/', genericWithLinks('Child 1'));
-        const { getByText } = render(machine);
+        const { queryByText } = render(machine);
 
         expect(history.location.pathname).toBe('/child-1');
-        expect(getByText('Child 1')).toBeTruthy();
-        fireEvent.click(getByText(/URL Push/));
+        expect(queryByText('Child 1')).toBeTruthy();
+        fireEvent.click(queryByText(/URL Push/));
         expect(history.location.pathname).toBe('/child-2');
         expect(history.action).toBe('PUSH');
-        expect(getByText('Grand Child 2')).toBeTruthy();
+        expect(queryByText('Grand Child 2')).toBeTruthy();
     });
 
     test('Replaces URL in history if "replace" attribute is true and is clicked', () => {
         const [ history, machine ] = renderWithNavigation('/', genericWithLinks('Child 1'));
-        const { getByText } = render(machine);
+        const { queryByText } = render(machine);
         // const assignMock = jest.fn();
         // const location = { ...window.location };
         // delete window.location;
         // window.location = { assign: assignMock };
 
         expect(history.location.pathname).toBe('/child-1');
-        expect(getByText(/Child 1/)).toBeTruthy();
-        fireEvent.click(getByText(/URL Replace/));
+        expect(queryByText(/Child 1/)).toBeTruthy();
+        fireEvent.click(queryByText(/URL Replace/));
         expect(history.location.pathname).toBe('/child-2');
         expect(history.action).toBe('REPLACE');
-        expect(getByText('Grand Child 2')).toBeTruthy();
+        expect(queryByText('Grand Child 2')).toBeTruthy();
 
         // assignMock.mockClear();
         // window.location = location;
@@ -85,9 +85,9 @@ describe('<Link/>', () => {
             <h1>Child 1</h1>
             <Link href='/child-2' disabled onClick={mockFn}>URL Disabled</Link>
         </div>);
-        const { getByText } = render(machine);
+        const { queryByText } = render(machine);
         expect(history.location.pathname).toBe('/child-1');
-        fireEvent.click(getByText('URL Disabled'));
+        fireEvent.click(queryByText('URL Disabled'));
         expect(history.location.pathname).toBe('/child-1');
         expect(mockFn).not.toHaveBeenCalled();
     });

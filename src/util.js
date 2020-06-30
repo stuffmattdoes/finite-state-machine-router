@@ -189,7 +189,7 @@ const normalizeChildStateProps = (stateNodes, rootId) => {
     });
 }
 
-const resolveToAtomic = (stack, normalized) => {
+const getAtomic = (stack, normalized) => {
     const { childStates, path, stack: nextStack } = normalized.find(norm =>  norm.stack === stack);
     let initial = {
         path,
@@ -201,7 +201,7 @@ const resolveToAtomic = (stack, normalized) => {
         const initialChild = childStatesFull.find(child => child.initial) || childStatesFull[0];
 
         if (initialChild.childStates.length) {
-            return resolveToAtomic(initialChild.stack, normalized);
+            return getAtomic(initialChild.stack, normalized);
         } else {
             initial.path = initialChild.path || '/';
             initial.stack = initialChild.stack;
@@ -211,7 +211,7 @@ const resolveToAtomic = (stack, normalized) => {
     return initial;
 }
 
-const resolveInitial = (url, normalized, machineId) => {
+const resolveSeed = (url, normalized, machineId) => {
     let initialProps = {
         params: null,
         path: null,
@@ -227,7 +227,7 @@ const resolveInitial = (url, normalized, machineId) => {
     if (isNotFound(currentStack)) {
 
     } else {
-        const { path, stack } = resolveToAtomic(currentStack, normalized);
+        const { path, stack } = getAtomic(currentStack, normalized);
 
         initialProps.path = path;
         initialProps.stack = stack;
@@ -265,7 +265,7 @@ export {
     isCurrentStack, 
     isExactStack,
     normalizeChildStateProps,
-    resolveInitial,
-    resolveToAtomic,
+    resolveSeed,
+    getAtomic,
     selectTransition
 }

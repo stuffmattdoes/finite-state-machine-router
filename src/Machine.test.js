@@ -31,15 +31,15 @@ describe('<Machine/>', () => {
     }
 
     test('Renders the minimum necessary components for a valid <Machine/>', () => {
-        const { getByText } = render(<Machine id='home'>
+        const { queryByText } = render(<Machine id='home'>
             <State id='child' component={generic('Child 1')}/>
         </Machine>);
 
-        expect(getByText('Child 1')).toBeTruthy();
+        expect(queryByText('Child 1')).toBeTruthy();
     });
 
     test('Renders <Machine/> content that does not contain any URLs', () => {
-        const { getByText } = render(<Machine id='home'>
+        const { queryByText } = render(<Machine id='home'>
             <State id='parent'>
                 <State id='child-1' component={generic('Child 1')}>
                     <Transition event='test-event' target='child-2'/>
@@ -52,7 +52,7 @@ describe('<Machine/>', () => {
             </State>
         </Machine>);
 
-        expect(getByText('Child 1')).toBeTruthy;
+        expect(queryByText('Child 1')).toBeTruthy;
     });
 
     test('Renders <Machine/> content at \'/\'', () => {
@@ -65,9 +65,9 @@ describe('<Machine/>', () => {
                 </State>
                 <State id='child-2' component={generic('Child 2')} path='/child-2'/>
             </State>);
-        const { getByText } = render(machine);
+        const { queryByText } = render(machine);
 
-        expect(getByText('Child 1')).toBeTruthy;
+        expect(queryByText('Child 1')).toBeTruthy;
     });
 
     test('Resolves nitial <State/> node lineage', () => {
@@ -80,9 +80,9 @@ describe('<Machine/>', () => {
                 <State id='child-2' initial component={generic('Child 2')}/>
             </State>
         );
-        const { getByText } = render(machine);
+        const { queryByText } = render(machine);
 
-        expect(getByText('Child 2')).toBeTruthy();
+        expect(queryByText('Child 2')).toBeTruthy();
 
         const [ history2, machine2 ] = renderWithNavigation('/',
             <State id='parent'>
@@ -94,12 +94,12 @@ describe('<Machine/>', () => {
                     <State id='gren-child-2' component={generic('Grand Child 2')}/>
                 </State>
             </State>);
-        const { getByText: getByText2 } = render(machine2);
+        const { queryByText: queryByText2 } = render(machine2);
 
-        expect(getByText2('Grand Child 2')).toBeTruthy();
+        expect(queryByText2('Grand Child 2')).toBeTruthy();
     });
 
-    test('Resolves to an atomic <State/> from a URL', () => {
+    test('Resolves to an atomic <State/> from a URL, with or without trailing slash', () => {
         const [ history, machine ] = renderWithNavigation('/child-2',
             <State id='parent'>
                 <State id='child-1' path='/child-1' component={generic('Child 1')}>
@@ -109,9 +109,22 @@ describe('<Machine/>', () => {
                     <State id='grand-child-2' component={generic('Grand Child 2')}/>
                 </State>
             </State>);
-        const { getByText } = render(machine);
+        const { queryByText } = render(machine);
 
-        expect(getByText('Grand Child 2')).toBeTruthy();
+        expect(queryByText('Grand Child 2')).toBeTruthy();
+
+        const [ history2, machine2 ] = renderWithNavigation('/child-2/',
+            <State id='parent'>
+                <State id='child-1' path='/child-1' component={generic('Child 1')}>
+                    <State id='grand-child-1' component={generic('Grand Child 1')}/>
+                </State>
+                <State id='child-2' component={generic('Child 2')} path='/child-2'>
+                    <State id='grand-child-2' component={generic('Grand Child 2')}/>
+                </State>
+            </State>);
+        const { queryByText: queryByText2 } = render(machine2);
+
+        expect(queryByText2('Grand Child 2')).toBeTruthy();
     });
 
     test('Resolves to wildcard route when no <State/> matches URL', () => {
@@ -119,14 +132,14 @@ describe('<Machine/>', () => {
                 <State key='1' id='parent' path='/parent'/>,
                 <State key='2' id='*' component={generic('Wildcard Route')}/>
         ]);
-        const { getByText } = render(machine);
+        const { queryByText } = render(machine);
 
-        expect(getByText('Wildcard Route')).toBeTruthy();
+        expect(queryByText('Wildcard Route')).toBeTruthy();
     });
 
     test('renders nothing instead of crashing when no <State/> matches URL', () => {
         const [ history, machine ] = renderWithNavigation('/no-route-found', <State id='parent' path='/parent'/>);
-        const { getByText} = render(machine);
+        const { queryByText} = render(machine);
         expect(console.warn).toHaveBeenCalledWith(expect.stringMatching(/No <State\/> configuration matches URL/));
     });
 
@@ -142,15 +155,15 @@ describe('<Machine/>', () => {
                 <State id='child-2' path='/child-2' component={generic('Child 2')}/>
             </State>
         );
-        const { getByText } = render(machine);
+        const { queryByText } = render(machine);
 
         expect(history.location.pathname).toBe('/child-1');
-        expect(getByText('Child 1')).toBeTruthy();
-        expect(getByText('Fire event')).toBeTruthy();
-        fireEvent.click(getByText(/Fire event/i));
+        expect(queryByText('Child 1')).toBeTruthy();
+        expect(queryByText('Fire event')).toBeTruthy();
+        fireEvent.click(queryByText(/Fire event/i));
         // expect(console.log).toHaveBeenCalledWith(expect.stringMatching(/Machine Event Sent/), expect.any(Object));
         expect(history.location.pathname).toBe('/child-2');
-        expect(getByText('Child 2')).toBeTruthy();
+        expect(queryByText('Child 2')).toBeTruthy();
     });
 
     test('Transitions state & resolves URL upon event emission, even if the <Transition/> is an ancestor', () => {
@@ -163,13 +176,13 @@ describe('<Machine/>', () => {
                 </div>}/>
                 <State id='child-2' path='/child-2' component={generic('Child 2')}/>
             </State>);
-        const { getByText } = render(machine);
+        const { queryByText } = render(machine);
 
-        expect(getByText('Child 1')).toBeTruthy();
+        expect(queryByText('Child 1')).toBeTruthy();
         expect(history.location.pathname).toBe('/child-1');
-        fireEvent.click(getByText(/Fire event/i));
+        fireEvent.click(queryByText(/Fire event/i));
         // expect(console.log).toHaveBeenCalledWith(expect.stringMatching(/Machine Event Sent/), expect.any(Object));
-        expect(getByText('Child 2')).toBeTruthy();
+        expect(queryByText('Child 2')).toBeTruthy();
         expect(history.location.pathname).toBe('/child-2');
     });
 
@@ -186,13 +199,13 @@ describe('<Machine/>', () => {
                 <State id='child-2' path='/child-2' component={generic('Child 2')}/>
                 <State id='child-3' path='/child-3' component={generic('Child 3')}/>
             </State>);
-        const { getByText } = render(machine);
+        const { queryByText } = render(machine);
 
-        expect(getByText('Child 1')).toBeTruthy();
+        expect(queryByText('Child 1')).toBeTruthy();
         expect(history.location.pathname).toBe('/child-1');
-        fireEvent.click(getByText(/Fire event/i));
+        fireEvent.click(queryByText(/Fire event/i));
         // expect(console.log).toHaveBeenCalledWith(expect.stringMatching(/Machine Event Sent/), expect.any(Object));
-        expect(getByText('Child 3')).toBeTruthy();
+        expect(queryByText('Child 3')).toBeTruthy();
         expect(history.location.pathname).toBe('/child-3');
     });
 
@@ -209,41 +222,46 @@ describe('<Machine/>', () => {
                     <State id='grand-child-2' component={generic('Grand Child 2')}/>
                 </State>
             </State>);
-        const { getByText } = render(machine);
+        const { queryByText } = render(machine);
 
-        expect(getByText('Child 1')).toBeTruthy();
+        expect(queryByText('Child 1')).toBeTruthy();
         expect(history.location.pathname).toBe('/child-1');
-        fireEvent.click(getByText(/Fire event/i));
+        fireEvent.click(queryByText(/Fire event/i));
         // expect(console.log).toHaveBeenCalledWith(expect.stringMatching(/Machine Event Sent/), expect.any(Object));
-        expect(getByText('Grand Child 2')).toBeTruthy();
+        expect(queryByText('Grand Child 2')).toBeTruthy();
         expect(history.location.pathname).toBe('/child-2');
     });
 
-    test.skip('Transitions state & resolves URL when target state is descendant & NOT initial state, while "path" attribute is in ascestor', () => {
+    test('Transitions state & resolves URL when target state is descendant & NOT initial state, while "path" attribute is in ascestor', () => {
         const [ history, machine ] = renderWithNavigation('/',
             <State id='parent'>
-                <State id='child-1' path='/child-1' component={({ machine }) => <div>
+                <State id='child-1' path='/child-1'>
+                    <Transition event='test-event-1' target='grand-child-2-2'/>
+                    <State id='grand-child-1' path='/grand-child-1' component={({ machine }) => <div>
                     Child 1
                     <button onClick={event => machine.send('test-event-1')}>Fire event</button>
-                </div>}>
-                    <Transition event='test-event-1' target='grand-child-2-2'/>
+                </div>}/>
                 </State>
                 <State id='child-2' path='/child-2'>
                     <State id='grand-child-2' component={generic('Grand Child 2')}/>
                     <State id='grand-child-2-2' component={generic('Grand Child 2-2')}/>
                 </State>
             </State>);
-        const { getByText } = render(machine);
+        const { queryByText } = render(machine);
 
-        expect(getByText('Child 1')).toBeTruthy();
-        expect(history.location.pathname).toBe('/child-1');
-        fireEvent.click(getByText(/Fire event/i));
+        expect(queryByText('Child 1')).toBeTruthy();
+        expect(history.location.pathname).toBe('/child-1/grand-child-1');
+        fireEvent.click(queryByText(/Fire event/i));
         // expect(console.log).toHaveBeenCalledWith(expect.stringMatching(/Machine Event Sent/), expect.any(Object));
-        expect(getByText('Grand Child 2-2')).toBeTruthy();
+        expect(queryByText('Grand Child 2-2')).toBeTruthy();
         expect(history.location.pathname).toBe('/child-2');
     });
 
     // test('Discards events that result in mo matching transition', () => {
+
+    // });
+
+    // test('Throws error when two <State/>s have the same "id" attribute', () => {
 
     // });
 });

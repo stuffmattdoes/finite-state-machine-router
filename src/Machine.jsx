@@ -5,8 +5,8 @@ import {
     getInitialChildStateNode,
     injectUrlParams,
     normalizeChildStateProps,
-    resolveInitial,
-    resolveToAtomic,
+    resolveSeed,
+    getAtomic,
     selectTransition
 } from './util';
 
@@ -32,20 +32,15 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
 
         const _normalized = normalizeChildStateProps(_childStates, machineId);
 
-        // Check for a wildcard state
-        // if (!_normalized.find(({ id }) => id === '*')) {
-        //     _childStates.push(<State id='*' component={props => <div>Not found</div>}/>)
-        // }
-
         return [ _childStates, _normalized ];
     }, [ machineChildren ]);
 
     const [ initialStack, params ] = useMemo(() => {
         let initialStack = '#' + machineId + '.' + getInitialChildStateNode(childStates).props.id;
-        const { params, path, stack, url } = resolveInitial(history.location.pathname, normalized, machineId);
+        const { params, path, stack, url } = resolveSeed(history.location.pathname, normalized, machineId);
 
         if (history.location.pathname !== url) {
-            history.push(url);
+            history.replace(url);
         }
 
         return [ stack || initialStack, params ];
@@ -61,14 +56,10 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
         const url = injectUrlParams(path, state.params);
 
         if (url !== history.location.pathname) {
-            history.push(url, { stack: state.current });
+            history.push(url, { shouldgetAtomic: false });
         }
     }
 
-    /*
-        Todo:
-        populate event queue and execute after render with useEffect, instead of immediately
-    */
     function send(event, data = null) {
         const targetState = selectTransition(event, state.current, normalized);
 
@@ -78,15 +69,7 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
             const targetNode = normalized.find(norm => norm.id === targetId);
 
             if (targetNode) {
-                const { path, stack } = resolveToAtomic(
-                    targetNode.stack,
-                    normalized
-                );
-
-                // unable to redirect to yourself / loader doesn't dissapear
-                //if (stack === state.current) {
-                //    return;
-                //}
+                const { path, stack } = getAtomic(targetNode.stack, normalized);
 
                 // if (process.env.NODE_ENV === 'development') {
                     console.log('Machine Event Sent:', {
@@ -97,34 +80,28 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
                     });
                 // }
 
-                // console.log('machine setState', 1, state.current, stack);
+                resolvePath(path);
                 setState({ current: stack, event: event, params });
-                // console.log('machine setState', 2, state, stack);
             } else {
                 console.error(`Invalid transition target: No target State Node of id "${targetId}" exists. event ${event} will be discarded.`);
             }
         }
     }
 
-    // useEffect(() => console.log('machine current', state, history.location.pathname));
+    useEffect(() =>  history.listen(({ action, location }) => {
+            const { shouldgetAtomic } = location.state || true;
+            const { params, path, stack, url } = resolveSeed(location.pathname, normalized, machineId);
 
-    useEffect(() => {
-        const { current, event } = state;
-
-        return history.listen(({ action, location }) => {
-            const { params, path, stack, url } = resolveInitial(location.pathname, normalized, machineId);
-
-            if (stack !== current) {
+            if (shouldgetAtomic) {
                 setState({ current: stack, params });
             }
-        });
-    }, [ state.current ]);
+    }), [ state.current ]);
 
     const providerValue = {
         ...state,
         history,
         id: machineId,
-        resolvePath,
+        // resolvePath,
         send
     };
 

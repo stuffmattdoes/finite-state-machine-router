@@ -9,8 +9,8 @@ import {
     isCurrentStack,
     isExactStack,
     normalizeChildStateProps,
-    resolveInitial,
-    resolveToAtomic,
+    resolveSeed,
+    getAtomic,
     selectTransition
 } from './util';
 
@@ -125,16 +125,16 @@ describe('utility functions', () => {
         expect(normalizedPaths).toMatchSnapshot();
     });
 
-    test('resolveInitial', () => {
-        expect(resolveInitial('/', normalizedSimple, 'home')).toMatchSnapshot();
-        expect(resolveInitial('/', normalizedComplex, 'home')).toMatchSnapshot();
-        expect(resolveInitial('/parent-id/child-1', normalizedPaths, 'home')).toMatchSnapshot();
+    test('resolveSeed', () => {
+        expect(resolveSeed('/', normalizedSimple, 'home')).toMatchSnapshot();
+        expect(resolveSeed('/', normalizedComplex, 'home')).toMatchSnapshot();
+        expect(resolveSeed('/parent-id/child-1', normalizedPaths, 'home')).toMatchSnapshot();
     })
 
-    test('resolveToAtomic', () => {
-        expect(resolveToAtomic('#home.child', normalizedSimple)).toMatchSnapshot();
-        expect(resolveToAtomic('#home.parent.child-1', normalizedComplex)).toMatchSnapshot();
-        expect(resolveToAtomic('#home.parent.child-2', normalizedPaths)).toMatchSnapshot();
+    test('getAtomic', () => {
+        expect(getAtomic('#home.child', normalizedSimple)).toMatchSnapshot();
+        expect(getAtomic('#home.parent.child-1', normalizedComplex)).toMatchSnapshot();
+        expect(getAtomic('#home.parent.child-2', normalizedPaths)).toMatchSnapshot();
     });
 
     test('selectTransition', () => {

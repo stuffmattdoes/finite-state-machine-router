@@ -22,11 +22,11 @@ function Link({ children, className, disabled = false, event: machineEvent, href
             event.preventDefault();
 
             if (!machineEvent) {
-                history.push(href);
+                history.push(href, { shouldgetAtomic: true });
             }
         } else {
             event.preventDefault();
-            history.replace(href);
+            history.replace(href, { shouldgetAtomic: true });
         }
 
         onClick && onClick(event);

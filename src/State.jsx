@@ -10,7 +10,7 @@ export const StateNodeContext = React.createContext({
 StateNodeContext.displayName = 'StateNode';
 
 function State(props) {
-    const { children, component: Component, id, initial, onEntry, onExit, path, type } = props;
+    const { children, component: Component, id, initial, onEntry, onExit, path } = props;
     const machineContext = useContext(MachineContext);
     const { event: machineEvent, current, history, id: machineId, params, resolvePath, send: machineSend } = machineContext;
     const { id: parentId, path: parentPath, stack: parentStack } = useContext(StateNodeContext);
@@ -22,47 +22,6 @@ function State(props) {
         path: stackPath,
         url: history.location.pathname
     } : false;
-
-    const _type = useMemo(() => {
-        let _type = type;
-        const childStates = getChildStateNodes(React.Children.toArray(children));
-        // const transitions = getChildrenOfType(children, 'Transition').map(({ props }) => ({
-        //     cond: props.cond || null,
-        //     event: props.event,
-        //     sendid: id,
-        //     target: props.target,
-        //     type: 'internal'
-        // }));
-        // const initialChild = childStates.find(c => c.props.initial) || childStates[0];
-
-        if (_type !== 'parallel') {
-            if (!childStates.length) {
-                _type = 'atomic';
-            } else if (childStates.length > 1) {
-                _type = 'compound';
-            } else {
-                _type = 'default';
-            }
-        }
-
-        return _type;
-    }, [ children ]);
-
-    useEffect(() => {
-        if (match) {
-            if (_type === 'atomic' && id !== '*') {
-                stackPath ? resolvePath(stackPath) : resolvePath('/');
-            }
-        }
-    }, [ current ]);
-
-    // const interrupted = useMemo(() => {
-    //     if (match && onEntry) {
-    //         return !onEntry(machineContext);
-    //     }
-
-    //     return false;
-    // }, [ match ]);
 
     const initialContext = {
         id,
