@@ -9,18 +9,19 @@ import {
     getAtomic,
     selectTransition
 } from './util';
+import { logger } from './logger';
 
 export const MachineContext = React.createContext({});
 MachineContext.displayName = 'Machine';
 
-// export const createMachine = (id, path) => (props) => Machine({ ...props, id, path });
+export const createMachine = (options) => (props) => Machine({ ...props, ...options });
 
 export const useMachine = () => {
     const { current, history, id, params, send } = useContext(MachineContext);
     return [{ current, history, id, params }, send ];
 }
 
-function Machine ({ children: machineChildren, history: machineHistory, id: machineId, path: machinePath }) {
+function Machine ({ children: machineChildren, history: machineHistory, id: machineId = 'machine', path: machinePath }) {
     const history = useMemo(() => machineHistory || createBrowserHistory({ basename: machinePath }), []);
     const [ childStates, normalized ] = useMemo(() => {
         const _childStates = getChildStateNodes(React.Children.toArray(machineChildren));
@@ -48,7 +49,8 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
     const [ state, setState ] = useState({
         current: initialStack,
         event: null,
-        params
+        params,
+        path: null
     });
 
     const resolvePath = (path) => {
@@ -74,20 +76,46 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
             if (targetNode) {
                 const { path, stack } = getAtomic(targetNode.stack, normalized);
 
-                // if (process.env.NODE_ENV === 'development') {
-                    console.log('Machine Event Sent:', {
-                        event: event,
-                        data,
-                        targetId,
+                logger({
+                    action: 'TRANSITION',
+                    event,
+                    source: {
+                        state: state.current,
+                        path: null
+                    },
+                    target: {
+                        state: stack,
                         path
-                    });
-                // }
+                    }
+                });
 
                 resolvePath(path);
-                setState({ current: stack, event: event, params });
+                setState({ current: stack, event: event, params, path });
             } else {
                 console.error(`Invalid transition target: No target State Node of id "${targetId}" exists. event ${event} will be discarded.`);
+                logger({
+                    action: 'EVENT_DISCARDED',
+                    event,
+                    reason: 'NO_MATCHING_STATE',
+                    source: {
+                        state: state.current,
+                        path: state.path
+                    },
+                    target: {
+                        state: targetId   
+                    }
+                });
             }
+        } else {
+            logger({
+                action: 'EVENT_DISCARDED',
+                event,
+                reason: 'NO_MATCHING_TRANSITION',
+                source: {
+                    state: state.current,
+                    path: state.path
+                },
+            });
         }
     }
 
@@ -127,5 +155,5 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
 
 Machine.displayName = 'Machine';
 
-export const createMachine = (props) => Machine(props);
+// export const createMachine = (props) => Machine(props);
 export default Machine;

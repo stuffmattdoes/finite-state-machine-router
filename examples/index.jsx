@@ -1,23 +1,29 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import { Link, Machine, State, Transition } from '../src';
+import { createMachine, Link, Machine, State, Transition } from '../src';
 
-const App = ({ children, machine }) => <main>
-    <header>Example | Finite State Machine Router</header>
-    <nav>
-        <Link href='/parent/child-1'>URL: Child 1</Link><br/>
-        <Link href='/parent/child-2'>URL: Child 2</Link><br/>
-        <Link href='/parent/child-3'>URL: Child 3</Link><br/>
-        <Link href='/parent/child-4'>URL: Child 4</Link>
-    </nav>
-    <ul>
-        <li onClick={event => machine.send('child-1')}>EVENT: Child 1</li>
-        <li onClick={event => machine.send('grand-child-2-1')}>EVENT: Grand Child 2-1</li>
-        <li onClick={event => machine.send('grand-child-3-2')}>EVENT: Grand Child 3-2</li>
-        <li onClick={event => machine.send('child-4')}>EVENT: Child 4</li>
-    </ul>
-    {children}
-</main>;
+// const CustomMachine = createMachine({ id: 'home' });
+
+const App = ({ children, machine }) => {
+    useEffect(() => machine.send('grand-child-2-1'), []);
+
+    return <main>
+        <header>Example | Finite State Machine Router</header>
+        <nav>
+            <Link href='/parent/child-1'>URL: Child 1</Link><br/>
+            <Link href='/parent/child-2'>URL: Child 2</Link><br/>
+            <Link href='/parent/child-3'>URL: Child 3</Link><br/>
+            <Link href='/parent/child-4'>URL: Child 4</Link>
+        </nav>
+        <ul>
+            <li onClick={event => machine.send('child-1')}>EVENT: Child 1</li>
+            <li onClick={event => machine.send('grand-child-2-1')}>EVENT: Grand Child 2-1</li>
+            <li onClick={event => machine.send('grand-child-3-2')}>EVENT: Grand Child 3-2</li>
+            <li onClick={event => machine.send('child-4')}>EVENT: Child 4</li>
+        </ul>
+        {children}
+    </main>;
+}
 
 const generic = (name) => ({ children }) => <div>
     <p>{name}</p>
@@ -25,7 +31,7 @@ const generic = (name) => ({ children }) => <div>
 </div>
 
 ReactDOM.render(
-    <Machine id='home'>
+    <Machine>
         <State id='parent' component={App} path='/parent'>
             <Transition event='child-1' target='child-1'/>
             <Transition event='grand-child-2-1' target='grand-child-2-1'/>
