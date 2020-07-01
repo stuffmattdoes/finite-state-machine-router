@@ -1,7 +1,7 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
 import { Link, Machine, State, Transition } from '.';
-import { cleanup, render, fireEvent } from '@testing-library/react'
+import { act, cleanup, render, fireEvent } from '@testing-library/react';
 
 describe('<Machine/>', () => {
     let _console = {
@@ -298,27 +298,27 @@ describe('<Machine/>', () => {
         expect(history.location.pathname).toBe('/child-4/grand-child-4');
         expect(queryByText('Grand Child 4')).toBeTruthy();
 
-        history.back();
+        act(() => history.back());
         expect(history.location.pathname).toBe('/child-3');
         expect(queryByText('Grand Child 3')).toBeTruthy();
 
-        history.back();
+        act(() => history.back());
         expect(history.location.pathname).toBe('/child-2');
         expect(queryByText('Child 2')).toBeTruthy();
 
-        history.back();
+        act(() => history.back());
         expect(history.location.pathname).toBe('/child-1/grand-child-1');
         expect(queryByText('Grand Child 1')).toBeTruthy();
 
-        history.forward();
+        act(() => history.forward());
         expect(history.location.pathname).toBe('/child-2');
         expect(queryByText('Child 2')).toBeTruthy();
 
-        history.forward();
+        act(() => history.forward());
         expect(history.location.pathname).toBe('/child-3');
         expect(queryByText('Grand Child 3')).toBeTruthy();
 
-        history.forward();
+        act(() => history.forward());
         expect(history.location.pathname).toBe('/child-4/grand-child-4');
         expect(queryByText('Grand Child 4')).toBeTruthy();
     });
