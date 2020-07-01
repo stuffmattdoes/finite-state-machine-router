@@ -181,7 +181,7 @@ Array [
 ]
 `;
 
-exports[`utility functions resolveSeed 1`] = `
+exports[`utility functions resolveSeedToAtomic 1`] = `
 Object {
   "params": null,
   "path": "/",
@@ -190,7 +190,7 @@ Object {
 }
 `;
 
-exports[`utility functions resolveSeed 2`] = `
+exports[`utility functions resolveSeedToAtomic 2`] = `
 Object {
   "params": null,
   "path": "/",
@@ -199,7 +199,7 @@ Object {
 }
 `;
 
-exports[`utility functions resolveSeed 3`] = `
+exports[`utility functions resolveSeedToAtomic 3`] = `
 Object {
   "params": Object {
     "parent": "parent-id",

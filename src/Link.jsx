@@ -1,32 +1,29 @@
 import React, { useContext } from 'react';
-import { classNames } from './util';
+import { classNames, resolveSeedToAtomic } from './util';
 import { MachineContext } from './Machine';
-import { StateNodeContext } from './State';
 
-function Link({ children, className, disabled = false, event: machineEvent, href = '#', onClick, replace = false }) {
-    const { history } = useContext(MachineContext);
-    const { send } = useContext(StateNodeContext);
+function Link({ children, className, disabled = false, href = '#', onClick, replace = false }) {
+    const { current, history } = useContext(MachineContext);
 
     const handleClick = (event) => {
+        event.preventDefault();
+
         if (disabled) {
-            event.preventDefault();
             return;
         }
 
-        if (machineEvent) {
-            event.preventDefault();
-            send(machineEvent);
-        }
-
-        if (!replace) {
-            event.preventDefault();
-
-            if (!machineEvent) {
-                history.push(href, { shouldgetAtomic: true });
-            }
+        if (replace) {
+            history.replace(href, {
+                sourceState: current,
+                // targetState: null,
+                shouldgetAtomic: true
+            });
         } else {
-            event.preventDefault();
-            history.replace(href, { shouldgetAtomic: true });
+            history.push(href, {
+                sourceState: current,
+                // targetState: null,
+                shouldgetAtomic: true
+            });
         }
 
         onClick && onClick(event);

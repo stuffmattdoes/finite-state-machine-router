@@ -5,7 +5,7 @@ import {
     getInitialChildStateNode,
     injectUrlParams,
     normalizeChildStateProps,
-    resolveSeed,
+    resolveSeedToAtomic,
     getAtomic,
     selectTransition
 } from './util';
@@ -21,8 +21,7 @@ export const useMachine = () => {
 }
 
 function Machine ({ children: machineChildren, history: machineHistory, id: machineId, path: machinePath }) {
-    let history = machineHistory || createBrowserHistory({ basename: machinePath });
-
+    const history = useMemo(() => machineHistory || createBrowserHistory({ basename: machinePath }), []);
     const [ childStates, normalized ] = useMemo(() => {
         const _childStates = getChildStateNodes(React.Children.toArray(machineChildren));
 
@@ -37,7 +36,7 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
 
     const [ initialStack, params ] = useMemo(() => {
         let initialStack = '#' + machineId + '.' + getInitialChildStateNode(childStates).props.id;
-        const { params, path, stack, url } = resolveSeed(history.location.pathname, normalized, machineId);
+        const { params, path, stack, url } = resolveSeedToAtomic(history.location.pathname, normalized, machineId);
 
         if (history.location.pathname !== url) {
             history.replace(url);
@@ -56,7 +55,11 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
         const url = injectUrlParams(path, state.params);
 
         if (url !== history.location.pathname) {
-            history.push(url, { shouldgetAtomic: false });
+            history.push(url, {
+                sourceState: state.current,
+                // targetState: null,
+                shouldgetAtomic: false
+            });
         }
     }
 
@@ -90,18 +93,30 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
 
     useEffect(() =>  history.listen(({ action, location }) => {
         const { shouldgetAtomic } = location.state || true;
-        const { params, path, stack, url } = resolveSeed(location.pathname, normalized, machineId);
+        const { params, path, stack, url } = resolveSeedToAtomic(location.pathname, normalized, machineId);
 
-        if (shouldgetAtomic) {
+        if (shouldgetAtomic || action === 'POP') {
             setState({ current: stack, params });
         }
-    }), [ state.current ]);
+    }), []);
+
+    // Alternative history listener?
+    // useEffect(() => {
+    //     const { action, location } = history;
+    //     const { shouldgetAtomic } = location.state || true;
+    //     const { params, path, stack, url } = resolveSeedToAtomic(location.pathname, normalized, machineId);
+
+    //     console.log('history', action, location, state.current);
+
+    //     if (shouldgetAtomic || action === 'POP') {
+    //         setState({ current: stack, params });
+    //     }
+    // }, [ history.location.pathname ]);
 
     const providerValue = {
         ...state,
         history,
         id: machineId,
-        // resolvePath,
         send
     };
 

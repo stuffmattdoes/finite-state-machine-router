@@ -211,32 +211,13 @@ const getAtomic = (stack, normalized) => {
     return initial;
 }
 
-const resolveSeed = (url, normalized, machineId) => {
+const resolveSeedToAtomic = (url, normalized, machineId) => {
     let initialProps = {
         params: null,
         path: null,
         stack: null,
         url
     };
-
-    // let { params, path, stack } = deriveStateFromUrl(url, normalized, machineId);
-    // initialProps.path = initial.path;
-    // initialProps.stack = stack;
-    // initialProps.params = params;
-
-    // if (isRootPath(url)) {
-    //     if (!isNotFound(stack)) {
-    //         const initial = normalized[0];
-    //         initialProps.path = initial.path;
-    //         initialProps.stack = initial.stack;
-    //     }
-
-    //     let { path: atomicPath, stack: atomicStack } = getAtomic(initialProps.stack, normalized);
-    //     initialProps.path = atomicPath;
-    //     initialProps.stack = atomicStack;
-    // }
-
-    // initialProps.url = injectUrlParams(initialProps.stack, params);
 
     if (isRootPath(url)) {
         const { path, stack } = normalized[0];
@@ -289,7 +270,7 @@ export {
     isCurrentStack, 
     isExactStack,
     normalizeChildStateProps,
-    resolveSeed,
+    resolveSeedToAtomic,
     getAtomic,
     selectTransition
 }
