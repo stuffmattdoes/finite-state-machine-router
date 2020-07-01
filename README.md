@@ -195,7 +195,7 @@ const [ machine: { current, history, id, params }, send ] = useMachine();
 - [`<Link/>`](./docs/API/Link.md)
 
 ## References:
-- [WC4 SCXML Specification](https://www.w3.org/TR/scxml/)
+- [WC3 SCXML Specification](https://www.w3.org/TR/scxml/)
 - [David Harel's "Statecharts: A Visual Formalism for Complex Systems](http://www.inf.ed.ac.uk/teaching/courses/seoc/2005_2006/resources/statecharts.pdf)
 
 ## License
