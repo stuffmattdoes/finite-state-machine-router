@@ -110,6 +110,7 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
         }
     });
 
+    // Alternative history listener?
     // useEffect(() => {
     //     const { action, location } = history;
     //     const { shouldgetAtomic } = location.state || true;

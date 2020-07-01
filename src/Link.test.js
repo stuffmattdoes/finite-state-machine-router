@@ -101,7 +101,6 @@ describe('<Link/>', () => {
 
     // });
 
-
     test('Ignores clicks when disabled', () => {
         const mockFn = jest.fn();
         const [ history, machine ] = renderWithNavigation(null, (props) => <div>
