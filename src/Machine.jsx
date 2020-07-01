@@ -21,9 +21,7 @@ export const useMachine = () => {
 }
 
 function Machine ({ children: machineChildren, history: machineHistory, id: machineId, path: machinePath }) {
-    const history = useMemo(() => machineHistory || createBrowserHistory({ basename: machinePath }));
-    // const history = machineHistory || createBrowserHistory({ basename: machinePath });
-
+    const history = useMemo(() => machineHistory || createBrowserHistory({ basename: machinePath }), []);
     const [ childStates, normalized ] = useMemo(() => {
         const _childStates = getChildStateNodes(React.Children.toArray(machineChildren));
 
@@ -93,22 +91,14 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
         }
     }
 
-    useEffect(() => {
-        const unlisten = history.listen(({ action, location }) => {
-            const { shouldgetAtomic } = location.state || true;
-            const { params, path, stack, url } = resolveSeedToAtomic(location.pathname, normalized, machineId);
+    useEffect(() =>  history.listen(({ action, location }) => {
+        const { shouldgetAtomic } = location.state || true;
+        const { params, path, stack, url } = resolveSeedToAtomic(location.pathname, normalized, machineId);
 
-            if (shouldgetAtomic || action === 'POP') {
-                // console.log('history listen', 1, action, location);
-                setState({ current: stack, params });
-            }
-        });
-
-        return () => {
-            // console.log('unlisten');
-            unlisten();
+        if (shouldgetAtomic || action === 'POP') {
+            setState({ current: stack, params });
         }
-    });
+    }), []);
 
     // Alternative history listener?
     // useEffect(() => {
