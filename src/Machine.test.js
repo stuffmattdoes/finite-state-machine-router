@@ -1,6 +1,6 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
-import { Machine, State, Transition } from '.';
+import { Link, Machine, State, Transition } from '.';
 import { cleanup, render, fireEvent } from '@testing-library/react'
 
 describe('<Machine/>', () => {
@@ -24,8 +24,22 @@ describe('<Machine/>', () => {
     });
 
     const generic = name => ({ children }) => <div><h1>{name}</h1>{children}</div>;
-    const renderWithNavigation = (path, element) => {
-        const testHistory = createMemoryHistory({ initialEntries: [ path ] });
+    const genericWithLinks = name => ({ children }) => <div><h1>{name}</h1>
+        <Link href='/child-2'>URL Push 1</Link>
+        <Link href='/child-3'>URL Push 2</Link>
+        {children}
+    </div>;
+    const renderWithNavigation = (initialEntries, element) => {
+        let path = initialEntries;
+
+        if (typeof initialEntries === 'object') {
+            path = initialEntries ? initialEntries[initialEntries.length - 1] : null;
+            initialEntries = initialEntries ? initialEntries : [ null ];
+        } else {
+            initialEntries = [ initialEntries ];
+        }
+
+        const testHistory = createMemoryHistory({ initialEntries });
         const machine = <Machine history={testHistory} id='home' path={path}>{element}</Machine>;
         return [ testHistory, machine ];
     }
@@ -169,6 +183,7 @@ describe('<Machine/>', () => {
         expect(history.location.pathname).toBe('/child-1');
         expect(queryByText('Child 1')).toBeTruthy();
         expect(queryByText('Fire event')).toBeTruthy();
+
         fireEvent.click(queryByText(/Fire event/i));
         // expect(console.log).toHaveBeenCalledWith(expect.stringMatching(/Machine Event Sent/), expect.any(Object));
         expect(history.location.pathname).toBe('/child-2');
@@ -187,10 +202,11 @@ describe('<Machine/>', () => {
             </State>);
         const { queryByText } = render(machine);
 
-        expect(queryByText('Child 1')).toBeTruthy();
         expect(history.location.pathname).toBe('/child-1');
+        expect(queryByText('Child 1')).toBeTruthy();
+        expect(queryByText('Fire event')).toBeTruthy();
+
         fireEvent.click(queryByText(/Fire event/i));
-        // expect(console.log).toHaveBeenCalledWith(expect.stringMatching(/Machine Event Sent/), expect.any(Object));
         expect(queryByText('Child 2')).toBeTruthy();
         expect(history.location.pathname).toBe('/child-2');
     });
@@ -213,7 +229,6 @@ describe('<Machine/>', () => {
         expect(queryByText('Child 1')).toBeTruthy();
         expect(history.location.pathname).toBe('/child-1');
         fireEvent.click(queryByText(/Fire event/i));
-        // expect(console.log).toHaveBeenCalledWith(expect.stringMatching(/Machine Event Sent/), expect.any(Object));
         expect(queryByText('Child 3')).toBeTruthy();
         expect(history.location.pathname).toBe('/child-3');
     });
@@ -236,7 +251,6 @@ describe('<Machine/>', () => {
         expect(queryByText('Child 1')).toBeTruthy();
         expect(history.location.pathname).toBe('/child-1');
         fireEvent.click(queryByText(/Fire event/i));
-        // expect(console.log).toHaveBeenCalledWith(expect.stringMatching(/Machine Event Sent/), expect.any(Object));
         expect(queryByText('Grand Child 2')).toBeTruthy();
         expect(history.location.pathname).toBe('/child-2');
     });
@@ -261,9 +275,52 @@ describe('<Machine/>', () => {
         expect(queryByText('Child 1')).toBeTruthy();
         expect(history.location.pathname).toBe('/child-1/grand-child-1');
         fireEvent.click(queryByText(/Fire event/i));
-        // expect(console.log).toHaveBeenCalledWith(expect.stringMatching(/Machine Event Sent/), expect.any(Object));
         expect(queryByText('Grand Child 2-2')).toBeTruthy();
         expect(history.location.pathname).toBe('/child-2');
+    });
+
+    test('Resolves to proper state on "history.back" (browser navigation)', () => {
+        const [ history, machine ] = renderWithNavigation([ '/child-1/grand-child-1', '/child-2', '/child-3', '/child-4/grand-child-4'],
+            <State id='parent'>
+                <State id='child-1' path='/child-1'>
+                    <State id='grand-child-1' path='/grand-child-1' component={genericWithLinks('Grand Child 1')}/>
+                </State>
+                <State id='child-2' path='/child-2' component={genericWithLinks('Child 2')}/>
+                <State id='child-3' path='/child-3'>
+                    <State id='grand-child-3' component={generic('Grand Child 3')}/>
+                </State>
+                <State id='child-4' path='/child-4'>
+                    <State id='grand-child-4' path='/grand-child-4' component={generic('Grand Child 4')}/>
+                </State>
+            </State>);
+        const { queryByText } = render(machine);
+
+        expect(history.location.pathname).toBe('/child-4/grand-child-4');
+        expect(queryByText('Grand Child 4')).toBeTruthy();
+
+        history.back();
+        expect(history.location.pathname).toBe('/child-3');
+        expect(queryByText('Grand Child 3')).toBeTruthy();
+
+        history.back();
+        expect(history.location.pathname).toBe('/child-2');
+        expect(queryByText('Child 2')).toBeTruthy();
+
+        history.back();
+        expect(history.location.pathname).toBe('/child-1/grand-child-1');
+        expect(queryByText('Grand Child 1')).toBeTruthy();
+
+        history.forward();
+        expect(history.location.pathname).toBe('/child-2');
+        expect(queryByText('Child 2')).toBeTruthy();
+
+        history.forward();
+        expect(history.location.pathname).toBe('/child-3');
+        expect(queryByText('Grand Child 3')).toBeTruthy();
+
+        history.forward();
+        expect(history.location.pathname).toBe('/child-4/grand-child-4');
+        expect(queryByText('Grand Child 4')).toBeTruthy();
     });
 
     // test('Discards events that result in mo matching transition', () => {

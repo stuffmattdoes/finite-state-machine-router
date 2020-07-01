@@ -28,7 +28,7 @@ describe('<Link/>', () => {
         return [ testHistory, machine ];
     }
 
-    test.skip('Build verification', () => {
+    test('Build verification', () => {
         const [ history, machine ] = renderWithNavigation(null, genericWithLinks('Child 1'));
         const { queryByText } = render(machine);
 
@@ -38,7 +38,7 @@ describe('<Link/>', () => {
         expect(queryByText('URL Replace')).toBeTruthy();
     });
 
-    test.skip('Pushes URL to history by default', () => {
+    test('Pushes URL to history by default', () => {
         const [ history, machine ] = renderWithNavigation(null, genericWithLinks('Child 1'));
         const { queryByText } = render(machine);
 
@@ -70,7 +70,7 @@ describe('<Link/>', () => {
         expect(queryByText('Child 1')).toBeTruthy();
     });
 
-    test.skip('Replaces URL in history if "replace" attribute is true and is clicked', () => {
+    test('Replaces URL in history if "replace" attribute is true and is clicked', () => {
         const [ history, machine ] = renderWithNavigation(null, genericWithLinks('Child 1'));
         const { queryByText } = render(machine);
         // const assignMock = jest.fn();
@@ -101,11 +101,8 @@ describe('<Link/>', () => {
 
     // });
 
-    // test.skip('Resolves to proper state when history "POP" action occurs (browser navigation)', () => {
 
-    // });
-
-    test.skip('Ignores clicks when disabled', () => {
+    test('Ignores clicks when disabled', () => {
         const mockFn = jest.fn();
         const [ history, machine ] = renderWithNavigation(null, (props) => <div>
             <h1>Child 1</h1>

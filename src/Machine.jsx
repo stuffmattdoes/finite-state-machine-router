@@ -22,6 +22,7 @@ export const useMachine = () => {
 
 function Machine ({ children: machineChildren, history: machineHistory, id: machineId, path: machinePath }) {
     const history = useMemo(() => machineHistory || createBrowserHistory({ basename: machinePath }));
+    // const history = machineHistory || createBrowserHistory({ basename: machinePath });
 
     const [ childStates, normalized ] = useMemo(() => {
         const _childStates = getChildStateNodes(React.Children.toArray(machineChildren));
@@ -97,11 +98,9 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
             const { shouldgetAtomic } = location.state || true;
             const { params, path, stack, url } = resolveSeedToAtomic(location.pathname, normalized, machineId);
 
-            if (shouldgetAtomic) {
+            if (shouldgetAtomic || action === 'POP') {
                 // console.log('history listen', 1, action, location);
                 setState({ current: stack, params });
-            } else if (action === 'POP') {
-                // console.log('history listen', 2, action, location);
             }
         });
 
@@ -111,13 +110,22 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
         }
     });
 
-    // console.log('render');
+    // useEffect(() => {
+    //     const { action, location } = history;
+    //     const { shouldgetAtomic } = location.state || true;
+    //     const { params, path, stack, url } = resolveSeedToAtomic(location.pathname, normalized, machineId);
+
+    //     console.log('history', action, location, state.current);
+
+    //     if (shouldgetAtomic || action === 'POP') {
+    //         setState({ current: stack, params });
+    //     }
+    // }, [ history.location.pathname ]);
 
     const providerValue = {
         ...state,
         history,
         id: machineId,
-        // resolvePath,
         send
     };
 
