@@ -2,6 +2,8 @@
     TRANSITION log
     source: { state: "stateId", : path: "/path" }
     event: { event: "event-name", : date: { ...data }}
+        if transition isn't child:
+    matched: { }
     target: { state: "stateId", : path: "/path" }
         if not atomic:
     resolved: { state: "stateId", : path: "/path" }
@@ -15,16 +17,17 @@
 */
 
 
-export const logger = ({ action, event, data, reason, source, target }) => {
+export const logger = ({ action, event, reason, source, target }) => {
     const date = new Date();
     const time = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}.${date.getMilliseconds()}`;
     const log = (msg) => {
         console.group(`%cFSM-Router: %c${action} %c@ ${time}`, 'color: grey; font-weight: normal', 'font-weight: bold;', 'color: grey; font-weight: normal');
         console.log('%csource:', 'color: grey; font-weight: bold;', source);
-        console.log('%cevent:', 'color: blue; font-weight: bold;', { event, data });
+        console.log('%cevent:', 'color: blue; font-weight: bold;', event);
         msg();
         console.groupEnd();
     };
+
     switch(action) {
         case 'TRANSITION':
             return log(() => console.log('%ctarget', 'color: green; font-weight: bold;', target));

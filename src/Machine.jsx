@@ -76,7 +76,6 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
 
                 logging && logger({
                     action: 'TRANSITION',
-                    data,
                     event,
                     source: {
                         state: state.current,
@@ -94,7 +93,6 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
                 // console.error(`Invalid transition target: No target State Node of id "${targetId}" exists. event ${event} will be discarded.`);
                 logging && logger({
                     action: 'EVENT_DISCARDED',
-                    data,
                     event,
                     reason: 'NO_MATCHING_STATE',
                     source: {
@@ -109,7 +107,6 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
         } else {
             logging && logger({
                 action: 'EVENT_DISCARDED',
-                data,
                 event,
                 reason: 'NO_MATCHING_TRANSITION',
                 source: {
@@ -126,7 +123,7 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
 
             logging && logger({
                 action: 'HISTORY_CHANGE',
-                data: location.pathname,
+                event: location.pathname,
                 source: {
                     state: state.current,
                     path: state.path
