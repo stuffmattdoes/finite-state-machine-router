@@ -42,4 +42,5 @@ Check out [proposals](./docs/Proposals.md).
 - [x] Simplify `type` to `parallel` since all other types are derived automatically
 - [x] Unit tests!
 - [x] Arguments passed into `util.js` should already be formatted with `React.Children.toArray`
-- [ ] Implement `microStep` (the executin of a single transition) and `macroStep` (execution of multiple microSteps after which Machien is in a stable state i.e. depleted internal event queue).
+- [ ] ~Implement `microStep` (the executin of a single transition) and `macroStep` (execution of multiple microSteps after which Machien is in a stable state i.e. depleted internal event queue).~
+- [ ] Implement `History` attribute, which will resolve to last active state when entered. As it is now, initial lineage is resolved when entered.

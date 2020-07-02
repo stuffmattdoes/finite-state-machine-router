@@ -1,15 +1,14 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState, useReducer } from 'react';
 import { createBrowserHistory } from 'history';
+import useLogger from './logger';
 import {
     getChildStateNodes,
-    // getInitialChildStateNode,
     injectUrlParams,
     normalizeChildStateProps,
     resolveUrlToAtomic,
     getAtomic,
     selectTransition
 } from './util';
-import { logger } from './logger';
 
 export const MachineContext = React.createContext({});
 MachineContext.displayName = 'Machine';
@@ -37,7 +36,7 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
     }, [ machineChildren ]);
 
     const [ initialStack, params, path ] = useMemo(() => {
-        const { params, path, stack, url } = resolveUrlToAtomic(history.location.pathname, normalized, machineId);
+        const { exact, params, path, stack, url } = resolveUrlToAtomic(history.location.pathname, normalized, machineId);
 
         if (history.location.pathname !== url) {
             history.replace(url);
@@ -51,6 +50,7 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
         params,
         path
     });
+    const [ logs, log ] = useLogger(state, logging);
 
     const resolvePath = (path, params, source, target) => {
         const url = injectUrlParams(path, params);
@@ -74,66 +74,42 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
             if (targetNode) {
                 const { path, stack } = getAtomic(targetNode.stack, normalized);
 
-                logging && logger({
-                    action: 'TRANSITION',
-                    event,
-                    source: {
-                        state: state.current,
-                        path: state.path
-                    },
-                    target: {
-                        state: stack,
-                        path
+                logging && log({
+                    type: 'TRANSITION',
+                    payload: {
+                        event,
+                        target: { params, path, state: stack }
                     }
                 });
-
                 setState({ current: stack, params, path });
                 resolvePath(path, params, state.current, stack);
             } else {
-                // console.error(`Invalid transition target: No target State Node of id "${targetId}" exists. event ${event} will be discarded.`);
-                logging && logger({
-                    action: 'EVENT_DISCARDED',
-                    event,
-                    reason: 'NO_MATCHING_STATE',
-                    source: {
-                        state: state.current,
-                        path: state.path
-                    },
-                    target: {
-                        state: targetId   
+                logging && log({
+                    type: 'NO_MATCHING_STATE',
+                    payload: { 
+                        event,
+                        target: { params, state: targetId }
                     }
                 });
             }
         } else {
-            logging && logger({
-                action: 'EVENT_DISCARDED',
-                event,
-                reason: 'NO_MATCHING_TRANSITION',
-                source: {
-                    state: state.current,
-                    path: state.path
-                },
+            logging && log({
+                type: 'NO_MATCHING_TRANSITION',
+                payload: { event }
             });
         }
     }
 
     useEffect(() => history.listen(({ action, location }) => {
         if ((!location.state || !location.state.target) || action === 'POP') {
-            const { params, path, stack, url } = resolveUrlToAtomic(location.pathname, normalized, machineId);
+            const { exact, params, path, stack, url } = resolveUrlToAtomic(location.pathname, normalized, machineId);
 
-            logging && logger({
-                action: 'HISTORY_CHANGE',
-                event: location.pathname,
-                source: {
-                    state: state.current,
-                    path: state.path
-                },
-                target: {
-                    state: stack,
-                    path
+            logging && log({
+                type: `HISTORY_${action}`,
+                payload: {
+                    target: { exact, params, path, state: stack }
                 }
             });
-
             setState({ current: stack, params, path });
         }
     }), [ history.location.pathname ]);

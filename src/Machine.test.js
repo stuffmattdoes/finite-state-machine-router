@@ -330,4 +330,8 @@ describe('<Machine/>', () => {
     // test('Throws error when two <State/>s have the same "id" attribute', () => {
 
     // });
+
+    // test('Rejects usage of "." or "#" in <State/> "id" attribute', () => {
+
+    // });
 });

@@ -222,14 +222,16 @@ const getAtomic = (stack, normalized) => {
 
 const resolveUrlToAtomic = (url, normalized, machineId) => {
     let initialProps = {
+        exact: null,
         params: null,
         path: null,
         stack: null,
         url
     };
 
-    const atomicGotten = (stack) => {
+    const atomicGotten = (stack, path) => {
         const { path: atomicPath, stack: atomicStack } = getAtomic(stack, normalized);
+        initialProps.exact = { stack, path };
         initialProps.path = atomicPath;
         initialProps.stack = atomicStack;
         initialProps.url = injectUrlParams(atomicPath, initialProps.params);

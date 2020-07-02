@@ -5,15 +5,13 @@ import { createMachine, Link, Machine, State, Transition } from '../src';
 // const CustomMachine = createMachine({ id: 'home' });
 
 const App = ({ children, machine }) => {
-    useEffect(() => machine.send('grand-child-2-1'), []);
-
     return <main>
         <header>Example | Finite State Machine Router</header>
         <nav>
             <Link href='/parent/child-1'>URL: Child 1</Link><br/>
             <Link href='/parent/child-2'>URL: Child 2</Link><br/>
             <Link href='/parent/child-3'>URL: Child 3</Link><br/>
-            <Link href='/parent/child-4'>URL: Child 4</Link>
+            <Link href='/parent/child-4' replace>URL: Child 4</Link>
         </nav>
         <ul>
             <li onClick={event => machine.send('child-1')}>EVENT: Child 1</li>
@@ -37,6 +35,7 @@ ReactDOM.render(
             <Transition event='grand-child-2-1' target='grand-child-2-1'/>
             <Transition event='grand-child-3-2' target='grand-child-3-2'/>
             <Transition event='child-4' target='child-4'/>
+            <Transition event='grand-child-4' target='grand-child-4'/>
             <State id='child-1' path='/child-1'>
                 <State id='grand-child-1' component={generic('Grand Child 1')}/>
             </State>
