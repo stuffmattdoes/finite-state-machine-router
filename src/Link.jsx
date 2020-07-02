@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { classNames, resolveSeedToAtomic } from './util';
+import { classNames } from './util';
 import { MachineContext } from './Machine';
 
 function Link({ children, className, disabled = false, href = '#', onClick, replace = false }) {
@@ -12,20 +12,8 @@ function Link({ children, className, disabled = false, href = '#', onClick, repl
             return;
         }
 
-        if (replace) {
-            history.replace(href, {
-                sourceState: current,
-                // targetState: null,
-                shouldgetAtomic: true
-            });
-        } else {
-            history.push(href, {
-                sourceState: current,
-                // targetState: null,
-                shouldgetAtomic: true
-            });
-        }
-
+        const action = replace ? 'replace' : 'push';
+        history[action](href);
         onClick && onClick(event);
     }
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
-import { Link, Machine, State, Transition } from '.';
+import { Link, Machine, State } from '.';
 import { cleanup, render, fireEvent } from '@testing-library/react';
 
 describe('<Link/>', () => {
@@ -73,10 +73,6 @@ describe('<Link/>', () => {
     test('Replaces URL in history if "replace" attribute is true and is clicked', () => {
         const [ history, machine ] = renderWithNavigation(null, genericWithLinks('Child 1'));
         const { queryByText } = render(machine);
-        // const assignMock = jest.fn();
-        // const location = { ...window.location };
-        // delete window.location;
-        // window.location = { assign: assignMock };
 
         expect(history.location.pathname).toBe('/child-1');
         expect(queryByText('Child 1')).toBeTruthy();
@@ -84,9 +80,6 @@ describe('<Link/>', () => {
         expect(history.location.pathname).toBe('/child-2');
         expect(history.action).toBe('REPLACE');
         expect(queryByText('Grand Child 2')).toBeTruthy();
-
-        // assignMock.mockClear();
-        // window.location = location;
     });
 
     // test.skip('Replaces URL when link for current path is clicked without state', () => {
