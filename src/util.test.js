@@ -2,6 +2,7 @@ import React from 'react';
 import { Machine, State, Transition } from '.';
 import {
     classNames,
+    fakeUUID,
     getChildStateNodes,
     // getInitialChildStateNode,
     injectUrlParams,
@@ -60,6 +61,10 @@ describe('utility functions', () => {
 
         expect (classNames(className)).toBe('custom-class should-display');
         expect (classNames(className2)).toBeNull();
+    });
+
+    test('fakeUUID', () => {
+        expect(fakeUUID()).toEqual(expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/));
     });
 
     test('getChildStateNodes', () => {

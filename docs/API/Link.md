@@ -24,12 +24,6 @@
         <td>When disabled, the `<Link/>` does not respond to click events, and will not make any URL pushes.</td>
     </tr>
     <tr>
-        <td><code>event</code></td>
-        <td><code>string</code></td>
-        <td></td>
-        <td>The machine event that the `<Link/>` will emit when clicked. If `event` and `href` are both present, the `event` will take precedence and ignore the `href`, causing no URL push.</td>
-    </tr>
-    <tr>
         <td><code>href</code></td>
         <td><code>string</code></td>
         <td></td>

@@ -34,37 +34,6 @@
         <td></td>
         <td>The URL that the browser will resolve to upon entry of this state. It is relative to all ancestor urls.</td>
     </tr>
-    <!-- <tr>
-        <td><code>onEntry</code></td>
-        <td><code>Function</code></td>
-        <td></td>
-        <td>Function that is called when the upon entry to this state. Occurs before the first render.<br><br>
-            <strong>Signature</strong><br>
-            <code>function() => void<code><br>
-        </td>
-    </tr>
-    <tr>
-        <td><code>onExit</code></td>
-        <td><code>Function</code></td>
-        <td></td>
-        <td>Function that is called upon exiting this state. Occurs after the last render.<br><br>
-            <strong>Signature</strong><br>
-            <code>function() => void<code><br>
-        </td>
-    </tr> -->
-    <tr>
-        <td><code>type</code></td>
-        <td><code>String: [ "atomic", "compound", "default", "final" ]</code></td>
-        <td><code>default</code></tc>
-        <td>Determines state behavior:<br><br>
-            <ul>
-                <li><strong>atomic</strong> - has no children states.</li>
-                <li><strong>compound</strong> - has multiple children states, of which only one can be active.</li>
-                <li><strong>default</strong> - has a single child state.</li>
-                <li><strong>final</strong> - has no children states or transitions. Upon entry to this state, a <code>done</code> event is emitted as `${id}.done`. i.e. `checkout-page.done`</li>
-            </ul>
-        </td>
-    </tr>
 </table>
 
 ## Reference

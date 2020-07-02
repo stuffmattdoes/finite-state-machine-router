@@ -140,6 +140,12 @@ const deriveStateFromUrl = (url, normalized, rootId) => {
     return match;
 }
 
+const fakeUUID = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    let r = Math.random() * 16 | 0;
+    let v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+});
+
 const normalizeChildStateProps = (stateNodes, rootId) => {
     const normalizeLoop = (stateNodes) => {
         let initialIndex = stateNodes.findIndex(s => s.props.initial);
@@ -222,8 +228,11 @@ const resolveUrlToAtomic = (url, normalized, machineId) => {
         url
     };
 
-    const atomicGotten = (stack) => {
+    const atomicGotten = (stack, path) => {
         const { path: atomicPath, stack: atomicStack } = getAtomic(stack, normalized);
+        if (stack !== atomicStack) {
+            initialProps.exact = { stack, path };
+        }
         initialProps.path = atomicPath;
         initialProps.stack = atomicStack;
         initialProps.url = injectUrlParams(atomicPath, initialProps.params);
@@ -231,7 +240,7 @@ const resolveUrlToAtomic = (url, normalized, machineId) => {
 
     if (isRootPath(url)) {
         const { stack } = normalized[0];
-        atomicGotten(stack);
+        atomicGotten(stack, url);
     } else {
         const { params, path: currentPath, stack: currentStack } = deriveStateFromUrl(url, normalized, machineId);
         initialProps.params = params;
@@ -239,7 +248,7 @@ const resolveUrlToAtomic = (url, normalized, machineId) => {
         initialProps.stack = currentStack;
 
         if (!isNotFound(currentStack)) {
-            atomicGotten(currentStack);
+            atomicGotten(currentStack, currentPath);
         }
     }
 
@@ -267,6 +276,7 @@ const selectTransition = (event, stack, normalized) => {
 
 export {
     classNames,
+    fakeUUID,
     getChildrenOfType,
     getChildStateNodes,
     // getInitialChildStateNode,

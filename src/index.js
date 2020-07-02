@@ -1,9 +1,10 @@
 import Link from './Link';
-import Machine, { useMachine } from './Machine';
+import Machine, { createMachine, useMachine } from './Machine';
 import State from './State';
 import Transition from './Transition';
 
 export {
+    createMachine,
     Link,
     Machine,
     State,
