@@ -222,7 +222,6 @@ const getAtomic = (stack, normalized) => {
 
 const resolveUrlToAtomic = (url, normalized, machineId) => {
     let initialProps = {
-        exact: null,
         params: null,
         path: null,
         stack: null,
@@ -231,7 +230,9 @@ const resolveUrlToAtomic = (url, normalized, machineId) => {
 
     const atomicGotten = (stack, path) => {
         const { path: atomicPath, stack: atomicStack } = getAtomic(stack, normalized);
-        initialProps.exact = { stack, path };
+        if (stack !== atomicStack) {
+            initialProps.exact = { stack, path };
+        }
         initialProps.path = atomicPath;
         initialProps.stack = atomicStack;
         initialProps.url = injectUrlParams(atomicPath, initialProps.params);
@@ -239,7 +240,7 @@ const resolveUrlToAtomic = (url, normalized, machineId) => {
 
     if (isRootPath(url)) {
         const { stack } = normalized[0];
-        atomicGotten(stack);
+        atomicGotten(stack, url);
     } else {
         const { params, path: currentPath, stack: currentStack } = deriveStateFromUrl(url, normalized, machineId);
         initialProps.params = params;
@@ -247,7 +248,7 @@ const resolveUrlToAtomic = (url, normalized, machineId) => {
         initialProps.stack = currentStack;
 
         if (!isNotFound(currentStack)) {
-            atomicGotten(currentStack);
+            atomicGotten(currentStack, currentPath);
         }
     }
 

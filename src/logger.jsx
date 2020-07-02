@@ -33,7 +33,18 @@ const useLogger = (source) => {
                 'color: grey; font-weight: normal', 'font-weight: bold;', 'color: grey; font-weight: normal');
         const logEvent = () => console.log('%cevent:', 'color: blue; font-weight: bold;', event);
         const logSource = () => console.log('%csource:', 'color: grey; font-weight: bold;', { state: source.current, path: source.path });
-        const logTarget = () => console.log('%ctarget', 'color: green; font-weight: bold;', { state: target.state, path: target.path });
+        const logTarget = () => {
+            if (target.exact) {
+                console.log('%ctarget', 'color: green; font-weight: bold;', {
+                    state: target.state,
+                    path: target.path,
+                    matched: target.exact,
+                    // resolved: { state: target.state, path: target.path }
+                });
+            } else {
+                console.log('%ctarget', 'color: green; font-weight: bold;', { state: target.state, path: target.path });
+            }
+        }
 
         switch(type) {
             case 'TRANSITION':
