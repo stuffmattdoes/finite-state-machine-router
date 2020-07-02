@@ -33,7 +33,9 @@ const classNames = (_classNames) => {
     return Boolean(next) ? next : null;
 }
 const getChildrenOfType = (children, type) => children.filter(c => c.type.displayName === type);
-const getInitialChildStateNode = (stateNodes) => stateNodes.find(c => c.props.initial) || stateNodes[0];
+// const getInitialChildStateNode = (stateNodes) => stateNodes.find(c => c.props.initial) || stateNodes[0];
+// const isAtomic = (stateNode) => getChildStateNodes(React.Children.toArray(stateNode.props.children)).length === 0;
+// const isAtomicNormalized = (stateNode) => stateNode.childStates.length === 0;
 const isCurrentStack = (id, stack) => !!stack.split('.').find(state => state === id);
 const isExactStack = (id, stack) => stack.split('.').pop() === id;
 const isDynamicSegment = segment => /^:(.+)/.test(segment);
@@ -118,17 +120,18 @@ const deriveStateFromUrl = (url, normalized, rootId) => {
         });
 
         if (dynamicPathMatch) {
-            // 3. finally, return the stack that corresponds to the URL
+            // 2.4 finally, return the stack that corresponds to the URL
             match.path = dynamicPathMatch;
             match.stack = normalized.find(norm => norm.path === dynamicPathMatch).stack;;
         }
     }
 
-    // Finally, if no match, resolve to *
+    // 3.0 if no match, resolve to wildcard route "*""
     if (!match.stack) {
         const notFoundState = normalized.find(norm => norm.id === '*');
         match.stack = '#' + rootId + '.*';
 
+        // 3.1 If no wildcard route "*", throw error
         if (!notFoundState) {
             console.warn(`No <State/> configuration matches URL "${url}, and no catch-all <State id='*' path='/404'/> exists. Consider adding one.`);
         }
@@ -211,7 +214,7 @@ const getAtomic = (stack, normalized) => {
     return initial;
 }
 
-const resolveSeedToAtomic = (url, normalized, machineId) => {
+const resolveUrlToAtomic = (url, normalized, machineId) => {
     let initialProps = {
         params: null,
         path: null,
@@ -219,12 +222,16 @@ const resolveSeedToAtomic = (url, normalized, machineId) => {
         url
     };
 
-    if (isRootPath(url)) {
-        const { path, stack } = normalized[0];
+    const atomicGotten = (stack) => {
         const { path: atomicPath, stack: atomicStack } = getAtomic(stack, normalized);
         initialProps.path = atomicPath;
         initialProps.stack = atomicStack;
-        initialProps.url = injectUrlParams(atomicPath, {});
+        initialProps.url = injectUrlParams(atomicPath, initialProps.params);
+    }
+
+    if (isRootPath(url)) {
+        const { stack } = normalized[0];
+        atomicGotten(stack);
     } else {
         const { params, path: currentPath, stack: currentStack } = deriveStateFromUrl(url, normalized, machineId);
         initialProps.params = params;
@@ -232,10 +239,7 @@ const resolveSeedToAtomic = (url, normalized, machineId) => {
         initialProps.stack = currentStack;
 
         if (!isNotFound(currentStack)) {
-            const { path: atomicPath, stack: atomicStack } = getAtomic(currentStack, normalized);
-            initialProps.path = atomicPath;
-            initialProps.stack = atomicStack;
-            initialProps.url = injectUrlParams(atomicPath, params);
+            atomicGotten(currentStack);
         }
     }
 
@@ -251,26 +255,27 @@ const selectTransition = (event, stack, normalized) => {
 
     if (availableTransitions.length) {
         const activeTransition = availableTransitions.find(({ cond, event: transitionEvent, target }) => 
-            transitionEvent === event && cond === null || cond === true);
+            transitionEvent === event && (cond === null || cond === true));
         if (activeTransition) {
             return activeTransition;
         }
     }
 
-    const nextStack = stack.split('.').slice(0, -1).join('.');
-    return selectTransition(event, nextStack, normalized);
+    const parentStack = stack.split('.').slice(0, -1).join('.');
+    return selectTransition(event, parentStack, normalized);
 }
 
 export {
     classNames,
     getChildrenOfType,
     getChildStateNodes,
-    getInitialChildStateNode,
+    // getInitialChildStateNode,
     injectUrlParams,
+    // isAtomic,
     isCurrentStack, 
     isExactStack,
     normalizeChildStateProps,
-    resolveSeedToAtomic,
+    resolveUrlToAtomic,
     getAtomic,
     selectTransition
 }
