@@ -31,7 +31,7 @@ const generic = (name) => ({ children }) => <div>
 </div>
 
 ReactDOM.render(
-    <Machine>
+    <Machine logging>
         <State id='parent' component={App} path='/parent'>
             <Transition event='child-1' target='child-1'/>
             <Transition event='grand-child-2-1' target='grand-child-2-1'/>
