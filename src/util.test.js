@@ -1,16 +1,16 @@
 import React from 'react';
 import { Machine, State, Transition } from '.';
 import {
-    // getChildrenOfType,
     classNames,
     fakeUUID,
     getChildStateNodes,
-    getInitialChildStateNode,
+    // getInitialChildStateNode,
     injectUrlParams,
+    // isAtomic,
     isCurrentStack,
     isExactStack,
     normalizeChildStateProps,
-    resolveSeedToAtomic,
+    resolveUrlToAtomic,
     getAtomic,
     selectTransition
 } from './util';
@@ -80,7 +80,7 @@ describe('utility functions', () => {
         expect(childrenPaths).toBe(true);
     });
 
-    test('getInitialChildStateNode', () => {
+    test.skip('getInitialChildStateNode', () => {
         const machineWithoutInitial = [
             <State id='child-1'/>,
             <State id='child-2'/>
@@ -112,6 +112,17 @@ describe('utility functions', () => {
         expect(injectUrlParams('/static-path/:dynamicPath/another-static-path', params)).toBe('/static-path/dynamic-path/another-static-path');
     });
 
+    test.skip('isAtomic', () => {
+        const notAtomic = <State id='child-1'>
+            <Transition event='test-event' target='child-2'/>
+            <State id='grand-child'/>
+        </State>;
+        const atomic = <State id='child-2'/>;
+        
+        expect(isAtomic(notAtomic)).toBe(false);
+        expect(isAtomic(atomic)).toBe(true);
+    });
+
     test('isCurrentStack', () => {
         expect(isCurrentStack('child-1', '#home.parent.child-1.grand-child')).toBe(true);
         expect(isCurrentStack('child-2', '#home.parent.child-1.grand-child')).toBe(false);
@@ -130,10 +141,10 @@ describe('utility functions', () => {
         expect(normalizedPaths).toMatchSnapshot();
     });
 
-    test('resolveSeedToAtomic', () => {
-        expect(resolveSeedToAtomic('/', normalizedSimple, 'home')).toMatchSnapshot();
-        expect(resolveSeedToAtomic('/', normalizedComplex, 'home')).toMatchSnapshot();
-        expect(resolveSeedToAtomic('/parent-id/child-1', normalizedPaths, 'home')).toMatchSnapshot();
+    test('resolveUrlToAtomic', () => {
+        expect(resolveUrlToAtomic('/', normalizedSimple, 'home')).toMatchSnapshot();
+        expect(resolveUrlToAtomic('/', normalizedComplex, 'home')).toMatchSnapshot();
+        expect(resolveUrlToAtomic('/parent-id/child-1', normalizedPaths, 'home')).toMatchSnapshot();
     })
 
     test('getAtomic', () => {

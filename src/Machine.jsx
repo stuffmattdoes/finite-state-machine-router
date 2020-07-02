@@ -2,10 +2,10 @@ import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { createBrowserHistory } from 'history';
 import {
     getChildStateNodes,
-    getInitialChildStateNode,
+    // getInitialChildStateNode,
     injectUrlParams,
     normalizeChildStateProps,
-    resolveSeedToAtomic,
+    resolveUrlToAtomic,
     getAtomic,
     selectTransition
 } from './util';
@@ -21,8 +21,9 @@ export const useMachine = () => {
     return [{ current, history, id, params }, send ];
 }
 
-function Machine ({ children: machineChildren, history: machineHistory, id: machineId = 'machine', path: machinePath }) {
+function Machine ({ children: machineChildren, history: machineHistory, id: machineId = 'machine', logging = false, path: machinePath }) {
     const history = useMemo(() => machineHistory || createBrowserHistory({ basename: machinePath }), []);
+
     const [ childStates, normalized ] = useMemo(() => {
         const _childStates = getChildStateNodes(React.Children.toArray(machineChildren));
 
@@ -35,32 +36,29 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
         return [ _childStates, _normalized ];
     }, [ machineChildren ]);
 
-    const [ initialStack, params ] = useMemo(() => {
-        let initialStack = '#' + machineId + '.' + getInitialChildStateNode(childStates).props.id;
-        const { params, path, stack, url } = resolveSeedToAtomic(history.location.pathname, normalized, machineId);
+    const [ initialStack, params, path ] = useMemo(() => {
+        const { params, path, stack, url } = resolveUrlToAtomic(history.location.pathname, normalized, machineId);
 
         if (history.location.pathname !== url) {
             history.replace(url);
         }
 
-        return [ stack || initialStack, params ];
+        return [ stack, params, path ];
     }, []);
 
     const [ state, setState ] = useState({
         current: initialStack,
-        event: null,
         params,
-        path: null
+        path
     });
 
-    const resolvePath = (path) => {
-        const url = injectUrlParams(path, state.params);
+    const resolvePath = (path, params, source, target) => {
+        const url = injectUrlParams(path, params);
 
         if (url !== history.location.pathname) {
             history.push(url, {
-                sourceState: state.current,
-                // targetState: null,
-                shouldgetAtomic: false
+                source,
+                target
             });
         }
     }
@@ -76,12 +74,13 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
             if (targetNode) {
                 const { path, stack } = getAtomic(targetNode.stack, normalized);
 
-                logger({
+                logging && logger({
                     action: 'TRANSITION',
+                    data,
                     event,
                     source: {
                         state: state.current,
-                        path: null
+                        path: state.path
                     },
                     target: {
                         state: stack,
@@ -89,12 +88,13 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
                     }
                 });
 
-                resolvePath(path);
-                setState({ current: stack, event: event, params, path });
+                setState({ current: stack, params, path });
+                resolvePath(path, params, state.current, stack);
             } else {
-                console.error(`Invalid transition target: No target State Node of id "${targetId}" exists. event ${event} will be discarded.`);
-                logger({
+                // console.error(`Invalid transition target: No target State Node of id "${targetId}" exists. event ${event} will be discarded.`);
+                logging && logger({
                     action: 'EVENT_DISCARDED',
+                    data,
                     event,
                     reason: 'NO_MATCHING_STATE',
                     source: {
@@ -107,8 +107,9 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
                 });
             }
         } else {
-            logger({
+            logging && logger({
                 action: 'EVENT_DISCARDED',
+                data,
                 event,
                 reason: 'NO_MATCHING_TRANSITION',
                 source: {
@@ -119,27 +120,26 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
         }
     }
 
-    useEffect(() =>  history.listen(({ action, location }) => {
-        const { shouldgetAtomic } = location.state || true;
-        const { params, path, stack, url } = resolveSeedToAtomic(location.pathname, normalized, machineId);
+    useEffect(() => history.listen(({ action, location }) => {
+        if ((!location.state || !location.state.target) || action === 'POP') {
+            const { params, path, stack, url } = resolveUrlToAtomic(location.pathname, normalized, machineId);
 
-        if (shouldgetAtomic || action === 'POP') {
-            setState({ current: stack, params });
+            logging && logger({
+                action: 'HISTORY_CHANGE',
+                data: location.pathname,
+                source: {
+                    state: state.current,
+                    path: state.path
+                },
+                target: {
+                    state: stack,
+                    path
+                }
+            });
+
+            setState({ current: stack, params, path });
         }
-    }), []);
-
-    // Alternative history listener?
-    // useEffect(() => {
-    //     const { action, location } = history;
-    //     const { shouldgetAtomic } = location.state || true;
-    //     const { params, path, stack, url } = resolveSeedToAtomic(location.pathname, normalized, machineId);
-
-    //     console.log('history', action, location, state.current);
-
-    //     if (shouldgetAtomic || action === 'POP') {
-    //         setState({ current: stack, params });
-    //     }
-    // }, [ history.location.pathname ]);
+    }), [ history.location.pathname ]);
 
     const providerValue = {
         ...state,

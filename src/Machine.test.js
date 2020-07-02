@@ -279,7 +279,7 @@ describe('<Machine/>', () => {
         expect(history.location.pathname).toBe('/child-2');
     });
 
-    test('Resolves to proper state on "history.back" (browser navigation)', () => {
+    test('Resolves to proper state on native browser navigation', () => {
         const [ history, machine ] = renderWithNavigation([ '/child-1/grand-child-1', '/child-2', '/child-3', '/child-4/grand-child-4'],
             <State id='parent'>
                 <State id='child-1' path='/child-1'>
