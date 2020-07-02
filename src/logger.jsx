@@ -1,54 +1,43 @@
 /*
-    Logging events:
-    - TRANSITION EVENT
-    - EVENT DISCARDED
-    - URL PUSH
-    - URL POP
+    TRANSITION log
+    source: { state: "stateId", : path: "/path" }
+    event: { event: "event-name", : date: { ...data }}
+    target: { state: "stateId", : path: "/path" }
+        if not atomic:
+    resolved: { state: "stateId", : path: "/path" }
 
-    Data: {
-        'source state': {
-            state,
-            path
-        },
-        'target state': {
-            state,
-            path
-        }
-    }
+    HISTORY PUSH/POP/REPLAC
+    source: { state: "stateId", : path: "/path" }
+    url: "/path",
+    target: { state: "stateId", : path: "/path" }
+        if not atomic:
+    resolved: { state: "stateId", : path: "/path" }
 */
+
 
 export const logger = ({ action, event, data, reason, source, target }) => {
     const date = new Date();
     const time = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}.${date.getMilliseconds()}`;
-    const eventLog = (msg) => {
-        console.group(`%cFSM-Router Event: %c${action} %c@ ${time}`, 'color: grey; font-weight: normal', 'font-weight: bold;', 'color: grey; font-weight: normal');
+    const log = (msg) => {
+        console.group(`%cFSM-Router: %c${action} %c@ ${time}`, 'color: grey; font-weight: normal', 'font-weight: bold;', 'color: grey; font-weight: normal');
         console.log('%csource:', 'color: grey; font-weight: bold;', source);
-        console.log('%cdata:', 'color: blue; font-weight: bold;', { event, data });
+        console.log('%cevent:', 'color: blue; font-weight: bold;', { event, data });
         msg();
         console.groupEnd();
     };
-
-    const historyLog = (msg) => {
-        console.group(`%cFSM-Router Event: %c${action} %c@ ${time}`, 'color: grey; font-weight: normal', 'font-weight: bold;', 'color: grey; font-weight: normal');
-        console.log('%csource:', 'color: grey; font-weight: bold;', source);
-        console.log('%curl:', 'color: blue; font-weight: bold;', data);
-        msg();
-        console.groupEnd();
-    };
-
     switch(action) {
         case 'TRANSITION':
-            return eventLog(() => console.log('%ctarget', 'color: green; font-weight: bold;', target));
+            return log(() => console.log('%ctarget', 'color: green; font-weight: bold;', target));
         case 'EVENT_DISCARDED':
             if (reason === 'NO_MATCHING_TRANSITION') {
-                return eventLog(() => console.log(`%creason: %cNo matching %c<Transition id="${event}"/> %cfrom within source state or any of its ancestors.`,
+                return log(() => console.log(`%creason: %cNo matching %c<Transition id="${event}"/> %cfrom within source state or any of its ancestors.`,
                     'color: red; font-weight: bold;', null, 'font-weight: bold; font-family: monospace;', null));
             } else if ('NO_MATCHING_STATE') {
-                return eventLog(() => console.log(`%creason: %cNo matching %c<State id="${target.state}"/> %cfound.`,
+                return log(() => console.log(`%creason: %cNo matching %c<State id="${target.state}"/> %cfound.`,
                     'color: red; font-weight: bold;', null, 'font-weight: bold; font-family: monospace;', null));
             }
         case 'HISTORY_CHANGE':
-            return historyLog(() => console.log('%ctarget', 'color: green; font-weight: bold;', target));
+            return log(() => console.log('%ctarget', 'color: green; font-weight: bold;', target));
     }
 
     log();
