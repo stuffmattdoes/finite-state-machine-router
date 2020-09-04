@@ -21,7 +21,11 @@ import React, { useState } from 'react';
         resolved: { state: "stateId", : path: "/path" }
 */
 
-const useLogger = (source) => {
+const useLogger = (source, enabled) => {
+    if (!enabled) {
+        return;
+    }
+
     const [ logs, setLogs ] = useState([]);
     const log = ({ type, payload }) => {
         const date = new Date();
@@ -32,17 +36,18 @@ const useLogger = (source) => {
             console.group(`%cFSM-Router action: %c${actionType} %c@ ${time}`,
                 'color: grey; font-weight: normal', 'font-weight: bold;', 'color: grey; font-weight: normal');
         const logEvent = () => console.log('%cevent:', 'color: blue; font-weight: bold;', event);
-        const logSource = () => console.log('%csource:', 'color: grey; font-weight: bold;', { state: source.current, path: source.path });
+        const logSource = () => console.log('%csource:', 'color: grey; font-weight: bold;', { state: source.current, location: source.location });
         const logTarget = () => {
             if (target.exact) {
                 console.log('%ctarget', 'color: green; font-weight: bold;', {
-                    state: target.state,
-                    path: target.path,
+                    location: target.location,
                     matched: target.exact,
+                    state: target.state
                     // resolved: { state: target.state, path: target.path }
+                    // search: target.location.search
                 });
             } else {
-                console.log('%ctarget', 'color: green; font-weight: bold;', { state: target.state, path: target.path });
+                console.log('%ctarget', 'color: green; font-weight: bold;', { state: target.state, location: target.location });
             }
         }
 
@@ -72,7 +77,7 @@ const useLogger = (source) => {
             case 'HISTORY_PUSH':
             case 'HISTORY_POP':
                 logTitle();
-                console.log('%cpath', 'color: blue; font-weight: bold;', target.path);
+                console.log('%cpath', 'color: blue; font-weight: bold;', target.location.pathname);
                 logSource();
                 logTarget();
                 break;

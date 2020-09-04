@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState, useReducer } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { createBrowserHistory } from 'history';
 import useLogger from './logger';
 import {
@@ -20,18 +20,19 @@ export const useMachine = () => {
     return [{ current, history, id, params }, send ];
 }
 
-function Machine ({ children: machineChildren, history: machineHistory, id: machineId = 'machine', logging = false, path: machinePath }) {
-    const history = useMemo(() => machineHistory || createBrowserHistory({ basename: machinePath }), []);
+function Machine ({ children: machineChildren, history: machineHistory, id: machineId = 'machine', logging = false }) {
+    const history = useMemo(() => machineHistory || createBrowserHistory(), []);
 
     const [ childStates, normalized ] = useMemo(() => {
         const _childStates = getChildStateNodes(React.Children.toArray(machineChildren));
 
-        if (_childStates.length === 0) {
-            throw new Error('<Machine/> has no children <State/> nodes! At least one is required to be considered a valid state machine.');
-        }
+        // if (_childStates.length === 0) {
+        //     throw new Error('<Machine/> has no children <State/> nodes! At least one is required to be considered a valid state machine.');
+        // }
 
         const _normalized = normalizeChildStateProps(_childStates, machineId);
 
+        console.log(_normalized, _childStates);
         return [ _childStates, _normalized ];
     }, [ machineChildren ]);
 
@@ -47,8 +48,8 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
 
     const [ state, setState ] = useState({
         current: initialStack,
-        params,
-        path
+        location: history.location,
+        params
     });
     const [ logs, log ] = useLogger(state, logging);
 
@@ -74,17 +75,17 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
             if (targetNode) {
                 const { path, stack } = getAtomic(targetNode.stack, normalized);
 
-                logging && log({
+                log({
                     type: 'TRANSITION',
                     payload: {
                         event,
-                        target: { params, path, state: stack }
+                        target: { params, location: history.location, state: stack }
                     }
                 });
-                setState({ current: stack, params, path });
+                setState({ current: stack, location: history.location, params });
                 resolvePath(path, params, state.current, stack);
             } else {
-                logging && log({
+                log({
                     type: 'NO_MATCHING_STATE',
                     payload: { 
                         event,
@@ -93,7 +94,7 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
                 });
             }
         } else {
-            logging && log({
+            log({
                 type: 'NO_MATCHING_TRANSITION',
                 payload: { event }
             });
@@ -104,13 +105,13 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
         if ((!location.state || !location.state.target) || action === 'POP') {
             const { exact, params, path, stack, url } = resolveUrlToAtomic(location.pathname, normalized, machineId);
 
-            logging && log({
+            log({
                 type: `HISTORY_${action}`,
                 payload: {
-                    target: { exact, params, path, state: stack }
+                    target: { exact, params, location: history.location, state: stack }
                 }
             });
-            setState({ current: stack, params, path });
+            setState({ current: stack, location: history.location, params });
         }
     }), [ history.location.pathname ]);
 
@@ -128,5 +129,4 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
 
 Machine.displayName = 'Machine';
 
-// export const createMachine = (props) => Machine(props);
 export default Machine;
