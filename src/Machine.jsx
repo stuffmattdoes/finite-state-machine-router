@@ -26,13 +26,12 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
     const [ childStates, normalized ] = useMemo(() => {
         const _childStates = getChildStateNodes(React.Children.toArray(machineChildren));
 
-        // if (_childStates.length === 0) {
-        //     throw new Error('<Machine/> has no children <State/> nodes! At least one is required to be considered a valid state machine.');
-        // }
+        if (_childStates.length === 0) {
+            throw new Error('<Machine/> has no children <State/> nodes! At least one is required to be considered a valid state machine.');
+        }
 
         const _normalized = normalizeChildStateProps(_childStates, machineId);
 
-        console.log(_normalized, _childStates);
         return [ _childStates, _normalized ];
     }, [ machineChildren ]);
 
