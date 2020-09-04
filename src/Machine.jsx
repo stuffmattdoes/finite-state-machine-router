@@ -32,17 +32,18 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
 
         const _normalized = normalizeChildStateProps(_childStates, machineId);
 
+        
         return [ _childStates, _normalized ];
     }, [ machineChildren ]);
 
-    const [ initialStack, params, path ] = useMemo(() => {
+    const [ initialStack, params ] = useMemo(() => {
         const { exact, params, path, stack, url } = resolveUrlToAtomic(history.location.pathname, normalized, machineId);
 
         if (history.location.pathname !== url) {
             history.replace(url);
         }
 
-        return [ stack, params, path ];
+        return [ stack, params ];
     }, []);
 
     const [ state, setState ] = useState({
