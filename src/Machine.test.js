@@ -40,7 +40,7 @@ describe('<Machine/>', () => {
         }
 
         const testHistory = createMemoryHistory({ initialEntries });
-        const machine = <Machine history={testHistory} id='home' path={path}>{element}</Machine>;
+        const machine = <Machine history={testHistory} id='home'>{element}</Machine>;
         return [ testHistory, machine ];
     }
 
