@@ -23,7 +23,7 @@ import React, { useState } from 'react';
 
 const useLogger = (source, enabled) => {
     if (!enabled) {
-        return;
+        return [ [], () => {} ];
     }
 
     const [ logs, setLogs ] = useState([]);

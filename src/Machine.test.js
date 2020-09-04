@@ -5,11 +5,15 @@ import { act, cleanup, render, fireEvent } from '@testing-library/react';
 
 describe('<Machine/>', () => {
     let _console = {
+        // group: console.group,
+        // groupEnd: console.groupEnd,
         log: console.log,
         warn: console.warn
     };
 
     beforeEach(() => {
+        // global.console.group = jest.fn();
+        // global.console.groupEnd = jest.fn();
         global.console.log = jest.fn();
         global.console.warn = jest.fn();
     });
