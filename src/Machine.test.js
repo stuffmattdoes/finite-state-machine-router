@@ -33,6 +33,10 @@ describe('<Machine/>', () => {
         <Link href='/child-3'>URL Push 2</Link>
         {children}
     </div>;
+    const genericWithParams = name => ({ children, match }) => <div><h1>{name}</h1>
+        {Object.keys(match.params).map(p => <span key={p}>{p}: {match.params[p]}</span>)}
+        {children}
+    </div>;
     const renderWithNavigation = (initialEntries, element) => {
         let path = initialEntries;
 
@@ -326,6 +330,22 @@ describe('<Machine/>', () => {
         expect(history.location.pathname).toBe('/child-4/grand-child-4');
         expect(queryByText('Grand Child 4')).toBeTruthy();
     });
+
+    // test('Translates the URL into dynamic segment when applicable', () => {
+    //     const [ history, machine ] = renderWithNavigation('/parent/marlin/grand-child/nemo',
+    //         <State id='parent' path='/parent' component={generic('Parent')}>
+    //             <State id='child' path='/:parent'>
+    //                 <State id='grand-child' path='/child'>
+    //                     <State id='great-grand-child' path='/:child' component={genericWithParams('Child')}/>
+    //                 </State>
+    //             </State>
+    //         </State>);
+    //     const { container, queryByText } = render(machine);
+
+    //     expect(queryByText('parent: marlin')).toBeTruthy();
+    //     expect(queryByText(/child\n:\nnemo/)).toBeTruthy();
+    //     expect(container.firstChild).toMatchSnapshot();
+    // });
 
     // test('Discards events that result in mo matching transition', () => {
 

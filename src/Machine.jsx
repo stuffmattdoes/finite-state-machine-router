@@ -31,7 +31,6 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
         }
 
         const _normalized = normalizeChildStateProps(_childStates, machineId);
-
         
         return [ _childStates, _normalized ];
     }, [ machineChildren ]);
@@ -111,6 +110,7 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
                     target: { exact, params, location: history.location, state: stack }
                 }
             });
+
             setState({ current: stack, location: history.location, params });
         }
     }), [ history.location.pathname ]);
