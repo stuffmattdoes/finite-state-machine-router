@@ -174,7 +174,7 @@ describe('<Machine/>', () => {
         expect(console.warn).toHaveBeenCalledWith(expect.stringMatching(/No <State\/> configuration matches URL/));
     });
 
-    test('Transitions state & resolves URL upon even emission', () => {
+    test('Transitions state & resolves URL upon event emission', () => {
         const [ history, machine ] = renderWithNavigation(null, 
             <State id='parent'>
                 <State id='child-1' path='/child-1' component={({ machine }) => <div>
