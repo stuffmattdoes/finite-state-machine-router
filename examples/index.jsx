@@ -21,7 +21,7 @@ const App = ({ children, machine }) => {
             <li onClick={event => machine.send('child-1')}>EVENT: Child 1</li>
             <li onClick={event => machine.send('grand-child-2-1')}>EVENT: Grand Child 2-1</li>
             <li onClick={event => machine.send('grand-child-3-2')}>EVENT: Grand Child 3-2</li>
-            <li onClick={event => machine.send('grand-child-3-2')}>EVENT: Grand Child 3-3</li>
+            <li onClick={event => machine.send('grand-child-3-3')}>EVENT: Grand Child 3-3</li>
             <li onClick={event => machine.send('child-4')}>EVENT: Child 4</li>
         </ul>
         {children}
