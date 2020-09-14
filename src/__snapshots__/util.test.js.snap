@@ -183,7 +183,7 @@ Array [
 
 exports[`utility functions resolveUrlToAtomic 1`] = `
 Object {
-  "params": null,
+  "params": Object {},
   "path": "/",
   "stack": "#home.child",
   "url": "/",
@@ -192,11 +192,7 @@ Object {
 
 exports[`utility functions resolveUrlToAtomic 2`] = `
 Object {
-  "exact": Object {
-    "path": "/",
-    "stack": "#home.parent",
-  },
-  "params": null,
+  "params": Object {},
   "path": "/",
   "stack": "#home.parent.child-1.grand-child",
   "url": "/",
@@ -205,10 +201,6 @@ Object {
 
 exports[`utility functions resolveUrlToAtomic 3`] = `
 Object {
-  "exact": Object {
-    "path": "/:parent/child-1",
-    "stack": "#home.parent.child-1",
-  },
   "params": Object {
     "parent": "parent-id",
   },

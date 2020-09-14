@@ -13,6 +13,7 @@ import {
 export const MachineContext = React.createContext({});
 MachineContext.displayName = 'Machine';
 
+// TODO: ignore hash option - doesn't resolve if only URL hash changes
 export const createMachine = (options) => (props) => Machine({ ...props, ...options });
 
 export const useMachine = () => {
@@ -20,7 +21,7 @@ export const useMachine = () => {
     return [{ current, history, id, params }, send ];
 }
 
-function Machine ({ children: machineChildren, history: machineHistory, id: machineId = 'machine', logging = false }) {
+function Machine ({ children: machineChildren, history: machineHistory, id: machineId = 'machine', ignoreHash = false, logging = false }) {
     const history = useMemo(() => machineHistory || createBrowserHistory(), []);
 
     const [ childStates, normalized ] = useMemo(() => {
@@ -36,7 +37,7 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
     }, [ machineChildren ]);
 
     const [ initialStack, params ] = useMemo(() => {
-        const { exact, params, path, stack, url } = resolveUrlToAtomic(history.location.pathname, normalized, machineId);
+        const { params, path, stack, url } = resolveUrlToAtomic(history.location.pathname, normalized, machineId);
 
         if (history.location.pathname !== url) {
             history.replace(url);
@@ -52,17 +53,6 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
     });
     const [ logs, log ] = useLogger(state, logging);
 
-    const resolvePath = (path, params, source, target) => {
-        const url = injectUrlParams(path, params);
-
-        if (url !== history.location.pathname) {
-            history.push(url, {
-                source,
-                target
-            });
-        }
-    }
-
     const send = (event, data = null) => {
         const targetState = selectTransition(event, state.current, normalized);
 
@@ -73,6 +63,13 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
 
             if (targetNode) {
                 const { path, stack } = getAtomic(targetNode.stack, normalized);
+                const url = injectUrlParams(path, params);
+
+                if (url !== history.location.pathname) {
+                    history.push(url);
+                } else {
+                    setState({ current: stack, location: history.location, params });
+                }
 
                 log({
                     type: 'TRANSITION',
@@ -81,8 +78,6 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
                         target: { params, location: history.location, state: stack }
                     }
                 });
-                setState({ current: stack, location: history.location, params });
-                resolvePath(path, params, state.current, stack);
             } else {
                 log({
                     type: 'NO_MATCHING_STATE',
@@ -101,19 +96,26 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
     }
 
     useEffect(() => history.listen(({ action, location }) => {
-        if ((!location.state || !location.state.target) || action === 'POP') {
-            const { exact, params, path, stack, url } = resolveUrlToAtomic(location.pathname, normalized, machineId);
+        // if ((!location.state || !location.state.target) || action === 'POP') {
+            const { params, path, stack, url } = resolveUrlToAtomic(location.pathname, normalized, machineId);
+            // TODO - check to see if URL update changes lineage, or if is exact match. If so, update stack
+            // Could compare match.isExact also
 
-            log({
-                type: `HISTORY_${action}`,
-                payload: {
-                    target: { exact, params, location: history.location, state: stack }
-                }
-            });
+            // if (ignoreHash && state.location.hash !== location.hash) {
+            //     setState({ ...state, location: history.location, params });
+            //     return;
+            // }
 
             setState({ current: stack, location: history.location, params });
-        }
-    }), [ history.location.pathname ]);
+
+            // log({
+            //     type: `HISTORY_${action}`,
+            //     payload: {
+            //         target: { target, params, location: history.location, state: stack }
+            //     }
+            // });
+        // }
+    }));
 
     const providerValue = {
         ...state,
