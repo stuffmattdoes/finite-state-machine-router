@@ -96,29 +96,33 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
     }
 
     useEffect(() => history.listen(({ action, location }) => {
-        const { params, path, stack, url } = resolveUrlToAtomic(location.pathname, normalized, machineId);
-        let target = stack;
+        // if ((!location.state || !location.state.target) || action === 'POP') {
+            const { params, path, stack, url } = resolveUrlToAtomic(location.pathname, normalized, machineId);
+            let target = stack;
 
-        // if (ignoreHash && state.location.hash !== location.hash) {
-        //     setState({ ...state, location: history.location, params });
-        //     return;
+            // if (ignoreHash && state.location.hash !== location.hash) {
+            //     setState({ ...state, location: history.location, params });
+            //     return;
+            // }
+
+            // TODO - check to see if URL update changes lineage, or if is exact match. If so, update stack
+            // Could compare match.isExact also
+
+            if (location.state && location.state.target) {
+                target = location.state.target;
+            } 
+
+            if (action === 'POP' || (!location.state || !location.state.target)) {
+                log({
+                    type: `HISTORY_${action}`,
+                    payload: {
+                        target: { target, params, location: history.location, state: stack }
+                    }
+                });
+            }
+
+            setState({ current: target, location: history.location, params });
         // }
-
-        // TODO - check to see if URL update changes lineage, or if is exact match. If so, update stack
-        // Could compare match.isExact also
-
-        if (location.state && location.state.target) {
-            target = location.state.target;
-        } else {
-            log({
-                type: `HISTORY_${action}`,
-                payload: {
-                    target: { target, params, location: history.location, state: stack }
-                }
-            });
-        }
-
-        setState({ current: target, location: history.location, params });
     }));
 
     const providerValue = {
