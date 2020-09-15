@@ -99,10 +99,10 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
         const { params, path, stack, url } = resolveUrlToAtomic(location.pathname, normalized, machineId);
         let target = stack;
 
-        // if (ignoreHash && state.location.hash !== location.hash) {
-        //     setState({ ...state, location: history.location, params });
-        //     return;
-        // }
+        if (ignoreHash && state.location.hash !== location.hash) {
+            setState({ ...state, location: history.location, params });
+            return;
+        }
 
         // TODO - check to see if URL update changes lineage, or if is exact match. If so, update stack
         // Could compare match.isExact also

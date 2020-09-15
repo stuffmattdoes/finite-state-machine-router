@@ -4,11 +4,7 @@ import { createMachine, Link, Machine, State, Transition, useMachine } from '../
 
 // const CustomMachine = createMachine({ id: 'home' });
 
-const App = ({ children, machine }) => {
-    useEffect(() => {
-        setTimeout(() => window.location.hash = window.location.hash.replace('lol=1', ''), 500);
-    }, []);
-
+const App = ({ children, history, machine }) => {
     return <main>
         <header>Example | Finite State Machine Router</header>
         <nav>

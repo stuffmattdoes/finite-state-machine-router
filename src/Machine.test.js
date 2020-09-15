@@ -1,7 +1,7 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
 import { Link, Machine, State, Transition } from '.';
-import { act, cleanup, render, fireEvent } from '@testing-library/react';
+import { act, cleanup, render, fireEvent, queryByText } from '@testing-library/react';
 
 describe('<Machine/>', () => {
     let _console = {
@@ -33,10 +33,10 @@ describe('<Machine/>', () => {
         <Link href='/child-3'>URL Push 2</Link>
         {children}
     </div>;
-    const genericWithParams = name => ({ children, match }) => <div><h1>{name}</h1>
-        {Object.keys(match.params).map(p => <span key={p}>{p}: {match.params[p]}</span>)}
-        {children}
-    </div>;
+    // const genericWithParams = name => ({ children, match }) => <div><h1>{name}</h1>
+    //     {Object.keys(match.params).map(p => <span key={p}>{p}: {match.params[p]}</span>)}
+    //     {children}
+    // </div>;
     const renderWithNavigation = (initialEntries, element) => {
         let path = initialEntries;
 
@@ -331,6 +331,38 @@ describe('<Machine/>', () => {
         expect(history.location.pathname).toBe('/child-4');
         expect(queryByText('Grand Child 4-1')).toBeTruthy();
     });
+
+    test('Ignores changes in URL hash', () => {
+        const testHistory = createMemoryHistory({ initialEntries: [ '/parent?search=true#hash=true' ] });
+        const { queryByText } = render(<Machine history={testHistory} id='home' ignoreHash>
+            <State id='parent' path='/parent'>
+                <State id='child-1' component={({ machine }) => <div>
+                    <h1>Child 1</h1>
+                    <button onClick={event => machine.send('test-event-1')}>Fire event</button>
+                </div>}>
+                    <Transition event='test-event-1' target='child-2'/>
+                </State>
+                <State id='child-2' component={genericWithLinks('Child 2')}/>
+            </State>
+        </Machine>);
+
+        expect(testHistory.location.pathname).toBe('/parent');
+        expect(testHistory.location.hash).toBe('#hash=true');
+        
+        fireEvent.click(queryByText(/Fire event/i));
+        expect(testHistory.location.pathname).toBe('/parent');
+        expect(testHistory.location.hash).toBe('#hash=true');
+        expect(queryByText('Child 2')).toBeTruthy();
+        
+        act(() => testHistory.push({ hash: null }));
+        expect(testHistory.location.pathname).toBe('/parent');
+        expect(testHistory.location.hash).toBeNull();
+        expect(queryByText('Child 2')).toBeTruthy();
+    });
+
+    // test('Preserves query parameters when resolving url', () => {
+
+    // });
 
     // test('Translates the URL into dynamic segment when applicable', () => {
     //     const [ history, machine ] = renderWithNavigation('/parent/marlin/grand-child/nemo',
