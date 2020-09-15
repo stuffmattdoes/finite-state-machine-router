@@ -1,7 +1,7 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
 import { Link, Machine, State, Transition } from '.';
-import { act, cleanup, render, fireEvent } from '@testing-library/react';
+import { act, cleanup, render, fireEvent, queryByText } from '@testing-library/react';
 
 describe('<Machine/>', () => {
     let _console = {
@@ -33,6 +33,10 @@ describe('<Machine/>', () => {
         <Link href='/child-3'>URL Push 2</Link>
         {children}
     </div>;
+    // const genericWithParams = name => ({ children, match }) => <div><h1>{name}</h1>
+    //     {Object.keys(match.params).map(p => <span key={p}>{p}: {match.params[p]}</span>)}
+    //     {children}
+    // </div>;
     const renderWithNavigation = (initialEntries, element) => {
         let path = initialEntries;
 
@@ -170,7 +174,7 @@ describe('<Machine/>', () => {
         expect(console.warn).toHaveBeenCalledWith(expect.stringMatching(/No <State\/> configuration matches URL/));
     });
 
-    test('Transitions state & resolves URL upon even emission', () => {
+    test('Transitions state & resolves URL upon event emission', () => {
         const [ history, machine ] = renderWithNavigation(null, 
             <State id='parent'>
                 <State id='child-1' path='/child-1' component={({ machine }) => <div>
@@ -284,7 +288,7 @@ describe('<Machine/>', () => {
     });
 
     test('Resolves to proper state on native browser navigation', () => {
-        const [ history, machine ] = renderWithNavigation([ '/child-1/grand-child-1', '/child-2', '/child-3', '/child-4/grand-child-4'],
+        const [ history, machine ] = renderWithNavigation([ '/child-1/grand-child-1', '/child-2', '/child-3', '/child-4'],
             <State id='parent'>
                 <State id='child-1' path='/child-1'>
                     <State id='grand-child-1' path='/grand-child-1' component={genericWithLinks('Grand Child 1')}/>
@@ -294,13 +298,14 @@ describe('<Machine/>', () => {
                     <State id='grand-child-3' component={generic('Grand Child 3')}/>
                 </State>
                 <State id='child-4' path='/child-4'>
-                    <State id='grand-child-4' path='/grand-child-4' component={generic('Grand Child 4')}/>
+                    <State id='grand-child-4-1' component={generic('Grand Child 4-1')}/>
+                    <State id='grand-child-4-2' component={generic('Grand Child 4-2')}/>
                 </State>
             </State>);
         const { queryByText } = render(machine);
 
-        expect(history.location.pathname).toBe('/child-4/grand-child-4');
-        expect(queryByText('Grand Child 4')).toBeTruthy();
+        expect(history.location.pathname).toBe('/child-4');
+        expect(queryByText('Grand Child 4-1')).toBeTruthy();
 
         act(() => history.back());
         expect(history.location.pathname).toBe('/child-3');
@@ -323,9 +328,57 @@ describe('<Machine/>', () => {
         expect(queryByText('Grand Child 3')).toBeTruthy();
 
         act(() => history.forward());
-        expect(history.location.pathname).toBe('/child-4/grand-child-4');
-        expect(queryByText('Grand Child 4')).toBeTruthy();
+        expect(history.location.pathname).toBe('/child-4');
+        expect(queryByText('Grand Child 4-1')).toBeTruthy();
     });
+
+    test('Ignores changes in URL hash', () => {
+        const testHistory = createMemoryHistory({ initialEntries: [ '/parent?search=true#hash=true' ] });
+        const { queryByText } = render(<Machine history={testHistory} id='home' ignoreHash>
+            <State id='parent' path='/parent'>
+                <State id='child-1' component={({ machine }) => <div>
+                    <h1>Child 1</h1>
+                    <button onClick={event => machine.send('test-event-1')}>Fire event</button>
+                </div>}>
+                    <Transition event='test-event-1' target='child-2'/>
+                </State>
+                <State id='child-2' component={genericWithLinks('Child 2')}/>
+            </State>
+        </Machine>);
+
+        expect(testHistory.location.pathname).toBe('/parent');
+        expect(testHistory.location.hash).toBe('#hash=true');
+        
+        fireEvent.click(queryByText(/Fire event/i));
+        expect(testHistory.location.pathname).toBe('/parent');
+        expect(testHistory.location.hash).toBe('#hash=true');
+        expect(queryByText('Child 2')).toBeTruthy();
+        
+        act(() => testHistory.push({ hash: null }));
+        expect(testHistory.location.pathname).toBe('/parent');
+        expect(testHistory.location.hash).toBeNull();
+        expect(queryByText('Child 2')).toBeTruthy();
+    });
+
+    // test('Preserves query parameters when resolving url', () => {
+
+    // });
+
+    // test('Translates the URL into dynamic segment when applicable', () => {
+    //     const [ history, machine ] = renderWithNavigation('/parent/marlin/grand-child/nemo',
+    //         <State id='parent' path='/parent' component={generic('Parent')}>
+    //             <State id='child' path='/:parent'>
+    //                 <State id='grand-child' path='/child'>
+    //                     <State id='great-grand-child' path='/:child' component={genericWithParams('Child')}/>
+    //                 </State>
+    //             </State>
+    //         </State>);
+    //     const { container, queryByText } = render(machine);
+
+    //     expect(queryByText('parent: marlin')).toBeTruthy();
+    //     expect(queryByText(/child\n:\nnemo/)).toBeTruthy();
+    //     expect(container.firstChild).toMatchSnapshot();
+    // });
 
     // test('Discards events that result in mo matching transition', () => {
 

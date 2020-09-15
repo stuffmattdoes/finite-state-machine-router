@@ -221,38 +221,41 @@ const getAtomic = (stack, normalized) => {
 }
 
 const resolveUrlToAtomic = (url, normalized, machineId) => {
-    let initialProps = {
-        params: null,
+    let atomic = {
+        params: {},
         path: null,
         stack: null,
         url
     };
 
-    const atomicGotten = (stack, path) => {
+    const atomicExists = (stack, path) => {
         const { path: atomicPath, stack: atomicStack } = getAtomic(stack, normalized);
-        if (stack !== atomicStack) {
-            initialProps.exact = { stack, path };
+        atomic = {
+            ...atomic,
+            path: atomicPath,
+            stack: atomicStack,
+            url: injectUrlParams(atomicPath, atomic.params)
         }
-        initialProps.path = atomicPath;
-        initialProps.stack = atomicStack;
-        initialProps.url = injectUrlParams(atomicPath, initialProps.params);
     }
 
     if (isRootPath(url)) {
         const { stack } = normalized[0];
-        atomicGotten(stack, url);
+        atomicExists(stack, url);
     } else {
         const { params, path: currentPath, stack: currentStack } = deriveStateFromUrl(url, normalized, machineId);
-        initialProps.params = params;
-        initialProps.path = currentPath;
-        initialProps.stack = currentStack;
+        atomic = {
+            ...atomic,
+            params,
+            path: currentPath,
+            stack: currentStack
+        }
 
         if (!isNotFound(currentStack)) {
-            atomicGotten(currentStack, currentPath);
+            atomicExists(currentStack, currentPath);
         }
     }
 
-    return initialProps;
+    return atomic;
 }
 
 const selectTransition = (event, stack, normalized) => {
@@ -279,9 +282,7 @@ export {
     fakeUUID,
     getChildrenOfType,
     getChildStateNodes,
-    // getInitialChildStateNode,
     injectUrlParams,
-    // isAtomic,
     isCurrentStack, 
     isExactStack,
     normalizeChildStateProps,

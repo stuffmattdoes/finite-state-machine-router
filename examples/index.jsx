@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import { createMachine, Link, Machine, State, Transition } from '../src';
+import { createMachine, Link, Machine, State, Transition, useMachine } from '../src';
 
 // const CustomMachine = createMachine({ id: 'home' });
 
-const App = ({ children, machine }) => {
+const App = ({ children, history, machine }) => {
     return <main>
         <header>Example | Finite State Machine Router</header>
         <nav>
@@ -17,16 +17,22 @@ const App = ({ children, machine }) => {
             <li onClick={event => machine.send('child-1')}>EVENT: Child 1</li>
             <li onClick={event => machine.send('grand-child-2-1')}>EVENT: Grand Child 2-1</li>
             <li onClick={event => machine.send('grand-child-3-2')}>EVENT: Grand Child 3-2</li>
+            <li onClick={event => machine.send('grand-child-3-3')}>EVENT: Grand Child 3-3</li>
             <li onClick={event => machine.send('child-4')}>EVENT: Child 4</li>
         </ul>
         {children}
     </main>;
 }
 
-const generic = (name) => ({ children }) => <div>
-    <p>{name}</p>
-    {children}
-</div>
+const generic = (name) => (props) => {
+    const [ machine, send ] = useMachine();
+    const { children, match: { params }} = props;
+
+    return <div>
+        <p>{name}</p>
+        {children}
+    </div>
+}
 
 ReactDOM.render(
     <Machine logging>
@@ -34,10 +40,13 @@ ReactDOM.render(
             <Transition event='child-1' target='child-1'/>
             <Transition event='grand-child-2-1' target='grand-child-2-1'/>
             <Transition event='grand-child-3-2' target='grand-child-3-2'/>
+            <Transition event='grand-child-3-3' target='grand-child-3-3'/>
             <Transition event='child-4' target='child-4'/>
             <Transition event='grand-child-4' target='grand-child-4'/>
             <State id='child-1' path='/child-1'>
-                <State id='grand-child-1' component={generic('Grand Child 1')}/>
+                <State id='grand-child-1' component={generic('Grand Child 1')}>
+                    <State id='great-grand-child-1' target='great-grand-child-1' path='/great-grand-child-1/:dynamicUrl'/>
+                </State>
             </State>
             <State id='child-2' path='/child-2'>
                 <State id='grand-child-2-1' component={generic('Grand Child 2-1')}/>
@@ -46,6 +55,7 @@ ReactDOM.render(
             <State id='child-3' path='/child-3' component={generic('Grand Child 3')}>
                 <State id='grand-child-3-1' component={generic('Grand Child 3-1')}/>
                 <State id='grand-child-3-2' initial component={generic('Grand Child 3-2')}/>
+                <State id='grand-child-3-3' component={generic('Grand Child 3-3')}/>
             </State>
             <State id='child-4' path='/child-4' component={generic('Child 4')}/>
         </State>
