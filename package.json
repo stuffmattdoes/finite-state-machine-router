@@ -38,6 +38,7 @@
   },
   "scripts": {
     "build": "webpack",
+    "deploy": "npm publish --access public",
     "dev": "webpack-dev-server --config webpack.config.dev.js",
     "test": "jest",
     "testing": "jest --watch"
