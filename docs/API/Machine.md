@@ -28,12 +28,6 @@
         <td><code>false</code></td>
         <td>Enables console logging for easier debugging. Enabled for <code>transitions</code> and <code>history</code> changes.</td>
     </tr>
-    <tr>
-        <td><code>path</code></td>
-        <td><code>String</code></td>
-        <td></td>
-        <td>The URL that the browser will resolve to upon entry of this machine. It is relative to all ancestor urls.</td>
-    </tr>
 </table>
 
 ## Reference
