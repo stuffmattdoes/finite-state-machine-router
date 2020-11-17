@@ -1,6 +1,6 @@
 {
   "name": "fsm-router",
-  "version": "0.3.3",
+  "version": "0.3.5",
   "dependencies": {
     "history": "^5.0.0"
   },
@@ -38,6 +38,7 @@
   },
   "scripts": {
     "build": "webpack",
+    "deploy": "npm publish --access public",
     "dev": "webpack-dev-server --config webpack.config.dev.js",
     "test": "jest",
     "testing": "jest --watch"
