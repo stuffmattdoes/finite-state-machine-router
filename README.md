@@ -4,7 +4,7 @@ A finite state machine + declarative URL routing (for React).
 ## Summary
 A **finite state machine (FSM)** is mathematical concept used to describe a flow of information from one layout (or *state*) to another according to a set of rules (or *transitions*). FSMs are described as "a limited number of states and corresponding transitions from these states into other states."
 
-In front-end web development we'll use FSMs to render the proper user interface. Furthermore, we'll integrate our FSM with a routing mechanism so our URLs and state resolution can be handled automatically - hence **Finite State Machine Router**!
+In front-end web development we'll use FSMs to render the proper user interface and to transition into other UI views. Furthermore, we'll integrate our FSM with a routing mechanism so our URLs and state resolution can be handled automatically - hence **Finite State Machine Router**!
 
 ## Rules:
 1. **Always Atomic** - State machine always resolves to an *atomic node* (states that have no child states).
@@ -20,23 +20,25 @@ First, let's compose our app in our standard `index.jsx`
 // Index.jsx
 import { Link, Machine, State, Transition } from 'fsm-router';
 
-<Machine id='wood' path='/wood'>
-    <Transition event='error' target='error'/>
-    <Transition event='not-found' target='not-found'/>
-    <State id='home' component={Home}>
-        <Transition event='browse' target='browse'/>
+<Machine id='wood'>
+    <State id='app' path='/wood'>
+        <Transition event='error' target='error'/>
+        <Transition event='not-found' target='not-found'/>
+        <State id='home' component={Home}>
+            <Transition event='browse' target='browse'/>
+        </State>
+        <State id='browse-wrapper' path='/browse'>
+            <State id='browse' component={Browse}/>
+            <State id='species' component={Species} path='/:speciesId'/>
+        </State>
+        <State id='error' component={Error}/>
+        <State id='not-found' component={NotFound}/>
     </State>
-    <State id='browse-wrapper' path='/browse'>
-        <State id='browse' component={Browse}/>
-        <State id='species' component={Species} path='/:speciesId'/>
-    </State>
-    <State id='error' component={Error}/>
-    <State id='not-found' component={NotFound}/>
 </Machine>
 ```
 
 What's going on here?
-- `<Machine/>` is our wrapper that contains unique naming & URL base pathing for our app.
+- `<Machine/>` is our top level component that we provide with a unique name.
 - `<State/>` conveys the UI components in a familiar tree hierarchy. Most of the time, you'll supply a `component` attribute which accepts a React component.
 - `<Transition/>` outline the rules on how we get from one `<State/>` to another. They are activated by emitting `events`, and are only valid when inside an active `<State/>` lineage.
 
@@ -120,8 +122,8 @@ Because we don't want to include conditional render logic in our component (upho
 
 ```jsx
 // Index.jsx
-<Machine id='wood' path='/wood'>
-    <State id='app' component={App}>
+<Machine id='wood'>
+    <State id='app' component={App} path='/wood'>
         <Transition event='fetch' target='app-loader'/>
         <State id='app-loader' component={Loader}>
             <Transition event='resolve' target='home'/>
