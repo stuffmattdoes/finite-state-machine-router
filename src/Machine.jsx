@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
-import { createBrowserHistory } from 'history';
+import { createBrowserHistory, createMemoryHistory } from 'history';
 import useLogger from './logger';
 import {
     getChildStateNodes,
@@ -21,8 +21,10 @@ export const useMachine = () => {
     return [{ current, history, id, params }, send ];
 }
 
-function Machine ({ children: machineChildren, history: machineHistory, id: machineId = 'machine', ignoreHash = false, logging = false }) {
-    const history = useMemo(() => machineHistory || createBrowserHistory(), []);
+export const MemoryMachine = (props) => Machine({ history: createMemoryHistory(), ...props });
+
+const Machine = ({ children: machineChildren, id: machineId = 'machine', ignoreHash = false, logging = false }) => {
+    const history = useMemo(() => createBrowserHistory(), []);
 
     const [ childStates, normalized ] = useMemo(() => {
         const _childStates = getChildStateNodes(React.Children.toArray(machineChildren));

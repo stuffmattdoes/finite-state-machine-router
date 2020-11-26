@@ -1,5 +1,5 @@
 import React from 'react';
-import { Machine, State, Transition } from '.';
+import { Machine, State, Transition } from '..';
 import {
     classNames,
     fakeUUID,
@@ -13,7 +13,7 @@ import {
     resolveUrlToAtomic,
     getAtomic,
     selectTransition
-} from './util';
+} from '../util';
 
 describe('utility functions', () => {
     const MachineSimple = <Machine id='home'>

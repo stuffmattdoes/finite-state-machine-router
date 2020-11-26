@@ -1,7 +1,7 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
-import { Link, Machine, State, Transition } from '.';
-import { act, cleanup, render, fireEvent, queryByText } from '@testing-library/react';
+import { Link, Machine, MemoryMachine, State, Transition } from '..';
+import { act, render, fireEvent } from '@testing-library/react';
 
 describe('<Machine/>', () => {
     let _console = {
@@ -23,8 +23,6 @@ describe('<Machine/>', () => {
             ...global.console,
             ..._console
         }
-
-        cleanup();
     });
 
     const generic = name => ({ children }) => <div><h1>{name}</h1>{children}</div>;
@@ -52,10 +50,18 @@ describe('<Machine/>', () => {
         return [ testHistory, machine ];
     }
 
-    test('Build verification', () => {
+    test('<Machine/> Build verification', () => {
         const { queryByText } = render(<Machine id='home'>
             <State id='child' component={generic('Child 1')}/>
         </Machine>);
+
+        expect(queryByText('Child 1')).toBeTruthy();
+    });
+
+    test('<MemoryMachine/> Build verification', () => {
+        const { queryByText } = render(<MemoryMachine id='home'>
+            <State id='child' component={generic('Child 1')}/>
+        </MemoryMachine>);
 
         expect(queryByText('Child 1')).toBeTruthy();
     });
@@ -360,35 +366,35 @@ describe('<Machine/>', () => {
         expect(queryByText('Child 2')).toBeTruthy();
     });
 
-    // test('Preserves query parameters when resolving url', () => {
+    test.skip('Preserves query parameters when resolving url', () => {
 
-    // });
+    });
 
-    // test('Translates the URL into dynamic segment when applicable', () => {
-    //     const [ history, machine ] = renderWithNavigation('/parent/marlin/grand-child/nemo',
-    //         <State id='parent' path='/parent' component={generic('Parent')}>
-    //             <State id='child' path='/:parent'>
-    //                 <State id='grand-child' path='/child'>
-    //                     <State id='great-grand-child' path='/:child' component={genericWithParams('Child')}/>
-    //                 </State>
-    //             </State>
-    //         </State>);
-    //     const { container, queryByText } = render(machine);
+    test.skip('Translates the URL into dynamic segment when applicable', () => {
+        const [ history, machine ] = renderWithNavigation('/parent/marlin/grand-child/nemo',
+            <State id='parent' path='/parent' component={generic('Parent')}>
+                <State id='child' path='/:parent'>
+                    <State id='grand-child' path='/child'>
+                        <State id='great-grand-child' path='/:child' component={genericWithParams('Child')}/>
+                    </State>
+                </State>
+            </State>);
+        const { container, queryByText } = render(machine);
 
-    //     expect(queryByText('parent: marlin')).toBeTruthy();
-    //     expect(queryByText(/child\n:\nnemo/)).toBeTruthy();
-    //     expect(container.firstChild).toMatchSnapshot();
-    // });
+        expect(queryByText('parent: marlin')).toBeTruthy();
+        expect(queryByText(/child\n:\nnemo/)).toBeTruthy();
+        expect(container.firstChild).toMatchSnapshot();
+    });
 
-    // test('Discards events that result in mo matching transition', () => {
+    test.skip('Discards events that result in mo matching transition', () => {
 
-    // });
+    });
 
-    // test('Throws error when two <State/>s have the same "id" attribute', () => {
+    test.skip('Throws error when two <State/>s have the same "id" attribute', () => {
 
-    // });
+    });
 
-    // test('Rejects usage of "." or "#" in <State/> "id" attribute', () => {
+    test.skip('Rejects usage of "." or "#" in <State/> "id" attribute', () => {
 
-    // });
+    });
 });

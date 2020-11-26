@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { classNames } from './util';
 import { MachineContext } from './Machine';
 
-function Link({ children, className, disabled = false, href = '#', onClick, replace = false }) {
+const Link = ({ children, className, disabled = false, href = '#', onClick, replace = false }) => {
     const { current, history } = useContext(MachineContext);
 
     const handleClick = (event) => {
