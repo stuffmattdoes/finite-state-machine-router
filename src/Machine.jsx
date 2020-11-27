@@ -13,15 +13,12 @@ import {
 export const MachineContext = React.createContext({});
 MachineContext.displayName = 'Machine';
 
-// TODO: ignore hash option - doesn't resolve if only URL hash changes
-export const createMachine = (options) => (props) => Machine({ ...props, ...options });
-
 export const useMachine = () => {
     const { current, history, id, params, send } = useContext(MachineContext);
     return [{ current, history, id, params }, send ];
 }
 
-const machineFactory = ({ children: machineChildren, history: machineHistory, id: machineId = 'machine', ignoreHash = false, logging = false }) => {
+const Machine = ({ children: machineChildren, history: machineHistory, id: machineId = 'machine', ignoreHash = false, logging = false }) => {
     const history = useMemo(() => machineHistory || createBrowserHistory(), []);
 
     const [ childStates, normalized ] = useMemo(() => {
@@ -135,13 +132,11 @@ const machineFactory = ({ children: machineChildren, history: machineHistory, id
     </MachineContext.Provider>;
 }
 
+Machine.displayName = 'Machine';
+
 export const MemoryMachine = ({ initialEntries, ...props }) =>
-    machineFactory({ history: createMemoryHistory({ initialEntries }), ...props });
+    <Machine history={createMemoryHistory({ initialEntries })} {...props}/>;
 
 MemoryMachine.displayName = 'MemoryMachine';
-
-const Machine = (props) => machineFactory({ ...props });
-
-Machine.displayName = 'Machine';
 
 export default Machine;
