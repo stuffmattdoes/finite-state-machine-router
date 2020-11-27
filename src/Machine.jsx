@@ -21,10 +21,7 @@ export const useMachine = () => {
     return [{ current, history, id, params }, send ];
 }
 
-export const MemoryMachine = ({ initialEntries, ...props }) =>
-    Machine({ history: createMemoryHistory({ initialEntries }), ...props });
-
-const Machine = ({ children: machineChildren, history: machineHistory, id: machineId = 'machine', ignoreHash = false, logging = false }) => {
+const machineFactory = ({ children: machineChildren, history: machineHistory, id: machineId = 'machine', ignoreHash = false, logging = false }) => {
     const history = useMemo(() => machineHistory || createBrowserHistory(), []);
 
     const [ childStates, normalized ] = useMemo(() => {
@@ -137,6 +134,13 @@ const Machine = ({ children: machineChildren, history: machineHistory, id: machi
         {childStates}
     </MachineContext.Provider>;
 }
+
+export const MemoryMachine = ({ initialEntries, ...props }) =>
+    machineFactory({ history: createMemoryHistory({ initialEntries }), ...props });
+
+MemoryMachine.displayName = 'MemoryMachine';
+
+const Machine = (props) => machineFactory({ ...props });
 
 Machine.displayName = 'Machine';
 
