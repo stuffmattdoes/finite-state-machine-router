@@ -24,8 +24,8 @@ export const useMachine = () => {
 export const MemoryMachine = ({ initialEntries, ...props }) =>
     Machine({ history: createMemoryHistory({ initialEntries }), ...props });
 
-const Machine = ({ children: machineChildren, id: machineId = 'machine', ignoreHash = false, initialEntries, logging = false }) => {
-    const history = useMemo(() => createBrowserHistory({ initialEntries }), []);
+const Machine = ({ children: machineChildren, history: machineHistory, id: machineId = 'machine', ignoreHash = false, logging = false }) => {
+    const history = useMemo(() => machineHistory || createBrowserHistory(), []);
 
     const [ childStates, normalized ] = useMemo(() => {
         const _childStates = getChildStateNodes(React.Children.toArray(machineChildren));
