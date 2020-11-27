@@ -93,7 +93,7 @@ Although we want to favor emitting events instead of pushign URLs, we can still 
 
 ```jsx
 // Species.jsx
-const Species = ({ childre, history, machine, match }) => {
+const Species = ({ children, history, machine, match }) => {
     const [ species, set ] = useCustomStoreHook();
 
     const {
