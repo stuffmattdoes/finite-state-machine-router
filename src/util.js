@@ -64,7 +64,7 @@ const injectUrlParams = (path, params) => {
     return '/' + url + (window.location.search ? window.location.search : '');
 }
 
-const deriveStateFromUrl = (url, normalized, rootId) => {
+const deriveStateFromUrl = (url, normalizedChildStates, rootId) => {
     let match = {
         params: {},
         path: url,
@@ -72,7 +72,7 @@ const deriveStateFromUrl = (url, normalized, rootId) => {
     }
 
     // 1. Exact match, no dynamic URL needed
-    const childMatch = normalized.find(norm => norm.path === url);
+    const childMatch = normalizedChildStates.find(norm => norm.path === url);
 
     if (childMatch) {
         match.path = childMatch.path;
@@ -82,12 +82,12 @@ const deriveStateFromUrl = (url, normalized, rootId) => {
 
     // 1.1 Check if URL is root, return initial stack
     if (isRootSegment(url)) {
-        match.stack = normalized.find(norm => norm.stack.match(/\./g).length === 1 && norm.initial).stack;
+        match.stack = normalizedChildStates.find(norm => norm.stack.match(/\./g).length === 1 && norm.initial).stack;
         return match;
     }
 
     // 2. No exact match yet, compare to dynamic URLs for match
-    const dynamicPaths = normalized.filter(norm => norm.path && norm.path.match(/\/:/g)).map(norm => norm.path);
+    const dynamicPaths = normalizedChildStates.filter(norm => norm.path && norm.path.match(/\/:/g)).map(norm => norm.path);
 
     if (dynamicPaths.length) {
         // 2.1 Split url && child paths into arrays, compare 1 by 1
@@ -122,13 +122,13 @@ const deriveStateFromUrl = (url, normalized, rootId) => {
         if (dynamicPathMatch) {
             // 2.4 finally, return the stack that corresponds to the URL
             match.path = dynamicPathMatch;
-            match.stack = normalized.find(norm => norm.path === dynamicPathMatch).stack;;
+            match.stack = normalizedChildStates.find(norm => norm.path === dynamicPathMatch).stack;;
         }
     }
 
     // 3.0 if no match, resolve to wildcard route "*""
     if (!match.stack) {
-        const notFoundState = normalized.find(norm => norm.id === '*');
+        const notFoundState = normalizedChildStates.find(norm => norm.id === '*');
         match.stack = '#' + rootId + '.*';
 
         // 3.1 If no wildcard route "*", throw error
@@ -198,19 +198,19 @@ const normalizeChildStateProps = (stateNodes, rootId) => {
     });
 }
 
-const getAtomic = (stack, normalized) => {
-    const { childStates, path, stack: nextStack } = normalized.find(norm =>  norm.stack === stack);
+const getAtomic = (stack, normalizedChildStates) => {
+    const { childStates, path, stack: _stack } = normalizedChildStates.find(norm =>  norm.stack === stack);
     let initial = {
         path,
-        stack: nextStack
+        stack: _stack
     }
 
     if (childStates.length) {
-        const childStatesFull = childStates.map(childId => normalized.find(norm => norm.id === childId));
+        const childStatesFull = childStates.map(childId => normalizedChildStates.find(norm => norm.id === childId));
         const initialChild = childStatesFull.find(child => child.initial) || childStatesFull[0];
 
         if (initialChild.childStates.length) {
-            return getAtomic(initialChild.stack, normalized);
+            return getAtomic(initialChild.stack, normalizedChildStates);
         } else {
             initial.path = initialChild.path || '/';
             initial.stack = initialChild.stack;
@@ -220,7 +220,7 @@ const getAtomic = (stack, normalized) => {
     return initial;
 }
 
-const resolveUrlToAtomic = (url, normalized, machineId) => {
+const resolveUrlToAtomic = (url, normalizedChildStates, machineId) => {
     let atomic = {
         params: {},
         path: null,
@@ -229,7 +229,7 @@ const resolveUrlToAtomic = (url, normalized, machineId) => {
     };
 
     const atomicExists = (stack, path) => {
-        const { path: atomicPath, stack: atomicStack } = getAtomic(stack, normalized);
+        const { path: atomicPath, stack: atomicStack } = getAtomic(stack, normalizedChildStates);
         atomic = {
             ...atomic,
             path: atomicPath,
@@ -239,10 +239,10 @@ const resolveUrlToAtomic = (url, normalized, machineId) => {
     }
 
     if (isRootPath(url)) {
-        const { stack } = normalized[0];
+        const { stack } = normalizedChildStates[0];
         atomicExists(stack, url);
     } else {
-        const { params, path: currentPath, stack: currentStack } = deriveStateFromUrl(url, normalized, machineId);
+        const { params, path: currentPath, stack: currentStack } = deriveStateFromUrl(url, normalizedChildStates, machineId);
         atomic = {
             ...atomic,
             params,
@@ -258,12 +258,12 @@ const resolveUrlToAtomic = (url, normalized, machineId) => {
     return atomic;
 }
 
-const selectTransition = (event, stack, normalized) => {
+const selectTransition = (event, stack, normalizedChildStates) => {
     if (isRootStack(stack)) {
         return null;
     }
 
-    const availableTransitions = normalized.find(norm => norm.stack === stack).transitions;
+    const availableTransitions = normalizedChildStates.find(norm => norm.stack === stack).transitions;
 
     if (availableTransitions.length) {
         const activeTransition = availableTransitions.find(({ cond, event: transitionEvent, target }) => 
@@ -274,7 +274,7 @@ const selectTransition = (event, stack, normalized) => {
     }
 
     const parentStack = stack.split('.').slice(0, -1).join('.');
-    return selectTransition(event, parentStack, normalized);
+    return selectTransition(event, parentStack, normalizedChildStates);
 }
 
 export {
