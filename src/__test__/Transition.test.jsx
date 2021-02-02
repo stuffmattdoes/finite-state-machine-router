@@ -1,5 +1,5 @@
 import React from 'react';
-import { Transition } from '.';
+import { Transition } from '..';
 import { cleanup, render } from '@testing-library/react';
 
 describe('<Transition/', () => {

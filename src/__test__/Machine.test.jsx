@@ -1,7 +1,7 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
-import { Link, Machine, State, Transition } from '.';
-import { act, cleanup, render, fireEvent, queryByText } from '@testing-library/react';
+import { Link, Machine, State, Transition } from '..';
+import { act, cleanup, render, fireEvent } from '@testing-library/react';
 
 describe('<Machine/>', () => {
     let _console = {
