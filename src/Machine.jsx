@@ -24,20 +24,20 @@ export const useMachine = () => {
 function Machine ({ children: machineChildren, history: machineHistory, id: machineId = 'machine', ignoreHash = false, logging = false }) {
     const history = useMemo(() => machineHistory || createBrowserHistory(), []);
 
-    const [ childStates, normalized ] = useMemo(() => {
+    const [ childStates, normalizedChildStates ] = useMemo(() => {
         const _childStates = getChildStateNodes(React.Children.toArray(machineChildren));
 
         if (_childStates.length === 0) {
             throw new Error('<Machine/> has no children <State/> nodes! At least one is required to be considered a valid state machine.');
         }
 
-        const _normalized = normalizeChildStateProps(_childStates, machineId);
+        const _normalizedChildStates = normalizeChildStateProps(_childStates, machineId);
         
-        return [ _childStates, _normalized ];
+        return [ _childStates, _normalizedChildStates ];
     }, [ machineChildren ]);
 
     const [ initialStack, params ] = useMemo(() => {
-        const { params, path, stack, url } = resolveUrlToAtomic(history.location.pathname, normalized, machineId);
+        const { params, path, stack, url } = resolveUrlToAtomic(history.location.pathname, normalizedChildStates, machineId);
 
         if (history.location.pathname !== url) {
             history.replace(url);
@@ -54,15 +54,15 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
     const [ logs, log ] = useLogger(state, logging);
 
     const send = (event, data = null) => {
-        const targetState = selectTransition(event, state.current, normalized);
+        const targetState = selectTransition(event, state.current, normalizedChildStates);
 
         if (targetState) {
             const params = data && data.params || state.params;
             const { event: transitionEvent, target: targetId } = targetState;
-            const targetNode = normalized.find(norm => norm.id === targetId);
+            const targetNode = normalizedChildStates.find(norm => norm.id === targetId);
 
             if (targetNode) {
-                const { path, stack } = getAtomic(targetNode.stack, normalized);
+                const { path, stack } = getAtomic(targetNode.stack, normalizedChildStates);
                 const url = injectUrlParams(path, params);
 
                 if (url !== history.location.pathname) {
@@ -96,7 +96,7 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
     }
 
     useEffect(() => history.listen(({ action, location }) => {
-        const { params, path, stack, url } = resolveUrlToAtomic(location.pathname, normalized, machineId);
+        const { params, path, stack, url } = resolveUrlToAtomic(location.pathname, normalizedChildStates, machineId);
         let target = stack;
 
         if (ignoreHash && state.location.hash !== location.hash) {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
-import { Link, Machine, State, Transition } from '.';
-import { act, cleanup, render, fireEvent, queryByText } from '@testing-library/react';
+import { Link, Machine, State, Transition } from '..';
+import { act, cleanup, render, fireEvent } from '@testing-library/react';
 
 describe('<Machine/>', () => {
     let _console = {
@@ -223,11 +223,13 @@ describe('<Machine/>', () => {
         const [ history, machine ] = renderWithNavigation(null,
             <State id='parent'>
                 <Transition event='test-event-1' target='child-2'/>
+                <Transition event='test-event-1' target='child-3'/>
                 <State id='child-1' path='/child-1' component={({ machine }) => <div>
                     Child 1
                     <button onClick={event => machine.send('test-event-1')}>Fire event</button>
                 </div>}>
                     <Transition event='test-event-1' target='child-3'/>
+                    <Transition event='test-event-1' target='child-2'/>
                 </State>
                 <State id='child-2' path='/child-2' component={generic('Child 2')}/>
                 <State id='child-3' path='/child-3' component={generic('Child 3')}/>
@@ -332,7 +334,7 @@ describe('<Machine/>', () => {
         expect(queryByText('Grand Child 4-1')).toBeTruthy();
     });
 
-    test('Ignores changes in URL hash', () => {
+    test('Ignores changes in URL hash if "ignoreHash" prop is present', () => {
         const testHistory = createMemoryHistory({ initialEntries: [ '/parent?search=true#hash=true' ] });
         const { queryByText } = render(<Machine history={testHistory} id='home' ignoreHash>
             <State id='parent' path='/parent'>

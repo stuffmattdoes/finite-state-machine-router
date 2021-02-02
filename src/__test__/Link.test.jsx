@@ -1,6 +1,6 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
-import { Link, Machine, State } from '.';
+import { Link, Machine, State } from '..';
 import { cleanup, render, fireEvent } from '@testing-library/react';
 
 describe('<Link/>', () => {
