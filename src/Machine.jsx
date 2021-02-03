@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { createBrowserHistory } from 'history';
 import useLogger from './logger';
 import {
+    fakeUUID,
     getChildStateNodes,
     injectUrlParams,
     normalizeChildStateProps,
@@ -48,12 +49,18 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
 
     const [ state, setState ] = useState({
         current: initialStack,
+        event: {
+            name: null,
+            stack: null,
+            target: null
+        },
         location: history.location,
-        params
+        params,
+        previous: null
     });
     const [ logs, log ] = useLogger(state, logging);
 
-    const send = (event, data = null) => {
+    const send = (event, id = fakeUUID(), data = null) => {
         const targetState = selectTransition(event, state.current, normalizedChildStates);
 
         if (targetState) {
@@ -62,20 +69,27 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
             const targetNode = normalizedChildStates.find(norm => norm.id === targetId);
 
             if (targetNode) {
-                const { path, stack } = getAtomic(targetNode.stack, normalizedChildStates);
+                const { path, stack: atomicStack } = getAtomic(targetNode.stack, normalizedChildStates);
                 const url = injectUrlParams(path, params);
 
+                // const selfTransition = stack === state.current;
+
                 if (url !== history.location.pathname) {
-                    history.push(url, { target: stack });
+                    history.push(url, { target: atomicStack });
                 } else {
-                    setState({ current: stack, location: history.location, params });
+                    setState({
+                        current: atomicStack,
+                        event: { name: event, stack: atomicStack, target: targetNode.stack },
+                        location: history.location,
+                        params
+                    });
                 }
 
                 log({
                     type: 'TRANSITION',
                     payload: {
                         event,
-                        target: { params, location: history.location, state: stack }
+                        target: { params, location: history.location, state: atomicStack }
                     }
                 });
             } else {
@@ -120,7 +134,7 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
             });
         }
 
-        setState({ current: target, location: history.location, params });
+        setState({ ...state, current: target, location: history.location, params });
     }));
 
     const providerValue = {

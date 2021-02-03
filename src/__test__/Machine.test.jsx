@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createMemoryHistory } from 'history';
 import { Link, Machine, State, Transition } from '..';
 import { act, cleanup, render, fireEvent } from '@testing-library/react';
@@ -360,6 +360,37 @@ describe('<Machine/>', () => {
         expect(testHistory.location.pathname).toBe('/parent');
         expect(testHistory.location.hash).toBeNull();
         expect(queryByText('Child 2')).toBeTruthy();
+    });
+
+    test('Self-transitions cause <State/> to re-mount', () => {
+        const unmountMock = jest.fn();
+        const mountMock = jest.fn();
+        const { queryByText } = render(<Machine id='home'>
+            <State id='parent'>
+                <State id='child'>
+                    <State id='grand-child' component={({ machine }) => {
+                        useEffect(() => {
+                            mountMock();
+                            return unmountMock;
+                        }, []);
+
+                        return <div>
+                            <h1>Child 1</h1>
+                            <button onClick={event => machine.send('restart')}>Restart</button>
+                        </div>
+                    }}>
+                        <Transition event='restart' target='child'/>
+                    </State>
+                </State>
+            </State>
+        </Machine>);
+
+        expect(mountMock).toHaveBeenCalledTimes(1);
+        expect(unmountMock).not.toHaveBeenCalled();
+
+        fireEvent.click(queryByText(/Restart/i));
+        expect(mountMock).toHaveBeenCalledTimes(2);
+        expect(unmountMock).toHaveBeenCalledTimes(1);
     });
 
     // test('Preserves query parameters when resolving url', () => {
