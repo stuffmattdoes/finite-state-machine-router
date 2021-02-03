@@ -17,9 +17,11 @@ describe('utility functions', () => {
     const MachineSimple = <Machine id='home'>
         <State id='child'/>
     </Machine>;
-    const MachineComplex = <Machine id='home'>
+
+    const MachineComplex = (cond) => <Machine id='home'>
         <State id='parent'>
             <State id='child-1'>
+                <Transition cond={cond} event='test-event' target='child-3'/>
                 <Transition event='test-event' target='child-2'/>
                 <State id='grand-child'/>
             </State>
@@ -42,8 +44,10 @@ describe('utility functions', () => {
             <State id='child-3'/>
         </State>
     </Machine>;
+
     const normalizedSimple = normalizeChildStateProps(React.Children.toArray(MachineSimple.props.children), 'home');
-    const normalizedComplex = normalizeChildStateProps(React.Children.toArray(MachineComplex.props.children), 'home');
+    const normalizedComplex = normalizeChildStateProps(React.Children.toArray(MachineComplex(false).props.children), 'home');
+    const normalizedGuard = normalizeChildStateProps(React.Children.toArray(MachineComplex(true).props.children), 'home');
     const normalizedPaths = normalizeChildStateProps(React.Children.toArray(MachineWithPaths.props.children), 'home');
 
     test('classNames', () => { 
@@ -68,7 +72,7 @@ describe('utility functions', () => {
     test('getChildStateNodes', () => {
         const childrenSimple = getChildStateNodes(React.Children.toArray(MachineSimple.props.children))
             .every(child => child.type.displayName === 'State');
-        const childrenComplex = getChildStateNodes(React.Children.toArray(MachineComplex.props.children))
+        const childrenComplex = getChildStateNodes(React.Children.toArray(MachineComplex(false).props.children))
             .every(child => child.type.displayName === 'State');
         const childrenPaths = getChildStateNodes(React.Children.toArray(MachineWithPaths.props.children))
             .every(child => child.type.displayName === 'State');
@@ -153,6 +157,7 @@ describe('utility functions', () => {
 
     test('selectTransition', () => {
         expect(selectTransition('no-matching-event', '#home.parent.child-1', normalizedComplex)).toBe(null);
-        expect(selectTransition('test-event', '#home.parent.child-1', normalizedComplex)).toMatchSnapshot();
+        expect(selectTransition('test-event', '#home.parent.child-1', normalizedComplex)).toHaveProperty('target', 'child-2');
+        expect(selectTransition('test-event', '#home.parent.child-1', normalizedGuard)).toHaveProperty('target', 'child-3');
     });
 });

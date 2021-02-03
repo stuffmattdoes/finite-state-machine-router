@@ -59,7 +59,13 @@ Array [
     "stack": "#home.parent.child-1",
     "transitions": Array [
       Object {
-        "cond": null,
+        "cond": false,
+        "event": "test-event",
+        "sendId": "child-1",
+        "target": "child-3",
+      },
+      Object {
+        "cond": true,
         "event": "test-event",
         "sendId": "child-1",
         "target": "child-2",
@@ -132,7 +138,7 @@ Array [
     "stack": "#home.parent.child-1",
     "transitions": Array [
       Object {
-        "cond": null,
+        "cond": true,
         "event": "test-event",
         "sendId": "child-1",
         "target": "child-2",
@@ -207,14 +213,5 @@ Object {
   "path": "/:parent/child-1",
   "stack": "#home.parent.child-1.grand-child",
   "url": "/parent-id/child-1",
-}
-`;
-
-exports[`utility functions selectTransition 1`] = `
-Object {
-  "cond": null,
-  "event": "test-event",
-  "sendId": "child-1",
-  "target": "child-2",
 }
 `;
