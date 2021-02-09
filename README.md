@@ -112,7 +112,7 @@ const Species = ({ children, history, machine, match }) => {
 ```
 Finally, we have access to all the various routing parameters with `match`. This is most useful for when you need to obtain a dynamic URL variable - for example, we've declared `path='/:speciesId'` which may look like `/northern-red-oak` in the URL.
 
-#### Guarded <Transitions/>
+#### Guarded `<Transition/>s`
 You may come across a scenario where you want to prevent a transition based on further information. In order to accomplish that, you'll use a "guard", notated by the `cond` attribute:
 
 ```jsx
