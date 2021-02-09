@@ -156,7 +156,7 @@ const normalizeChildStateProps = (stateNodes, rootId) => {
             const childStates = getChildStateNodes(React.Children.toArray(children));
             const transitions = getChildrenOfType(React.Children.toArray(children), 'Transition')
                 .map(({ props }) => ({
-                    cond: props.cond || null,
+                    cond: props.cond === true || props.cond === undefined ? true : false,
                     event: props.event,
                     sendId: id,
                     target: props.target
@@ -258,12 +258,12 @@ const resolveUrlToAtomic = (url, normalizedChildStates, machineId) => {
     return atomic;
 }
 
-const selectTransition = (event, stack, normalizedChildStates) => {
-    if (isRootStack(stack)) {
+const selectTransition = (event, currentStack, normalizedChildStates) => {
+    if (isRootStack(currentStack)) {
         return null;
     }
 
-    const availableTransitions = normalizedChildStates.find(norm => norm.stack === stack).transitions;
+    const availableTransitions = normalizedChildStates.find(norm => norm.stack === currentStack).transitions;
 
     if (availableTransitions.length) {
         const activeTransition = availableTransitions.find(({ cond, event: transitionEvent, target }) => 
@@ -273,7 +273,7 @@ const selectTransition = (event, stack, normalizedChildStates) => {
         }
     }
 
-    const parentStack = stack.split('.').slice(0, -1).join('.');
+    const parentStack = currentStack.split('.').slice(0, -1).join('.');
     return selectTransition(event, parentStack, normalizedChildStates);
 }
 

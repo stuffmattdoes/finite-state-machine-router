@@ -362,6 +362,26 @@ describe('<Machine/>', () => {
         expect(queryByText('Child 2')).toBeTruthy();
     });
 
+    test('Passes on guarded <Transition/>s', () => {
+        const { queryByText } = render(<Machine id='home' ignoreHash>
+            <State id='parent'>
+                <State id='child-1' component={({ machine }) => <div>
+                    <h1>Child 1</h1>
+                    <button onClick={event => machine.send('test-event')}>Fire event</button>
+                </div>}>
+                    <Transition cond={false} event='test-event' target='child-2'/>
+                    <Transition event='test-event' target='child-3'/>
+                </State>
+                <State id='child-2' component={generic('Child 2')}/>
+                <State id='child-3' component={generic('Child 3')}/>
+            </State>
+        </Machine>);
+
+        expect(queryByText('Child 1')).toBeTruthy();
+        fireEvent.click(queryByText(/Fire event/i));
+        expect(queryByText('Child 3')).toBeTruthy();
+    });
+
     // test('Preserves query parameters when resolving url', () => {
 
     // });
