@@ -1,5 +1,5 @@
 # `<Transition/>`
-`<Transition/>` component denotes the rules by which our state machine will allow changing of state. `<Transition/>` is a renderless component.
+`<Transition/>` component denotes the rules by which our state machine will allow changing of state. `<Transition/>` is a renderless component, and exists solely for visual organization.
 
 ## Properties
 &ast; = Required property
@@ -9,6 +9,12 @@
         <th>Type</th>
         <th>Default</th>
         <th>Description</th>
+    </tr>
+    <tr>
+        <td><code>cond</code>*</td>
+        <td><code>Boolean expression</code></td>
+        <td></td>
+        <td>The guard for this transition. If evaluated as `true`, the transition will proceed. If evaluates as `false`, this transition will not occur.</td>
     </tr>
     <tr>
         <td><code>event</code>*</td>

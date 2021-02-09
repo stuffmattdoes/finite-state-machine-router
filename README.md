@@ -112,6 +112,31 @@ const Species = ({ children, history, machine, match }) => {
 ```
 Finally, we have access to all the various routing parameters with `match`. This is most useful for when you need to obtain a dynamic URL variable - for example, we've declared `path='/:speciesId'` which may look like `/northern-red-oak` in the URL.
 
+#### Guarded <Transitions/>
+You may come across a scenario where you want to prevent a transition based on further information. In order to accomplish that, you'll use a "guard", notated by the `cond` attribute:
+
+```jsx
+import { Link, Machine, State, Transition } from 'fsm-router';
+
+<Machine id='wood'>
+    <State id='app' path='/wood'>
+        <State id='home' component={(( children, machine ) => {
+            const [ state, setState ] = useState('nope!');
+            return <>
+                <Transition cond={state === 'nope' ? false : true} event='test-event' target='child-2'/>
+                <Transition event='test-event' target='child-3'/>
+                <h1>Home</h1>
+                {children}
+            </>
+        })}>
+        <State id='child-2'/>
+        <State id='child-3'/>
+    </State>
+</Machine>
+```
+
+If we were to send a `test-event` event, the transition selection process would evaluate the `cond` expression in the first corresponding `<Transition/>` that appears. Since that expression evaluates to `false`, teh selection process would move on. We would eventually see `child-3` state become active.
+
 ### With API fetching
 Here's how we're going to organize our API requests:
 1. `App.jsx` container component makes API request to get some data.
