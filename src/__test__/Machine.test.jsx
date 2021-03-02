@@ -7,6 +7,7 @@ describe('<Machine/>', () => {
     let _console = {
         // group: console.group,
         // groupEnd: console.groupEnd,
+        error: console.error,
         log: console.log,
         warn: console.warn
     };
@@ -14,6 +15,7 @@ describe('<Machine/>', () => {
     beforeEach(() => {
         // global.console.group = jest.fn();
         // global.console.groupEnd = jest.fn();
+        global.console.error = jest.fn();
         global.console.log = jest.fn();
         global.console.warn = jest.fn();
     });
@@ -58,6 +60,11 @@ describe('<Machine/>', () => {
         </Machine>);
 
         expect(queryByText('Child 1')).toBeTruthy();
+    });
+
+    test('Throws error when <Machine/> has no children', () => {
+        expect(() => render(<Machine id='home'/>))
+            .toThrow('<Machine/> has no children <State/> nodes! At least one is required to be considered a valid state machine.');
     });
 
     test('Renders <Machine/> content that does not contain any URLs', () => {
