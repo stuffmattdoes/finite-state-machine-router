@@ -1,5 +1,8 @@
 name: Plull Request
-on: pull_request
+on:
+  pull_request:
+    branches:
+      - main
 jobs:
   test:
     name: Run tests
