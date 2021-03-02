@@ -1,5 +1,5 @@
 # Finite State Machine Router (for React)
-![example workflow](https://github.com/stuffmattdoes/finite-state-machine-router/.github/workflows/node-ci.yml/badge.svg)
+![Build](https://github.com/stuffmattdoes/finite-state-machine-router/actions/workflows/node-ci.yml/badge.svg)
 <!-- - VERSION -->
 <!-- - BUILD PASSING -->
 <!-- - CODE COVERAGE -->
