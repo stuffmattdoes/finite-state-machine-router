@@ -1,10 +1,10 @@
 name: Node.js CI
 
 on:
-  push:
-    branches: [ $default-branch ]
-  pull_request:
-    branches: [ $default-branch ]
+  # push:
+    # branches: [ $default-branch ]
+  pull_request
+    # branches: [ $default-branch ]
 
 jobs:
   build:
