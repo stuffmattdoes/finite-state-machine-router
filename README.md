@@ -1,7 +1,9 @@
 # Finite State Machine Router (for React)
 <!-- - BUILD PASSING -->
 <!-- ![Build](https://github.com/stuffmattdoes/finite-state-machine-router/actions/workflows/node-ci.yml/badge.svg) -->
-![Build](https://img.shields.io/github/workflow/status/stuffmattdoes/finite-state-machine-router/CI) [![NPM Version](https://img.shields.io/github/package-json/v/stuffmattdoes/finite-state-machine-router?label=npm)](https://www.npmjs.com/package/fsm-router) ![License](https://img.shields.io/github/license/stuffmattdoes/finite-state-machine-router)
+![Build](https://img.shields.io/github/workflow/status/stuffmattdoes/finite-state-machine-router/CI)
+[![NPM Version](https://img.shields.io/github/package-json/v/stuffmattdoes/finite-state-machine-router?label=npm)](https://www.npmjs.com/package/fsm-router)
+[![License](https://img.shields.io/github/license/stuffmattdoes/finite-state-machine-router)](https://github.com/stuffmattdoes/finite-state-machine-router/blob/action-badges/LICENSE.md)
 
 A finite state machine + declarative URL routing (for React).
 
