@@ -1,8 +1,9 @@
 # Finite State Machine Router (for React)
+<!-- - BUILD PASSING -->
 ![Build](https://github.com/stuffmattdoes/finite-state-machine-router/actions/workflows/node-ci.yml/badge.svg)
 <!-- - VERSION -->
-<!-- - BUILD PASSING -->
 <!-- - CODE COVERAGE -->
+<!-- - LICENSE -->
 
 A finite state machine + declarative URL routing (for React).
 
