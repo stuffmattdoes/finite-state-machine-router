@@ -146,6 +146,64 @@ const fakeUUID = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (
     return v.toString(16);
 });
 
+const normalizeChildren = (stateNodes, rootId) => {
+    const normalizeLoop = (stateNodes) => {
+        let initialIndex = stateNodes.findIndex(s => s.props.initial);
+        initialIndex = initialIndex >= 0 ? initialIndex : 0;
+
+        return stateNodes.reduce((acc, stateNode, i) => {
+            const childrenArr = React.Children.toArray(stateNode.props.children);
+            const transitions = getChildrenOfType(childrenArr, 'Transition')
+                .map(({ props: { cond, event, target } }) => ({
+                    cond: cond === true || cond === undefined ? true : false,
+                    event: event,
+                    // sendId: id,
+                    target: target
+                }));
+
+            // Add current state node to array
+            if (stateNode.type.displayName === 'State') {
+                const { id, parallel, path = '/' } = stateNode.props;
+
+                acc.push({
+                    childStates: getChildrenOfType(childrenArr, 'State').map(c => c.props.id),
+                    id,
+                    initial: initialIndex === i,
+                    path,
+                    stack: '.' + id,
+                    transitions,
+                    type: parallel ? 'parallel'
+                        : childrenArr.length === 0 ? 'atomic'
+                        : childrenArr.length > 1 ? 'compound' : 'default'
+                });
+            }
+
+            // Add children state nodes to array, recursively
+            if (childrenArr.length) {
+                console.log(normalizeLoop(childrenArr));
+                normalizeLoop(childrenArr).forEach((c) => {
+                    acc.push({
+                        childStates: c.childStates,
+                        id: c.id,
+                        initial: c.initial,
+                        path: !isRootPath(stateNode.path) ? !isRootPath(c.path) ? stateNode.path + c.path : stateNode.path : c.path,
+                        stack: '.' + stateNode.id + c.stack,
+                        transitions: c.transitions,
+                        type: c.type
+                    });
+                });
+            }
+
+            return acc;
+        }, []);
+    };
+
+    return normalizeLoop(stateNodes).map(norm => {
+        norm.stack = '#' + rootId + norm.stack;
+        return norm;
+    });
+}
+
 const normalizeChildStateProps = (stateNodes, rootId) => {
     const normalizeLoop = (stateNodes) => {
         let initialIndex = stateNodes.findIndex(s => s.props.initial);
@@ -279,12 +337,13 @@ const selectTransition = (event, currentStack, normalizedChildStates) => {
 
 export {
     classNames,
-    fakeUUID,
+    // fakeUUID,
     getChildrenOfType,
     getChildStateNodes,
     injectUrlParams,
     isCurrentStack, 
     isExactStack,
+    normalizeChildren,
     normalizeChildStateProps,
     resolveUrlToAtomic,
     getAtomic,

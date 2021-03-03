@@ -7,6 +7,7 @@ import {
     injectUrlParams,
     isCurrentStack,
     isExactStack,
+    normalizeChildren,
     normalizeChildStateProps,
     resolveUrlToAtomic,
     getAtomic,
@@ -71,7 +72,7 @@ describe('Utility functions', () => {
         expect (classNames(className2)).toBeNull();
     });
 
-    test('fakeUUID', () => {
+    test.skip('fakeUUID', () => {
         expect(fakeUUID()).toEqual(expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/));
     });
 
@@ -141,6 +142,110 @@ describe('Utility functions', () => {
         expect(isExactStack('child-1', '#home.parent.child-1.grand-child')).toBe(false);
         expect(isExactStack('child-2', '#home.parent.child-1.grand-child')).toBe(false);
         expect(isExactStack('grand-child', '#home.parent.child-1.grand-child')).toBe(true);
+    });
+
+    test.skip('normalizeChildren', () => {
+        const ChildComponent = ({ children }) => <div>{children}</div>;
+        ChildComponent.displayName = 'ChildComponent';
+        const MachineNested = (cond) => <Machine id='home' path='/home'>
+            <State id='parent' path='/:parent'>
+                <State id='child-1' path='/child-1'>
+                    <ChildComponent>
+                        <div>
+                            <Transition cond={cond} event='test-event' target='child-3'/>
+                            <Transition event='test-event' target='child-2'/>
+                            <State id='grand-child'/>
+                        </div>
+                    </ChildComponent>
+                </State>
+                <State id='child-2'/>
+            </State>
+            <State id='parent-2'>
+                <div>
+                    <State id='child-3'/>
+                </div>
+            </State>
+        </Machine>;
+    
+        const normalizedChildren = normalizeChildren(React.Children.toArray(MachineNested(true).props.children), 'home');
+        expect(normalizedChildren).toMatchInlineSnapshot(`
+            Array [
+                Object {
+                "childStates": Array [
+                    "child-1",
+                    "child-2",
+                ],
+                "id": "parent",
+                "initial": true,
+                "path": "/:parent",
+                "stack": "#home.parent",
+                "transitions": Array [],
+                "type": "compound",
+                },
+                Object {
+                "childStates": Array [
+                    "grand-child",
+                ],
+                "id": "child-1",
+                "initial": true,
+                "path": "/:parent/child-1",
+                "stack": "#home.parent.child-1",
+                "transitions": Array [
+                    Object {
+                    "cond": false,
+                    "event": "test-event",
+                    "sendId": "child-1",
+                    "target": "child-3",
+                    },
+                    Object {
+                    "cond": true,
+                    "event": "test-event",
+                    "sendId": "child-1",
+                    "target": "child-2",
+                    },
+                ],
+                "type": "default",
+                },
+                Object {
+                "childStates": Array [],
+                "id": "grand-child",
+                "initial": true,
+                "path": "/:parent/child-1",
+                "stack": "#home.parent.child-1.grand-child",
+                "transitions": Array [],
+                "type": "atomic",
+                },
+                Object {
+                "childStates": Array [],
+                "id": "child-2",
+                "initial": false,
+                "path": "/:parent",
+                "stack": "#home.parent.child-2",
+                "transitions": Array [],
+                "type": "atomic",
+                },
+                Object {
+                "childStates": Array [
+                    "child-3",
+                ],
+                "id": "parent-2",
+                "initial": false,
+                "path": "/",
+                "stack": "#home.parent-2",
+                "transitions": Array [],
+                "type": "default",
+                },
+                Object {
+                "childStates": Array [],
+                "id": "child-3",
+                "initial": true,
+                "path": "/",
+                "stack": "#home.parent-2.child-3",
+                "transitions": Array [],
+                "type": "atomic",
+                },
+            ]
+        `);
     });
 
     test('normalizeChildStateProps', () => {
