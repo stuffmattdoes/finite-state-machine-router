@@ -146,62 +146,49 @@ const fakeUUID = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (
     return v.toString(16);
 });
 
-const normalizeChildren = (stateNodes, rootId) => {
-    const normalizeLoop = (stateNodes) => {
-        let initialIndex = stateNodes.findIndex(s => s.props.initial);
-        initialIndex = initialIndex >= 0 ? initialIndex : 0;
+const normalizeChildren = (children, rootId) => {
+    const normalizeLoop = ({ stateNodes }, child) => {
+        const childrenArr = React.Children.toArray(child.props.children);
+        const transitions = getChildrenOfType(childrenArr, 'Transition')
+            .map(({ props }) => ({
+                cond: props.cond === true || props.cond === undefined ? true : false,
+                event: props.event,
+                sendId: id,
+                target: props.target
+            }));
 
-        return stateNodes.reduce((acc, stateNode, i) => {
-            const childrenArr = React.Children.toArray(stateNode.props.children);
-            const transitions = getChildrenOfType(childrenArr, 'Transition')
-                .map(({ props: { cond, event, target } }) => ({
-                    cond: cond === true || cond === undefined ? true : false,
-                    event: event,
-                    // sendId: id,
-                    target: target
-                }));
+        if (child.type.displayName === 'State') {
+            const { id, path } = child.props;
 
-            // Add current state node to array
-            if (stateNode.type.displayName === 'State') {
-                const { id, parallel, path = '/' } = stateNode.props;
+            stateNodes.push({
+                // childStates: childStates.map(child => child.props.id),
+                id,
+                // initial: initialIndex === i,
+                path,
+                stack: '.' + id,
+                transitions,
+                // type: parallel ? 'parallel'
+                //     : childStates.length === 0 ? 'atomic'
+                //     : childStates.length > 1 ? 'compound' : 'default'
+            });
+        }
 
-                acc.push({
-                    childStates: getChildrenOfType(childrenArr, 'State').map(c => c.props.id),
-                    id,
-                    initial: initialIndex === i,
-                    path,
-                    stack: '.' + id,
-                    transitions,
-                    type: parallel ? 'parallel'
-                        : childrenArr.length === 0 ? 'atomic'
-                        : childrenArr.length > 1 ? 'compound' : 'default'
-                });
-            }
+        if (childrenArr.length) {
+            const arr = childrenArr.reduce(normalizeLoop, []);
+            // console.log('arr', arr);
+            // console.log('pre', stateNodes);
+            // stateNodes.concat(arr);
+            arr.forEach(c => stateNodes.push(c));
+            // console.log('post', stateNodes);
+        }
+        // console.log('all', stateNodes);
 
-            // Add children state nodes to array, recursively
-            if (childrenArr.length) {
-                console.log(normalizeLoop(childrenArr));
-                normalizeLoop(childrenArr).forEach((c) => {
-                    acc.push({
-                        childStates: c.childStates,
-                        id: c.id,
-                        initial: c.initial,
-                        path: !isRootPath(stateNode.path) ? !isRootPath(c.path) ? stateNode.path + c.path : stateNode.path : c.path,
-                        stack: '.' + stateNode.id + c.stack,
-                        transitions: c.transitions,
-                        type: c.type
-                    });
-                });
-            }
+        return { stateNodes };
+    }
 
-            return acc;
-        }, []);
-    };
-
-    return normalizeLoop(stateNodes).map(norm => {
-        norm.stack = '#' + rootId + norm.stack;
-        return norm;
-    });
+    const norm = children.reduce(normalizeLoop, { stateNodes: [], transitions: [] });
+    // console.log('norm', norm);
+    return norm;
 }
 
 const normalizeChildStateProps = (stateNodes, rootId) => {

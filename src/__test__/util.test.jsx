@@ -144,7 +144,7 @@ describe('Utility functions', () => {
         expect(isExactStack('grand-child', '#home.parent.child-1.grand-child')).toBe(true);
     });
 
-    test.skip('normalizeChildren', () => {
+    test('normalizeChildren', () => {
         const ChildComponent = ({ children }) => <div>{children}</div>;
         ChildComponent.displayName = 'ChildComponent';
         const MachineNested = (cond) => <Machine id='home' path='/home'>
