@@ -64,7 +64,7 @@ describe('<Machine/>', () => {
 
     test('Throws error when <Machine/> has no children', () => {
         expect(() => render(<Machine id='home'/>))
-            .toThrow('<Machine/> has no children <State/> nodes! At least one is required to be considered a valid state machine.');
+            .toThrow('<Machine/> has no children! At least one is required to be considered a valid state machine.');
     });
 
     test('Renders <Machine/> content that does not contain any URLs', () => {

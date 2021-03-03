@@ -1,27 +1,27 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`utility functions getAtomic 1`] = `
+exports[`Utility functions getAtomic 1`] = `
 Object {
   "path": "/",
   "stack": "#home.child",
 }
 `;
 
-exports[`utility functions getAtomic 2`] = `
+exports[`Utility functions getAtomic 2`] = `
 Object {
   "path": "/",
   "stack": "#home.parent.child-1.grand-child",
 }
 `;
 
-exports[`utility functions getAtomic 3`] = `
+exports[`Utility functions getAtomic 3`] = `
 Object {
   "path": "/:parent",
   "stack": "#home.parent.child-2",
 }
 `;
 
-exports[`utility functions normalizeChildStateProps 1`] = `
+exports[`Utility functions normalizeChildStateProps 1`] = `
 Array [
   Object {
     "childStates": Array [],
@@ -35,7 +35,7 @@ Array [
 ]
 `;
 
-exports[`utility functions normalizeChildStateProps 2`] = `
+exports[`Utility functions normalizeChildStateProps 2`] = `
 Array [
   Object {
     "childStates": Array [
@@ -114,7 +114,7 @@ Array [
 ]
 `;
 
-exports[`utility functions normalizeChildStateProps 3`] = `
+exports[`Utility functions normalizeChildStateProps 3`] = `
 Array [
   Object {
     "childStates": Array [
@@ -137,6 +137,12 @@ Array [
     "path": "/:parent/child-1",
     "stack": "#home.parent.child-1",
     "transitions": Array [
+      Object {
+        "cond": false,
+        "event": "test-event",
+        "sendId": "child-1",
+        "target": "child-3",
+      },
       Object {
         "cond": true,
         "event": "test-event",
@@ -187,7 +193,7 @@ Array [
 ]
 `;
 
-exports[`utility functions resolveUrlToAtomic 1`] = `
+exports[`Utility functions resolveUrlToAtomic 1`] = `
 Object {
   "params": Object {},
   "path": "/",
@@ -196,7 +202,7 @@ Object {
 }
 `;
 
-exports[`utility functions resolveUrlToAtomic 2`] = `
+exports[`Utility functions resolveUrlToAtomic 2`] = `
 Object {
   "params": Object {},
   "path": "/",
@@ -205,7 +211,7 @@ Object {
 }
 `;
 
-exports[`utility functions resolveUrlToAtomic 3`] = `
+exports[`Utility functions resolveUrlToAtomic 3`] = `
 Object {
   "params": Object {
     "parent": "parent-id",

@@ -28,7 +28,7 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
         const _childStates = getChildStateNodes(React.Children.toArray(machineChildren));
 
         if (_childStates.length === 0) {
-            throw new Error('<Machine/> has no children <State/> nodes! At least one is required to be considered a valid state machine.');
+            throw new Error('<Machine/> has no children! At least one is required to be considered a valid state machine.');
         }
 
         const _normalizedChildStates = normalizeChildStateProps(_childStates, machineId);

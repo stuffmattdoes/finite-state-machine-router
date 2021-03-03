@@ -2,20 +2,20 @@ import React from 'react';
 
 const getChildStateNodes = (children) => {
     if (children.length) {
-        const childrenOfType = getChildrenOfType(React.Children.toArray(children), 'State');
+        const childrenArr = getChildrenOfType(React.Children.toArray(children), 'State');
+        // const childrenArr = React.Children.toArray(children);
     
-        if (childrenOfType.length) {
-            return childrenOfType;
-        }
-
-        if (children.props && children.props.children) {
+        if (childrenArr.length) {
+            return childrenArr;
+            // return getChildrenOfType(childrenArr, 'State');
+        } else if (children.props && children.props.children) {
             return children.props.children.reduce((acc, child) => {
                 acc = acc.concat(getChildrenOfType(React.Children.toArray(child.props.children), 'State'));
                 return acc;
             }, []);
         }
     }
-    
+
     return [];
 }
 const classNames = (_classNames) => {

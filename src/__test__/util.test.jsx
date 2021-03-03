@@ -13,7 +13,7 @@ import {
     selectTransition
 } from '../util';
 
-describe('utility functions', () => {
+describe('Utility functions', () => {
     const MachineSimple = <Machine id='home'>
         <State id='child'/>
     </Machine>;
@@ -21,9 +21,11 @@ describe('utility functions', () => {
     const MachineComplex = (cond) => <Machine id='home'>
         <State id='parent'>
             <State id='child-1'>
-                <Transition cond={cond} event='test-event' target='child-3'/>
-                <Transition event='test-event' target='child-2'/>
-                <State id='grand-child'/>
+                {/* <div> */}
+                    <Transition cond={cond} event='test-event' target='child-3'/>
+                    <Transition event='test-event' target='child-2'/>
+                    <State id='grand-child'/>
+                {/* </div> */}
             </State>
             <State id='child-2'/>
         </State>
@@ -32,11 +34,14 @@ describe('utility functions', () => {
         </State>
     </Machine>;
 
-    const MachineWithPaths = <Machine id='home' path='/home'>
+    const MachineWithPaths = (cond) => <Machine id='home' path='/home'>
         <State id='parent' path='/:parent'>
             <State id='child-1' path='/child-1'>
-                <Transition event='test-event' target='child-2'/>
-                <State id='grand-child'/>
+                {/* <div> */}
+                    <Transition cond={cond} event='test-event' target='child-3'/>
+                    <Transition event='test-event' target='child-2'/>
+                    <State id='grand-child'/>
+                {/* </div> */}
             </State>
             <State id='child-2'/>
         </State>
@@ -48,7 +53,8 @@ describe('utility functions', () => {
     const normalizedSimple = normalizeChildStateProps(React.Children.toArray(MachineSimple.props.children), 'home');
     const normalizedComplex = normalizeChildStateProps(React.Children.toArray(MachineComplex(false).props.children), 'home');
     const normalizedGuard = normalizeChildStateProps(React.Children.toArray(MachineComplex(true).props.children), 'home');
-    const normalizedPaths = normalizeChildStateProps(React.Children.toArray(MachineWithPaths.props.children), 'home');
+    const normalizedPaths = normalizeChildStateProps(React.Children.toArray(MachineWithPaths(false).props.children), 'home');
+    const normalizedPathsGuard = normalizeChildStateProps(React.Children.toArray(MachineWithPaths(true).props.children), 'home');
 
     test('classNames', () => { 
         const className = [
@@ -74,7 +80,7 @@ describe('utility functions', () => {
             .every(child => child.type.displayName === 'State');
         const childrenComplex = getChildStateNodes(React.Children.toArray(MachineComplex(false).props.children))
             .every(child => child.type.displayName === 'State');
-        const childrenPaths = getChildStateNodes(React.Children.toArray(MachineWithPaths.props.children))
+        const childrenPaths = getChildStateNodes(React.Children.toArray(MachineWithPaths(true).props.children))
             .every(child => child.type.displayName === 'State');
         
         expect(childrenSimple).toBe(true);
@@ -159,5 +165,6 @@ describe('utility functions', () => {
         expect(selectTransition('no-matching-event', '#home.parent.child-1', normalizedComplex)).toBe(null);
         expect(selectTransition('test-event', '#home.parent.child-1', normalizedComplex)).toHaveProperty('target', 'child-2');
         expect(selectTransition('test-event', '#home.parent.child-1', normalizedGuard)).toHaveProperty('target', 'child-3');
+        expect(selectTransition('test-event', '#home.parent.child-1', normalizedPathsGuard)).toHaveProperty('target', 'child-3');
     });
 });
