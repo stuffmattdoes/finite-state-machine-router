@@ -9,10 +9,15 @@ export const StateNodeContext = React.createContext({
 });
 StateNodeContext.displayName = 'StateNode';
 
-function State(props) {
-    const { children, component: Component, id, initial, path } = props;
-    const machineContext = useContext(MachineContext);
-    const { event: machineEvent, current, history, id: machineId, params, send: machineSend } = machineContext;
+type StateProps = {
+    component: React.ReactNode,
+    id: string,
+    initial: boolean,
+    path: string
+}
+
+const State: React.FC<StateProps> = ({ children, component: Component, id, initial, path }) => {
+    const { event: machineEvent, current, history, id: machineId, params, send: machineSend } = useContext(MachineContext);
     const { id: parentId, path: parentPath, stack: parentStack } = useContext(StateNodeContext);
     const stack = parentStack ? `${parentStack}.${id}` : `#${machineId}.${id}`;
     const stackPath = path ? parentPath ? parentPath + path : path : parentPath;

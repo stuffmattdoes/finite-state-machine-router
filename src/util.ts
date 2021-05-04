@@ -21,7 +21,7 @@ const getChildStateNodes: React.ReactNode[] = (children: React.ReactNode[]) => {
 
 type Classes = string | { [name: string]: boolean }
 
-const classNames = (classes: Array<Classes>): string | null => {
+const classNames = (classes: Array<Classes>): string => {
     const next = classes.map((className) => {
         switch(typeof className) {
             case 'string':
@@ -29,11 +29,11 @@ const classNames = (classes: Array<Classes>): string | null => {
             case 'object':
                 return Object.keys(className).filter(key => Boolean(className[key])).join( ' ').trim();
             default:
-                return null;
+                return '';
         }
     }).join(' ').trim();
 
-    return Boolean(next) ? next : null;
+    return Boolean(next) ? next : '';
 }
 
 const getChildrenOfType = (children: React.ReactNodeArray, type: string): React.ReactNodeArray =>
