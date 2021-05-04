@@ -1,8 +1,8 @@
 import React from 'react';
 
-const getChildStateNodes = (children) => {
+const getChildStateNodes: React.ReactNode[] = (children: React.ReactNode[]) => {
     if (children.length) {
-        const childrenOfType = getChildrenOfType(React.Children.toArray(children), 'State');
+        const childrenOfType: React.ReactNode[] = getChildrenOfType(React.Children.toArray(children), 'State');
     
         if (childrenOfType.length) {
             return childrenOfType;
@@ -18,8 +18,11 @@ const getChildStateNodes = (children) => {
     
     return [];
 }
-const classNames = (_classNames) => {
-    const next = _classNames.map(className => {
+
+type Classes = string | { [name: string]: boolean }
+
+const classNames = (classes: Array<Classes>): string | null => {
+    const next = classes.map((className) => {
         switch(typeof className) {
             case 'string':
                 return className;
@@ -32,20 +35,22 @@ const classNames = (_classNames) => {
 
     return Boolean(next) ? next : null;
 }
-const getChildrenOfType = (children, type) => children.filter(c => c.type.displayName === type);
+
+const getChildrenOfType = (children: React.ReactNodeArray, type: string): React.ReactNodeArray =>
+    children.filter((c: React.ReactNode) => c.type.displayName === type);
 // const getInitialChildStateNode = (stateNodes) => stateNodes.find(c => c.props.initial) || stateNodes[0];
 // const isAtomic = (stateNode) => getChildStateNodes(React.Children.toArray(stateNode.props.children)).length === 0;
 // const isAtomicNormalized = (stateNode) => stateNode.childStates.length === 0;
-const isCurrentStack = (id, stack) => !!stack.split('.').find(state => state === id);
-const isExactStack = (id, stack) => stack.split('.').pop() === id;
-const isDynamicSegment = segment => /^:(.+)/.test(segment);
-const isRootPath = (path) => path === '/';
-const isRootSegment = url => url.slice(1) === '';
-const isRootStack = stack => !stack.match(/\./g);
-const isNotFound = stack => stack.split('.').pop() === '*';
-const segmentize = url => url.split('/').filter(Boolean);
+const isCurrentStack = (id: string, stack: string): boolean => !!stack.split('.').find(state => state === id);
+const isExactStack = (id: string, stack: string): boolean => stack.split('.').pop() === id;
+const isDynamicSegment = (segment: string): boolean => /^:(.+)/.test(segment);
+const isRootPath = (path: string): boolean => path === '/';
+const isRootSegment = (url: string): boolean => url.slice(1) === '';
+const isRootStack = (stack: string): boolean => !stack.match(/\./g);
+const isNotFound = (stack: string): boolean => stack.split('.').pop() === '*';
+const segmentize = (url: string): string[] => url.split('/').filter(Boolean);
 
-const injectUrlParams = (path, params) => {
+const injectUrlParams = (path: string, params: { [name: string]: string }): string => {
     const url = segmentize(path).map(seg => {
         if (isDynamicSegment(seg)) {
             const param = seg.replace(':', '');
@@ -279,7 +284,7 @@ const selectTransition = (event, currentStack, normalizedChildStates) => {
 
 export {
     classNames,
-    fakeUUID,
+    // fakeUUID,
     getChildrenOfType,
     getChildStateNodes,
     injectUrlParams,
