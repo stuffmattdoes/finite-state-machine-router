@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { ReactChild } from 'react';
 
-const getChildStateNodes: React.ReactNode[] = (children: React.ReactNode[]) => {
-    if (children.length) {
-        const childrenOfType: React.ReactNode[] = getChildrenOfType(React.Children.toArray(children), 'State');
+const getChildStateNodes = (children: React.ReactNode[]): React.ReactNode[] => {
+    if (React.Children.count(children) > 0) {
+        const childrenOfType = getChildrenOfType(children, 'State');
     
         if (childrenOfType.length) {
             return childrenOfType;
@@ -10,7 +10,7 @@ const getChildStateNodes: React.ReactNode[] = (children: React.ReactNode[]) => {
 
         if (children.props && children.props.children) {
             return children.props.children.reduce((acc, child) => {
-                acc = acc.concat(getChildrenOfType(React.Children.toArray(child.props.children), 'State'));
+                acc = acc.concat(getChildrenOfType((child.props.children), 'State'));
                 return acc;
             }, []);
         }
@@ -19,15 +19,15 @@ const getChildStateNodes: React.ReactNode[] = (children: React.ReactNode[]) => {
     return [];
 }
 
-type Classes = string | { [name: string]: boolean }
+type ClasseName = string | { [name: string]: boolean };
 
-const classNames = (classes: Array<Classes>): string => {
-    const next = classes.map((className) => {
+const classNames = (classes: ClasseName[]): string => {
+    const next = classes.map((className: ClasseName) => {
         switch(typeof className) {
             case 'string':
                 return className;
             case 'object':
-                return Object.keys(className).filter(key => Boolean(className[key])).join( ' ').trim();
+                return Object.keys(className).filter(key => Boolean(className[key])).join(' ').trim();
             default:
                 return '';
         }
@@ -36,11 +36,8 @@ const classNames = (classes: Array<Classes>): string => {
     return Boolean(next) ? next : '';
 }
 
-const getChildrenOfType = (children: React.ReactNodeArray, type: string): React.ReactNodeArray =>
-    children.filter((c: React.ReactNode) => c.type.displayName === type);
-// const getInitialChildStateNode = (stateNodes) => stateNodes.find(c => c.props.initial) || stateNodes[0];
-// const isAtomic = (stateNode) => getChildStateNodes(React.Children.toArray(stateNode.props.children)).length === 0;
-// const isAtomicNormalized = (stateNode) => stateNode.childStates.length === 0;
+const getChildrenOfType = (children: React.ReactNode, type: string): React.ReactNode[] =>
+    React.Children.toArray(children).filter((child) => child?.type.displayName === type);
 const isCurrentStack = (id: string, stack: string): boolean => !!stack.split('.').find(state => state === id);
 const isExactStack = (id: string, stack: string): boolean => stack.split('.').pop() === id;
 const isDynamicSegment = (segment: string): boolean => /^:(.+)/.test(segment);
@@ -69,7 +66,15 @@ const injectUrlParams = (path: string, params: { [name: string]: string }): stri
     return '/' + url + (window.location.search ? window.location.search : '');
 }
 
-const deriveStateFromUrl = (url, normalizedChildStates, rootId) => {
+type StateMatch = {
+    exact: boolean,
+    params: { [key: string]: string },
+    path: string,
+    stack: string,
+    url: string
+}
+
+const deriveStateFromUrl = (url: string, normalizedChildStates: NormalizedState[], rootId: string): StateMatch => {
     let match = {
         params: {},
         path: url,
@@ -145,13 +150,24 @@ const deriveStateFromUrl = (url, normalizedChildStates, rootId) => {
     return match;
 }
 
-const fakeUUID = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    let r = Math.random() * 16 | 0;
-    let v = c == 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-});
+type TransitionType = {
+    cond: boolean,
+    event: string,
+    sendId: string,
+    target: string
+}
 
-const normalizeChildStateProps = (stateNodes, rootId) => {
+type NormalizedState = {
+    childStates: string[],
+    id: string,
+    initial: boolean,
+    path: string,
+    stack: string,
+    transitions: TransitionType[],
+    type: 'atomic' | 'compound' | 'default' | 'parallel'
+}
+
+const normalizeChildStateProps = (stateNodes, rootId): NormalizedState[] => {
     const normalizeLoop = (stateNodes) => {
         let initialIndex = stateNodes.findIndex(s => s.props.initial);
         initialIndex = initialIndex >= 0 ? initialIndex : 0;
@@ -159,7 +175,7 @@ const normalizeChildStateProps = (stateNodes, rootId) => {
         return stateNodes.reduce((acc, stateNode, i) => {
             const { children, id, parallel, path = '/' } = stateNode.props;
             const childStates = getChildStateNodes(React.Children.toArray(children));
-            const transitions = getChildrenOfType(React.Children.toArray(children), 'Transition')
+            const transitions = getChildrenOfType(children, 'Transition')
                 .map(({ props }) => ({
                     cond: props.cond === true || props.cond === undefined ? true : false,
                     event: props.event,
@@ -203,16 +219,16 @@ const normalizeChildStateProps = (stateNodes, rootId) => {
     });
 }
 
-const getAtomic = (stack, normalizedChildStates) => {
-    const { childStates, path, stack: _stack } = normalizedChildStates.find(norm =>  norm.stack === stack);
+const getAtomic = (stack: string, normalizedChildStates: NormalizedState[]): { path: string, stack: string } => {
+    const { childStates, path, stack: _stack } = normalizedChildStates.find(child =>  child.stack === stack);
     let initial = {
         path,
         stack: _stack
     }
 
     if (childStates.length) {
-        const childStatesFull = childStates.map(childId => normalizedChildStates.find(norm => norm.id === childId));
-        const initialChild = childStatesFull.find(child => child.initial) || childStatesFull[0];
+        const childStatesPopulate = childStates.map(id => normalizedChildStates.find(norm => norm.id === id));
+        const initialChild = childStatesPopulate.find(child => child.initial) || childStatesPopulate[0];
 
         if (initialChild.childStates.length) {
             return getAtomic(initialChild.stack, normalizedChildStates);
@@ -225,17 +241,24 @@ const getAtomic = (stack, normalizedChildStates) => {
     return initial;
 }
 
-const resolveUrlToAtomic = (url, normalizedChildStates, machineId) => {
-    let atomic = {
+type AtomicExists = {
+    params: { [name: string]: string },
+    path: string | null,
+    stack: string | null,
+    url: string
+}
+
+const resolveUrlToAtomic = (url: string, normalizedChildStates: NormalizedState[], machineId: string) => {
+    let atomic: AtomicExists = {
         params: {},
         path: null,
         stack: null,
         url
     };
 
-    const atomicExists = (stack, path) => {
+    const atomicExists = (stack: string, path: string): AtomicExists => {
         const { path: atomicPath, stack: atomicStack } = getAtomic(stack, normalizedChildStates);
-        atomic = {
+        return {
             ...atomic,
             path: atomicPath,
             stack: atomicStack,
@@ -245,7 +268,7 @@ const resolveUrlToAtomic = (url, normalizedChildStates, machineId) => {
 
     if (isRootPath(url)) {
         const { stack } = normalizedChildStates[0];
-        atomicExists(stack, url);
+        atomic = atomicExists(stack, url);
     } else {
         const { params, path: currentPath, stack: currentStack } = deriveStateFromUrl(url, normalizedChildStates, machineId);
         atomic = {
@@ -256,21 +279,21 @@ const resolveUrlToAtomic = (url, normalizedChildStates, machineId) => {
         }
 
         if (!isNotFound(currentStack)) {
-            atomicExists(currentStack, currentPath);
+            atomic = atomicExists(currentStack, currentPath);
         }
     }
 
     return atomic;
 }
 
-const selectTransition = (event, currentStack, normalizedChildStates) => {
+const selectTransition = (event: string, currentStack: string, normalizedChildStates: NormalizedState[]): TransitionType | null => {
     if (isRootStack(currentStack)) {
         return null;
     }
 
-    const availableTransitions = normalizedChildStates.find(norm => norm.stack === currentStack).transitions;
+    const availableTransitions = normalizedChildStates && normalizedChildStates.find(norm => norm.stack === currentStack)?.transitions;
 
-    if (availableTransitions.length) {
+    if (availableTransitions?.length) {
         const activeTransition = availableTransitions.find(({ cond, event: transitionEvent, target }) => 
             transitionEvent === event && (cond === null || cond === true));
         if (activeTransition) {
@@ -284,7 +307,6 @@ const selectTransition = (event, currentStack, normalizedChildStates) => {
 
 export {
     classNames,
-    // fakeUUID,
     getChildrenOfType,
     getChildStateNodes,
     injectUrlParams,

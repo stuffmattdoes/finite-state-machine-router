@@ -2,11 +2,7 @@ import React, { useContext } from 'react';
 import { MachineContext } from './Machine';
 import { isCurrentStack, isExactStack } from './util';
 
-export const StateNodeContext = React.createContext({
-    id: null,
-    path: null,
-    stack: null
-});
+export const StateNodeContext = React.createContext({});
 StateNodeContext.displayName = 'StateNode';
 
 type StateProps = {
@@ -14,6 +10,21 @@ type StateProps = {
     id: string,
     initial: boolean,
     path: string
+}
+
+type ComponentProps = {
+    children: React.ReactNode,
+    history: any,
+    machine: {
+        current: string,
+        send: (id: string) => void
+    },
+    match: {
+        exact: boolean,
+        params: { [key: string]: string },
+        path?: string,
+        url: string
+    } | boolean
 }
 
 const State: React.FC<StateProps> = ({ children, component: Component, id, initial, path }) => {
@@ -34,7 +45,7 @@ const State: React.FC<StateProps> = ({ children, component: Component, id, initi
         stack,
         send: machineSend,
     }
-    const componentProps = {
+    const componentProps: ComponentProps = {
         children,
         history,
         machine: {
