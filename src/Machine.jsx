@@ -25,7 +25,7 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
     const history = useMemo(() => machineHistory || createBrowserHistory(), []);
 
     const [ childStates, normalizedChildStates ] = useMemo(() => {
-        const _childStates = getChildStateNodes(React.Children.toArray(machineChildren));
+        const _childStates = getChildStateNodes(machineChildren);
 
         if (_childStates.length === 0) {
             throw new Error('<Machine/> has no children <State/> nodes! At least one is required to be considered a valid state machine.');

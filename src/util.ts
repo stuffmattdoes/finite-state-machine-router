@@ -1,21 +1,25 @@
-import React, { ReactChild } from 'react';
+import React, { ReactChildren } from 'react';
+import State from './State';
+import Transition from './Transition';
 
 const getChildStateNodes = (children: React.ReactNode[]): React.ReactNode[] => {
-    if (React.Children.count(children) > 0) {
-        const childrenOfType = getChildrenOfType(children, 'State');
-    
-        if (childrenOfType.length) {
-            return childrenOfType;
-        }
+    const childArray = React.Children.toArray(children);
 
+    if (childArray.length) {
+        const childStates = getChildrenOfType(children, State);
+
+        if (childStates.length) {
+            return childStates;
+        }
+        
         if (children.props && children.props.children) {
-            return children.props.children.reduce((acc, child) => {
-                acc = acc.concat(getChildrenOfType((child.props.children), 'State'));
+            return children.props.children.reduce((acc: React.ReactNode[], child: React.ReactElement) => {
+                acc = acc.concat(getChildrenOfType((child.props.children), State));
                 return acc;
             }, []);
         }
     }
-    
+
     return [];
 }
 
@@ -36,8 +40,11 @@ const classNames = (classes: ClasseName[]): string => {
     return Boolean(next) ? next : '';
 }
 
-const getChildrenOfType = (children: React.ReactNode, type: string): React.ReactNode[] =>
-    React.Children.toArray(children).filter((child) => child?.type.displayName === type);
+const getChildrenOfType = (children: React.ReactNode, type: React.ReactNode): React.ReactNode[] =>
+    React.Children.toArray(children).filter((child) =>
+        React.isValidElement(child) ? child.type === type : false
+    );
+
 const isCurrentStack = (id: string, stack: string): boolean => !!stack.split('.').find(state => state === id);
 const isExactStack = (id: string, stack: string): boolean => stack.split('.').pop() === id;
 const isDynamicSegment = (segment: string): boolean => /^:(.+)/.test(segment);
@@ -174,8 +181,8 @@ const normalizeChildStateProps = (stateNodes, rootId): NormalizedState[] => {
 
         return stateNodes.reduce((acc, stateNode, i) => {
             const { children, id, parallel, path = '/' } = stateNode.props;
-            const childStates = getChildStateNodes(React.Children.toArray(children));
-            const transitions = getChildrenOfType(children, 'Transition')
+            const childStates = getChildStateNodes(children);
+            const transitions = getChildrenOfType(children, Transition)
                 .map(({ props }) => ({
                     cond: props.cond === true || props.cond === undefined ? true : false,
                     event: props.event,
@@ -213,7 +220,7 @@ const normalizeChildStateProps = (stateNodes, rootId): NormalizedState[] => {
         }, []);
     };
 
-    return normalizeLoop(stateNodes).map(norm => {
+    return normalizeLoop(React.Children.toArray(stateNodes)).map(norm => {
         norm.stack = '#' + rootId + norm.stack;
         return norm;
     });

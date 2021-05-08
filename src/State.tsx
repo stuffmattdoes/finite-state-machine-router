@@ -2,15 +2,29 @@ import React, { useContext } from 'react';
 import { MachineContext } from './Machine';
 import { isCurrentStack, isExactStack } from './util';
 
-export const StateNodeContext = React.createContext({});
+type StateNodeContextProps = {
+    id: string,
+    path: string,
+    stack: string,
+    send: (event: string) => void,
+}
+
+export const StateNodeContext = React.createContext<Partial<StateNodeContextProps>>({});
 StateNodeContext.displayName = 'StateNode';
 
 type StateProps = {
-    component: React.ReactNode,
+    component: React.ElementType,
     id: string,
     initial: boolean,
     path: string
 }
+
+type Match = {
+    exact: boolean,
+    params: { [key: string]: string },
+    path: string,
+    url: string
+} | boolean;
 
 type ComponentProps = {
     children: React.ReactNode,
@@ -19,27 +33,22 @@ type ComponentProps = {
         current: string,
         send: (id: string) => void
     },
-    match: {
-        exact: boolean,
-        params: { [key: string]: string },
-        path?: string,
-        url: string
-    } | boolean
+    match: Match
 }
 
 const State: React.FC<StateProps> = ({ children, component: Component, id, initial, path }) => {
     const { event: machineEvent, current, history, id: machineId, params, send: machineSend } = useContext(MachineContext);
     const { id: parentId, path: parentPath, stack: parentStack } = useContext(StateNodeContext);
     const stack = parentStack ? `${parentStack}.${id}` : `#${machineId}.${id}`;
-    const stackPath = path ? parentPath ? parentPath + path : path : parentPath;
-    const match = isCurrentStack(id, current) ? {
+    const stackPath = path ? parentPath ? parentPath + path : path : parentPath || '';
+    const match: Match = isCurrentStack(id, current) ? {
         exact: isExactStack(id, current),
         params,
         path: stackPath,
         url: history.location.pathname
     } : false;
 
-    const initialContext = {
+    const initialContext: StateNodeContextProps = {
         id,
         path: stackPath,
         stack,

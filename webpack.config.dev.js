@@ -24,10 +24,10 @@ module.exports = (env, argv) => ({
                 use: [
                     {
                         loader: 'ts-loader',
-                        options: {
-                            // configFile: path.resolve('config', 'ts.config.json'),
-                            // transpileOnly: true
-                        },
+                        // options: {
+                        //     configFile: path.resolve('config', 'ts.config.json'),
+                        //     transpileOnly: true
+                        // },
                     },
                 ],
             },
