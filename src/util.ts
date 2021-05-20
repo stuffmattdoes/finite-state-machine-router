@@ -1,8 +1,8 @@
-import React, { ReactChildren } from 'react';
+import React from 'react';
 import State from './State';
 import Transition from './Transition';
 
-const getChildStateNodes = (children: React.ReactNode[]): React.ReactNode[] => {
+const getChildStateNodes = (children: React.ReactElement[]): React.ReactElement[] => {
     const childArray = React.Children.toArray(children);
 
     if (childArray.length) {
@@ -13,7 +13,7 @@ const getChildStateNodes = (children: React.ReactNode[]): React.ReactNode[] => {
         }
         
         if (children.props && children.props.children) {
-            return children.props.children.reduce((acc: React.ReactNode[], child: React.ReactElement) => {
+            return children.props.children.reduce((acc: React.ReactElement[], child: React.ReactElement) => {
                 acc = acc.concat(getChildrenOfType((child.props.children), State));
                 return acc;
             }, []);
@@ -40,7 +40,7 @@ const classNames = (classes: ClasseName[]): string => {
     return Boolean(next) ? next : '';
 }
 
-const getChildrenOfType = (children: React.ReactNode, type: React.ReactNode): React.ReactNode[] =>
+const getChildrenOfType = (children: React.ReactElement, type: React.ReactElement): React.ReactElement[] =>
     React.Children.toArray(children).filter((child) =>
         React.isValidElement(child) ? child.type === type : false
     );
@@ -174,8 +174,8 @@ type NormalizedState = {
     type: 'atomic' | 'compound' | 'default' | 'parallel'
 }
 
-const normalizeChildStateProps = (stateNodes, rootId): NormalizedState[] => {
-    const normalizeLoop = (stateNodes) => {
+const normalizeChildStateProps = (stateNodes: React.ReactElement[], rootId: string): NormalizedState[] => {
+    const normalizeLoop = (stateNodes: React.ReactElement[]) => {
         let initialIndex = stateNodes.findIndex(s => s.props.initial);
         initialIndex = initialIndex >= 0 ? initialIndex : 0;
 
@@ -234,7 +234,7 @@ const getAtomic = (stack: string, normalizedChildStates: NormalizedState[]): { p
     }
 
     if (childStates.length) {
-        const childStatesPopulate = childStates.map(id => normalizedChildStates.find(norm => norm.id === id));
+        const childStatesPopulate = childStates.map((id: string) => normalizedChildStates.find(norm => norm.id === id));
         const initialChild = childStatesPopulate.find(child => child.initial) || childStatesPopulate[0];
 
         if (initialChild.childStates.length) {
