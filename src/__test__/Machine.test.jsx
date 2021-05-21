@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createMemoryHistory } from 'history';
 import { Link, Machine, State, Transition } from '..';
 import { act, cleanup, render, fireEvent } from '@testing-library/react';
@@ -389,35 +389,68 @@ describe('<Machine/>', () => {
         expect(queryByText('Child 3')).toBeTruthy();
     });
 
-    // test('Preserves query parameters when resolving url', () => {
+    // test.skip('Send is closure-proof', async () => {
+    //     let sendSpy;
 
-    // });
+    //     const Child1 = ({ machine }) => {
+    //         sendSpy = jest.spyOn(machine, 'send');
 
-    // test('Translates the URL into dynamic segment when applicable', () => {
-    //     const [ history, machine ] = renderWithNavigation('/parent/marlin/grand-child/nemo',
-    //         <State id='parent' path='/parent' component={generic('Parent')}>
-    //             <State id='child' path='/:parent'>
-    //                 <State id='grand-child' path='/child'>
-    //                     <State id='great-grand-child' path='/:child' component={genericWithParams('Child')}/>
-    //                 </State>
+    //         useEffect(() => {
+    //             new Promise((resolve, reject) =>
+    //                 setTimeout(() => resolve(), 1)
+    //             ).then(() => machine.send('resolve'));
+
+    //             machine.send('resolve');
+    //         }, []);
+
+    //         return <h1>Child 1</h1>
+    //     };
+
+    //     const Child2 = (props) => <h1>Child 2</h1>;
+
+    //     render(<Machine id='home'>
+    //         <State id='parent'>
+    //             <State id='child-1' component={Child1}>
+    //                 <Transition event='resolve' target='child-2'/>
     //             </State>
-    //         </State>);
-    //     const { container, queryByText } = render(machine);
+    //             <State id='child-2' component={Child2}/>
+    //         </State>
+    //     </Machine>);
 
-    //     expect(queryByText('parent: marlin')).toBeTruthy();
-    //     expect(queryByText(/child\n:\nnemo/)).toBeTruthy();
-    //     expect(container.firstChild).toMatchSnapshot();
+    //     expect(sendSpy).toHaveBeenCalledTimes(1);
+    //     expect(sendSpy).toHaveBeenCalledWith('resolve');
+    //     await waitFor(() => expect(sendSpy).toHaveBeenCalledTimes(2));
     // });
 
-    // test('Discards events that result in mo matching transition', () => {
+    test.skip('Preserves query parameters when resolving url', () => {
 
-    // });
+    });
 
-    // test('Throws error when two <State/>s have the same "id" attribute', () => {
+    test.skip('Translates the URL into dynamic segment when applicable', () => {
+        const [ history, machine ] = renderWithNavigation('/parent/marlin/grand-child/nemo',
+            <State id='parent' path='/parent' component={generic('Parent')}>
+                <State id='child' path='/:parent'>
+                    <State id='grand-child' path='/child'>
+                        <State id='great-grand-child' path='/:child' component={genericWithParams('Child')}/>
+                    </State>
+                </State>
+            </State>);
+        const { container, queryByText } = render(machine);
 
-    // });
+        expect(queryByText('parent: marlin')).toBeTruthy();
+        expect(queryByText(/child\n:\nnemo/)).toBeTruthy();
+        expect(container.firstChild).toMatchSnapshot();
+    });
 
-    // test('Rejects usage of "." or "#" in <State/> "id" attribute', () => {
+    test.skip('Discards events that result in mo matching transition', () => {
 
-    // });
+    });
+
+    test.skip('Throws error when two <State/>s have the same "id" attribute', () => {
+
+    });
+
+    test.skip('Rejects usage of "." or "#" in <State/> "id" attribute', () => {
+
+    });
 });

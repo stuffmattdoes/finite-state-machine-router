@@ -68,7 +68,7 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
                 if (url !== history.location.pathname) {
                     history.push(url, { target: stack });
                 } else {
-                    setState({ current: stack, location: history.location, params });
+                    setState((prevState) => ({ current: stack, location: history.location, params }));
                 }
 
                 log({
@@ -100,7 +100,7 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
         let target = stack;
 
         if (ignoreHash && state.location.hash !== location.hash) {
-            setState({ ...state, location: history.location, params });
+            setState((prevState) => ({ ...state, location: history.location, params }));
             return;
         }
 
@@ -120,7 +120,7 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
             });
         }
 
-        setState({ current: target, location: history.location, params });
+        setState((prevState) => ({ current: target, location: history.location, params }));
     }));
 
     const providerValue = {
