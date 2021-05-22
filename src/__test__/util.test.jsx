@@ -2,7 +2,6 @@ import React from 'react';
 import { Machine, State, Transition } from '..';
 import {
     classNames,
-    fakeUUID,
     getChildStateNodes,
     injectUrlParams,
     isCurrentStack,
@@ -45,10 +44,10 @@ describe('utility functions', () => {
         </State>
     </Machine>;
 
-    const normalizedSimple = normalizeChildStateProps(React.Children.toArray(MachineSimple.props.children), 'home');
-    const normalizedComplex = normalizeChildStateProps(React.Children.toArray(MachineComplex(false).props.children), 'home');
-    const normalizedGuard = normalizeChildStateProps(React.Children.toArray(MachineComplex(true).props.children), 'home');
-    const normalizedPaths = normalizeChildStateProps(React.Children.toArray(MachineWithPaths.props.children), 'home');
+    const normalizedSimple = normalizeChildStateProps(MachineSimple.props.children, 'home');
+    const normalizedComplex = normalizeChildStateProps(MachineComplex(false).props.children, 'home');
+    const normalizedGuard = normalizeChildStateProps(MachineComplex(true).props.children, 'home');
+    const normalizedPaths = normalizeChildStateProps(MachineWithPaths.props.children, 'home');
 
     test('classNames', () => { 
         const className = [
@@ -65,16 +64,12 @@ describe('utility functions', () => {
         expect (classNames(className2)).toBeNull();
     });
 
-    test('fakeUUID', () => {
-        expect(fakeUUID()).toEqual(expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/));
-    });
-
     test('getChildStateNodes', () => {
-        const childrenSimple = getChildStateNodes(React.Children.toArray(MachineSimple.props.children))
+        const childrenSimple = getChildStateNodes(MachineSimple.props.children)
             .every(child => child.type.displayName === 'State');
-        const childrenComplex = getChildStateNodes(React.Children.toArray(MachineComplex(false).props.children))
+        const childrenComplex = getChildStateNodes(MachineComplex(false).props.children)
             .every(child => child.type.displayName === 'State');
-        const childrenPaths = getChildStateNodes(React.Children.toArray(MachineWithPaths.props.children))
+        const childrenPaths = getChildStateNodes(MachineWithPaths.props.children)
             .every(child => child.type.displayName === 'State');
         
         expect(childrenSimple).toBe(true);
@@ -82,7 +77,7 @@ describe('utility functions', () => {
         expect(childrenPaths).toBe(true);
     });
 
-    test.skip('getInitialChildStateNode', () => {
+    test('getInitialChildStateNode', () => {
         const machineWithoutInitial = [
             <State id='child-1'/>,
             <State id='child-2'/>
@@ -93,8 +88,8 @@ describe('utility functions', () => {
             <State id='child-2' initial/>
         ];
 
-        const result1 = getInitialChildStateNode(getChildStateNodes(React.Children.toArray(machineWithoutInitial))).props.id;
-        const result2 = getInitialChildStateNode(getChildStateNodes(React.Children.toArray(machineWithInitial))).props.id;
+        const result1 = getInitialChildStateNode(getChildStateNodes(machineWithoutInitial)).props.id;
+        const result2 = getInitialChildStateNode(getChildStateNodes(machineWithInitial)).props.id;
 
         expect(result1).toBe('child-1');
         expect(result2).toBe('child-2');
@@ -114,7 +109,7 @@ describe('utility functions', () => {
         expect(injectUrlParams('/static-path/:dynamicPath/another-static-path', params)).toBe('/static-path/dynamic-path/another-static-path');
     });
 
-    test.skip('isAtomic', () => {
+    test('isAtomic', () => {
         const notAtomic = <State id='child-1'>
             <Transition event='test-event' target='child-2'/>
             <State id='grand-child'/>
