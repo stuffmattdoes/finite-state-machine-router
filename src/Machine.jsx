@@ -39,10 +39,11 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
     const [ initialStack, params ] = useMemo(() => {
         const { params, path, stack, url } = resolveUrlToAtomic(history.location.pathname, normalizedChildStates, machineId);
 
-        // if (history.location.pathname !== url) {
-        //     console.log('HISTORY REPLACE', 1)
-        //     history.replace(url);
-        // }
+        // For mount
+        if (history.location.pathname !== url) {
+            console.log('HISTORY REPLACE', 1)
+            history.replace(url);
+        }
 
         return [ stack, params ];
     }, []);
@@ -67,10 +68,8 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
                 const url = injectUrlParams(path, params);
 
                 if (url !== history.location.pathname) {
-                    console.log('HISTORY PUSH');
                     history.push(url, { target: stack });
                 } else {
-                    console.log('SET STATE 1');
                     setState((prevState) => ({ current: stack, location: history.location, params }));
                 }
 
@@ -102,15 +101,12 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
         const { params, path, stack, url } = resolveUrlToAtomic(location.pathname, normalizedChildStates, machineId);
         let target = stack;
 
-        console.log('RENDER');
-
+        // After mount
         if (location.pathname !== url) {
-            console.log('HISTORY REPLACE', 2);
             history.replace(url);
         }
 
         if (ignoreHash && state.location.hash !== location.hash) {
-            console.log('HISTORY SET STATE');
             setState((prevState) => ({ ...state, location: history.location, params }));
             return;
         }
