@@ -1,32 +1,26 @@
 import React, { useEffect } from 'react';
 import { createMemoryHistory } from 'history';
 import { Link, Machine, State, Transition } from '..';
-import { act, cleanup, render, fireEvent } from '@testing-library/react';
+import { act, render, fireEvent } from '@testing-library/react';
 
 describe('<Machine/>', () => {
     let _console = {
-        // group: console.group,
-        // groupEnd: console.groupEnd,
         error: console.error,
         log: console.log,
         warn: console.warn
     };
 
-    beforeEach(() => {
-        // global.console.group = jest.fn();
-        // global.console.groupEnd = jest.fn();
+    beforeAll(() => {
         global.console.error = jest.fn();
         global.console.log = jest.fn();
         global.console.warn = jest.fn();
     });
     
-    afterEach(() => {
+    afterAll(() => {
         global.console = {
             ...global.console,
             ..._console
         }
-
-        cleanup();
     });
 
     const generic = name => ({ children }) => <div><h1>{name}</h1>{children}</div>;
@@ -452,5 +446,25 @@ describe('<Machine/>', () => {
 
     test.skip('Rejects usage of "." or "#" in <State/> "id" attribute', () => {
 
+    });
+
+    test('Resolves URL and executes transition simultaneously on mount', () => {
+        const Parent = ({ children, machine: { send } }) => {
+            useEffect(() => { send('transition'); }, []);
+
+            return children;
+        }
+
+        const [ history, machine ] = renderWithNavigation(null,
+            <State id='parent' component={Parent}>
+                <Transition event='transition' target='child'/>
+                <State id='loading' component={generic('Loading...')}/>
+                <State id='child' path='/child' component={generic('Child')}/>
+            </State>);
+        const { container, queryByText } = render(machine);
+
+        expect(container).toMatchSnapshot();
+        // expect(history.location.pathname).toBe('/child');
+        expect(queryByText('Child')).toBeTruthy();
     });
 });

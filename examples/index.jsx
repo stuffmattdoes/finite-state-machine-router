@@ -2,10 +2,8 @@ import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { createMachine, Link, Machine, State, Transition, useMachine } from '../src';
 
-// const CustomMachine = createMachine({ id: 'home' });
-
-const App = ({ children, history, machine }) => {
-    return <main>
+const App = ({ children, history, machine }) =>
+    <main>
         <header>Example | Finite State Machine Router</header>
         <nav>
             <Link href='/parent/child-1'>URL: Child 1</Link><br/>
@@ -22,7 +20,6 @@ const App = ({ children, history, machine }) => {
         </ul>
         {children}
     </main>;
-}
 
 const generic = (name) => (props) => {
     const [ machine, send ] = useMachine();
@@ -45,7 +42,7 @@ ReactDOM.render(
             <Transition event='grand-child-4' target='grand-child-4'/>
             <State id='child-1' path='/child-1'>
                 <State id='grand-child-1' component={generic('Grand Child 1')}>
-                    <State id='great-grand-child-1' target='great-grand-child-1' path='/great-grand-child-1/:dynamicUrl'/>
+                    <State id='great-grand-child-1' path='/great-grand-child-1' component={generic('Great Grand Child 1')}/>
                 </State>
             </State>
             <State id='child-2' path='/child-2'>

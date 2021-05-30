@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<Machine/> Resolves URL and executes transition simultaneously on mount 1`] = `
+<div>
+  <div>
+    <h1>
+      Loading...
+    </h1>
+  </div>
+</div>
+`;
