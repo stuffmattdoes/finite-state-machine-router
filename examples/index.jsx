@@ -21,9 +21,20 @@ const App = ({ children, history, machine }) =>
         {children}
     </main>;
 
-const generic = (name) => (props) => {
+const generic = (name) => ({ children, match: { params }}) => {
     const [ machine, send ] = useMachine();
-    const { children, match: { params }} = props;
+
+    return <div>
+        <p>{name}</p>
+        {children}
+    </div>
+}
+
+const transitionOnMount = (name) => ({ children, match: { params }}) => {
+    const [ machine, send ] = useMachine();
+    useEffect(() => {
+        send('mount');
+    }, []);
 
     return <div>
         <p>{name}</p>
@@ -55,6 +66,9 @@ ReactDOM.render(
                 <State id='grand-child-3-3' component={generic('Grand Child 3-3')}/>
             </State>
             <State id='child-4' path='/child-4' component={generic('Child 4')}/>
+            <State id='transition' path='/transition' component={transitionOnMount('Transition!')}>
+                <Transition event='mount' target='child-4'/>
+            </State>
         </State>
         <State id='*' component={generic('Not Found')}/>
         <State id='error' component={generic('Error')}/>

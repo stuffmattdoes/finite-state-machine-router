@@ -437,21 +437,26 @@ describe('<Machine/>', () => {
     });
 
     test.skip('Discards events that result in mo matching transition', () => {
+        const Parent = ({ children, machine: { send } }) => {
+            useEffect(() => { send('transition'); }, []);
+            return children;
+        }
 
+        const [ history, machine ] = renderWithNavigation(null,
+            <State id='parent' component={Parent}>
+                <Transition event='transition' target='child-2'/>
+                <State id='child' component={generic('Child')}/>
+            </State>);
+        const { container, queryByText } = render(machine);
     });
 
     test.skip('Throws error when two <State/>s have the same "id" attribute', () => {
 
     });
 
-    test.skip('Rejects usage of "." or "#" in <State/> "id" attribute', () => {
-
-    });
-
     test('Resolves URL and executes transition simultaneously on mount', () => {
         const Parent = ({ children, machine: { send } }) => {
             useEffect(() => { send('transition'); }, []);
-
             return children;
         }
 
@@ -463,8 +468,7 @@ describe('<Machine/>', () => {
             </State>);
         const { container, queryByText } = render(machine);
 
-        expect(container).toMatchSnapshot();
-        // expect(history.location.pathname).toBe('/child');
+        expect(history.location.pathname).toBe('/child');
         expect(queryByText('Child')).toBeTruthy();
     });
 });
