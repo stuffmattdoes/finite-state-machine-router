@@ -39,6 +39,7 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
     const [ initialStack, params ] = useMemo(() => {
         const { params, path, stack, url } = resolveUrlToAtomic(history.location.pathname, normalizedChildStates, machineId);
 
+        // For mount
         if (history.location.pathname !== url) {
             history.replace(url);
         }
@@ -95,9 +96,18 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
         }
     }
 
-    useEffect(() => history.listen(({ action, location }) => {
+    /*
+        useMemo ensures history listener is invoked prior to render.
+        This is vital to ensure any "send" events in child "useEffects" are captured
+    */
+    const unlisten = useMemo(() => history.listen(({ action, location }) => {
         const { params, path, stack, url } = resolveUrlToAtomic(location.pathname, normalizedChildStates, machineId);
         let target = stack;
+
+        // After mount
+        if (location.pathname !== url) {
+            history.replace(url);
+        }
 
         if (ignoreHash && state.location.hash !== location.hash) {
             setState((prevState) => ({ ...state, location: history.location, params }));
@@ -122,6 +132,8 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
 
         setState((prevState) => ({ current: target, location: history.location, params }));
     }));
+
+    useEffect(() => unlisten);
 
     const providerValue = {
         ...state,

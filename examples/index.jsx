@@ -2,10 +2,8 @@ import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { createMachine, Link, Machine, State, Transition, useMachine } from '../src';
 
-// const CustomMachine = createMachine({ id: 'home' });
-
-const App = ({ children, history, machine }) => {
-    return <main>
+const App = ({ children, history, machine }) =>
+    <main>
         <header>Example | Finite State Machine Router</header>
         <nav>
             <Link href='/parent/child-1'>URL: Child 1</Link><br/>
@@ -22,11 +20,21 @@ const App = ({ children, history, machine }) => {
         </ul>
         {children}
     </main>;
+
+const generic = (name) => ({ children, match: { params }}) => {
+    const [ machine, send ] = useMachine();
+
+    return <div>
+        <p>{name}</p>
+        {children}
+    </div>
 }
 
-const generic = (name) => (props) => {
+const transitionOnMount = (name) => ({ children, match: { params }}) => {
     const [ machine, send ] = useMachine();
-    const { children, match: { params }} = props;
+    useEffect(() => {
+        send('mount');
+    }, []);
 
     return <div>
         <p>{name}</p>
@@ -45,7 +53,7 @@ ReactDOM.render(
             <Transition event='grand-child-4' target='grand-child-4'/>
             <State id='child-1' path='/child-1'>
                 <State id='grand-child-1' component={generic('Grand Child 1')}>
-                    <State id='great-grand-child-1' target='great-grand-child-1' path='/great-grand-child-1/:dynamicUrl'/>
+                    <State id='great-grand-child-1' path='/great-grand-child-1' component={generic('Great Grand Child 1')}/>
                 </State>
             </State>
             <State id='child-2' path='/child-2'>
@@ -58,6 +66,9 @@ ReactDOM.render(
                 <State id='grand-child-3-3' component={generic('Grand Child 3-3')}/>
             </State>
             <State id='child-4' path='/child-4' component={generic('Child 4')}/>
+            <State id='transition' path='/transition' component={transitionOnMount('Transition!')}>
+                <Transition event='mount' target='child-4'/>
+            </State>
         </State>
         <State id='*' component={generic('Not Found')}/>
         <State id='error' component={generic('Error')}/>

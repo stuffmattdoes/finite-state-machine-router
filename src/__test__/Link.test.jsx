@@ -1,11 +1,9 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
 import { Link, Machine, State } from '..';
-import { cleanup, render, fireEvent } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 
 describe('<Link/>', () => {
-    afterEach(cleanup);
-
     const generic = (name) => ({ children }) => <div><h1>{name}</h1>{children}</div>;
     const genericWithLinks = (name) => (props) => <div>
         <h1>{name}</h1>

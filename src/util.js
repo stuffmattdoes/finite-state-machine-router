@@ -24,7 +24,7 @@ const classNames = (_classNames) => {
             case 'string':
                 return className;
             case 'object':
-                return Object.keys(className).filter(key => Boolean(className[key])).join( ' ').trim();
+                return Object.keys(className).filter(key => Boolean(className[key])).join(' ').trim();
             default:
                 return null;
         }
