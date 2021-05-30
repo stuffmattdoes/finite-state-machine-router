@@ -103,11 +103,11 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
         let target = stack;
 
         console.log('RENDER');
-        
-        // if (location.pathname !== url) {
-        //     console.log('HISTORY REPLACE', 2);
-        //     history.replace(url);
-        // }
+
+        if (location.pathname !== url) {
+            console.log('HISTORY REPLACE', 2);
+            history.replace(url);
+        }
 
         if (ignoreHash && state.location.hash !== location.hash) {
             console.log('HISTORY SET STATE');
