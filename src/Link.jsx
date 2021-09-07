@@ -3,7 +3,7 @@ import { classNames } from './util';
 import { MachineContext } from './Machine';
 
 function Link({ children, className, disabled = false, href = '#', onClick, replace = false }) {
-    const { current, history } = useContext(MachineContext);
+    const { history } = useContext(MachineContext);
 
     const handleClick = (event) => {
         event.preventDefault();
@@ -21,7 +21,7 @@ function Link({ children, className, disabled = false, href = '#', onClick, repl
         className,
         { 
             'link-exact': href === history.location.pathname,
-            'link-active': history.location.pathname.includes(href) && !disabled,
+            'link-active': history.location.pathname.includes(href),
             'disabled': disabled
         }
     ])} href={href} onClick={handleClick}>{children}</a>
