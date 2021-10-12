@@ -9,6 +9,7 @@ module.exports = {
         // compress: true,
         historyApiFallback: true,
         hot: true,
+        https: true,
         // open: true,
         port: 9000
     },

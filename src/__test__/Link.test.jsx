@@ -1,7 +1,8 @@
 import React from 'react';
 import { createMemoryHistory } from 'history';
 import { Link, Machine, State } from '..';
-import { render, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 describe('<Link/>', () => {
     const generic = (name) => ({ children }) => <div><h1>{name}</h1>{children}</div>;
@@ -43,7 +44,7 @@ describe('<Link/>', () => {
         expect(history.location.pathname).toBe('/child-1');
         expect(queryByText('Child 1')).toBeTruthy();
 
-        fireEvent.click(queryByText('URL Push 2'));
+        userEvent.click(queryByText('URL Push 2'));
         expect(history.location.pathname).toBe('/child-2');
         expect(history.action).toBe('PUSH');
         expect(queryByText('Grand Child 2')).toBeTruthy();
@@ -56,13 +57,13 @@ describe('<Link/>', () => {
         expect(history.location.pathname).toBe('/child-1');
         expect(queryByText('Child 1')).toBeTruthy();
 
-        fireEvent.click(queryByText('URL Push 2'));
+        userEvent.click(queryByText('URL Push 2'));
         expect(history.location.pathname).toBe('/child-2');
         expect(history.action).toBe('PUSH');
         expect(queryByText('Grand Child 2')).toBeTruthy();
 
-        fireEvent.click(queryByText('URL Push 2'));
-        fireEvent.click(queryByText('URL Push 1'));
+        userEvent.click(queryByText('URL Push 2'));
+        userEvent.click(queryByText('URL Push 1'));
         expect(history.location.pathname).toBe('/child-1');
         expect(history.action).toBe('PUSH');
         expect(queryByText('Child 1')).toBeTruthy();
@@ -74,7 +75,7 @@ describe('<Link/>', () => {
 
         expect(history.location.pathname).toBe('/child-1');
         expect(queryByText('Child 1')).toBeTruthy();
-        fireEvent.click(queryByText('URL Replace'));
+        userEvent.click(queryByText('URL Replace'));
         expect(history.location.pathname).toBe('/child-2');
         expect(history.action).toBe('REPLACE');
         expect(queryByText('Grand Child 2')).toBeTruthy();
@@ -100,7 +101,7 @@ describe('<Link/>', () => {
         </div>);
         const { queryByText } = render(machine);
         expect(history.location.pathname).toBe('/child-1');
-        fireEvent.click(queryByText('URL Disabled'));
+        userEvent.click(queryByText('URL Disabled'));
         expect(history.location.pathname).toBe('/child-1');
         expect(mockFn).not.toHaveBeenCalled();
     });

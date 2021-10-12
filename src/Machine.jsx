@@ -2,12 +2,13 @@ import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { createBrowserHistory } from 'history';
 import useLogger from './logger';
 import {
+    getAtomic,
     getChildStateNodes,
     injectUrlParams,
     normalizeChildStateProps,
     resolveUrlToAtomic,
-    getAtomic,
-    selectTransition
+    selectTransition,
+    urlMatchesPathname
 } from './util';
 
 export const MachineContext = React.createContext({});
@@ -38,9 +39,9 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
 
     const [ initialStack, params ] = useMemo(() => {
         const { params, path, stack, url } = resolveUrlToAtomic(history.location.pathname, normalizedChildStates, machineId);
-
+        
         // For mount
-        if (history.location.pathname !== url) {
+        if (urlMatchesPathname(history.location.pathname, url)) {
             history.replace(url);
         }
 
@@ -105,7 +106,7 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
         let target = stack;
 
         // After mount
-        if (location.pathname !== url) {
+        if (urlMatchesPathname(history.location.pathname, url)) {
             history.replace(url);
         }
 
