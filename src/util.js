@@ -277,9 +277,12 @@ const selectTransition = (event, currentStack, normalizedChildStates) => {
     return selectTransition(event, parentStack, normalizedChildStates);
 }
 
+const urlMatchesPathname = (pathname, url) => pathname !== url.split('?')[0];
+
 export {
     classNames,
     fakeUUID,
+    getAtomic,
     getChildrenOfType,
     getChildStateNodes,
     injectUrlParams,
@@ -287,6 +290,6 @@ export {
     isExactStack,
     normalizeChildStateProps,
     resolveUrlToAtomic,
-    getAtomic,
-    selectTransition
+    selectTransition,
+    urlMatchesPathname
 }
