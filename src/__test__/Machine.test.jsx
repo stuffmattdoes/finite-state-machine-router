@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { createMemoryHistory } from 'history';
 import { Link, Machine, State, Transition } from '..';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 describe('<Machine/>', () => {
@@ -162,7 +162,7 @@ describe('<Machine/>', () => {
         expect(screen.queryByText('Child 1')).toBeTruthy();
         expect(screen.queryByText('Fire event')).toBeTruthy();
 
-        fireEvent.click(screen.queryByText(/Fire event/i));
+        userEvent.click(screen.queryByText(/Fire event/i));
         expect(history.location.pathname).toBe('/child-2');
         expect(screen.queryByText('Child 2')).toBeTruthy();
     });
@@ -181,7 +181,7 @@ describe('<Machine/>', () => {
         expect(screen.queryByText('Child 1')).toBeTruthy();
         expect(screen.queryByText('Fire event')).toBeTruthy();
 
-        fireEvent.click(screen.queryByText(/Fire event/i));
+        userEvent.click(screen.queryByText(/Fire event/i));
         expect(screen.queryByText('Child 2')).toBeTruthy();
         expect(history.location.pathname).toBe('/child-2');
     });
@@ -203,7 +203,7 @@ describe('<Machine/>', () => {
 
         expect(screen.queryByText('Child 1')).toBeTruthy();
         expect(history.location.pathname).toBe('/child-1');
-        fireEvent.click(screen.queryByText(/Fire event/i));
+        userEvent.click(screen.queryByText(/Fire event/i));
         expect(screen.queryByText('Child 3')).toBeTruthy();
         expect(history.location.pathname).toBe('/child-3');
     });
@@ -223,7 +223,7 @@ describe('<Machine/>', () => {
 
         expect(screen.queryByText('Child 1')).toBeTruthy();
         expect(history.location.pathname).toBe('/child-1');
-        fireEvent.click(screen.queryByText(/Fire event/i));
+        userEvent.click(screen.queryByText(/Fire event/i));
         expect(screen.queryByText('Grand Child 2')).toBeTruthy();
         expect(history.location.pathname).toBe('/child-2');
     });
@@ -245,7 +245,7 @@ describe('<Machine/>', () => {
 
         expect(screen.queryByText('Child 1')).toBeTruthy();
         expect(history.location.pathname).toBe('/child-1/grand-child-1');
-        fireEvent.click(screen.queryByText(/Fire event/i));
+        userEvent.click(screen.queryByText(/Fire event/i));
         expect(screen.queryByText('Grand Child 2-2')).toBeTruthy();
         expect(history.location.pathname).toBe('/child-2');
     });
@@ -347,7 +347,7 @@ describe('<Machine/>', () => {
         expect(history.location.hash).toBe('#hash=true');
         expect(screen.queryByText('Child 1')).toBeTruthy();
         
-        fireEvent.click(screen.queryByText(/Fire event/i));
+        userEvent.click(screen.queryByText(/Fire event/i));
         expect(history.location.pathname).toBe('/parent');
         expect(history.location.hash).toBe('#hash=true');
         expect(screen.queryByText('Child 2')).toBeTruthy();
@@ -372,7 +372,7 @@ describe('<Machine/>', () => {
         </State>);
 
         expect(screen.queryByText('Child 1')).toBeTruthy();
-        fireEvent.click(screen.queryByText(/Fire event/i));
+        userEvent.click(screen.queryByText(/Fire event/i));
         expect(screen.queryByText('Child 3')).toBeTruthy();
     });
 
