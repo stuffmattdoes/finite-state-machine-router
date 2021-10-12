@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { createMemoryHistory } from 'history';
 import { Link, Machine, State, Transition } from '..';
 import { act, fireEvent, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 describe('<Machine/>', () => {
     let _console = {
@@ -24,11 +25,6 @@ describe('<Machine/>', () => {
     });
 
     const generic = name => ({ children }) => <div><h1>{name}</h1>{children}</div>;
-    const genericWithLinks = name => ({ children }) => <div><h1>{name}</h1>
-        <Link href='/child-2'>URL Push 1</Link>
-        <Link href='/child-3'>URL Push 2</Link>
-        {children}
-    </div>;
     const renderWithNavigation = (states, initialEntries = [ null ], props) => {
         const testHistory = createMemoryHistory({ initialEntries });
         const _render = render(<Machine history={testHistory} {...props}>{states}</Machine>);
@@ -254,12 +250,12 @@ describe('<Machine/>', () => {
         expect(history.location.pathname).toBe('/child-2');
     });
 
-    test('Resolves to proper state on native browser navigation', () => {
+    test('Resolves to proper state on history back/forward actions', () => {
         const [ history ] = renderWithNavigation(<State id='parent'>
             <State id='child-1' path='/child-1'>
-                <State id='grand-child-1' path='/grand-child-1' component={genericWithLinks('Grand Child 1')}/>
+                <State id='grand-child-1' path='/grand-child-1' component={generic('Grand Child 1')}/>
             </State>
-            <State id='child-2' path='/child-2' component={genericWithLinks('Child 2')}/>
+            <State id='child-2' path='/child-2' component={generic('Child 2')}/>
             <State id='child-3' path='/child-3'>
                 <State id='grand-child-3' component={generic('Grand Child 3')}/>
             </State>
@@ -268,7 +264,7 @@ describe('<Machine/>', () => {
                 <State id='grand-child-4-2' component={generic('Grand Child 4-2')}/>
             </State>
         </State>,
-        [ '/child-1/grand-child-1', '/child-2', '/child-3', '/child-4']);
+        [ '/child-1/grand-child-1', '/child-2', '/child-3', '/child-4' ]);
 
         expect(history.location.pathname).toBe('/child-4');
         expect(screen.queryByText('Grand Child 4-1')).toBeTruthy();
@@ -298,6 +294,42 @@ describe('<Machine/>', () => {
         expect(screen.queryByText('Grand Child 4-1')).toBeTruthy();
     });
 
+    test('Resolves to proper state on history push/replace actions', () => {
+        const [ history ] = renderWithNavigation(<State id='parent'>
+            <State id='child-1' path='/child-1'>
+                <State id='grand-child-1' path='/grand-child-1' component={generic('Grand Child 1')}/>
+            </State>
+            <State id='child-2' path='/child-2' component={generic('Child 2')}/>
+            <State id='child-3' path='/child-3'>
+                <State id='grand-child-3' component={generic('Grand Child 3')}/>
+            </State>
+            <State id='child-4' path='/child-4'>
+                <State id='grand-child-4-1' component={generic('Grand Child 4-1')}/>
+                <State id='grand-child-4-2' component={generic('Grand Child 4-2')}/>
+            </State>
+        </State>,
+        [ '/child-1' ]);
+
+        expect(history.location.pathname).toBe('/child-1/grand-child-1');
+        expect(screen.queryByText('Grand Child 1')).toBeTruthy();
+
+        act(() => history.push('/child-3'));
+        expect(history.location.pathname).toBe('/child-3');
+        expect(screen.queryByText('Grand Child 3')).toBeTruthy();
+
+        act(() => history.push('/child-2'));
+        expect(history.location.pathname).toBe('/child-2');
+        expect(screen.queryByText('Child 2')).toBeTruthy();
+
+        act(() => history.replace('/child-1'));
+        expect(history.location.pathname).toBe('/child-1/grand-child-1');
+        expect(screen.queryByText('Grand Child 1')).toBeTruthy();
+
+        act(() => history.replace('/child-2'));
+        expect(history.location.pathname).toBe('/child-2');
+        expect(screen.queryByText('Child 2')).toBeTruthy();
+    });
+
     test('Ignores changes in URL hash if "ignoreHash" prop is present', () => {
         const [ history ] = renderWithNavigation(<State id='parent' path='/parent'>
             <State id='child-1' component={({ machine }) => <div>
@@ -306,13 +338,14 @@ describe('<Machine/>', () => {
             </div>}>
                 <Transition event='test-event-1' target='child-2'/>
             </State>
-            <State id='child-2' component={genericWithLinks('Child 2')}/>
+            <State id='child-2' component={generic('Child 2')}/>
         </State>,
         [ '/parent?search=true#hash=true' ],
         { ignoreHash: true });
 
         expect(history.location.pathname).toBe('/parent');
         expect(history.location.hash).toBe('#hash=true');
+        expect(screen.queryByText('Child 1')).toBeTruthy();
         
         fireEvent.click(screen.queryByText(/Fire event/i));
         expect(history.location.pathname).toBe('/parent');
@@ -341,10 +374,6 @@ describe('<Machine/>', () => {
         expect(screen.queryByText('Child 1')).toBeTruthy();
         fireEvent.click(screen.queryByText(/Fire event/i));
         expect(screen.queryByText('Child 3')).toBeTruthy();
-    });
-
-    test.skip('Preserves query parameters when resolving url', () => {
-
     });
 
     test.skip('Translates the URL into dynamic segment when applicable', () => {
@@ -392,5 +421,124 @@ describe('<Machine/>', () => {
 
         expect(history.location.pathname).toBe('/child');
         expect(screen.queryByText('Child')).toBeTruthy();
+    });
+
+    test('Accepts URL query parameters and resolves properly', () => {
+        renderWithNavigation(<State id='parent' path='/parent' component={generic('Parent')}/>, [ '/parent?query=true' ]);
+        expect(screen.queryByText('Parent')).toBeTruthy();
+    });
+
+    test('Preserves URL query parameters through history back/forward actions that result in a new URL', () => {
+        const [ history ] = renderWithNavigation(<State id='parent'>
+            <State id='child-1' path='/child-1'>
+                <State id='grand-child-1' path='/grand-child-1' component={generic('Grand Child 1')}/>
+            </State>
+            <State id='child-2' path='/child-2' component={generic('Child 2')}/>
+            <State id='child-3' path='/child-3'>
+                <State id='grand-child-3' component={generic('Grand Child 3')}/>
+            </State>
+            <State id='child-4' path='/child-4'>
+                <State id='grand-child-4-1' component={generic('Grand Child 4-1')}/>
+                <State id='grand-child-4-2' component={generic('Grand Child 4-2')}/>
+            </State>
+        </State>,
+        [ '/child-1/grand-child-1', '/child-2', '/child-3?query=true', '/child-4?query=true' ]);
+
+        expect(history.location.pathname).toBe('/child-4');
+        expect(history.location.search).toBe('?query=true');
+        expect(screen.queryByText('Grand Child 4-1')).toBeTruthy();
+
+        act(() => history.back());
+        expect(history.location.pathname).toBe('/child-3');
+        expect(history.location.search).toBe('?query=true');
+        expect(screen.queryByText('Grand Child 3')).toBeTruthy();
+
+        act(() => history.back());
+        expect(history.location.pathname).toBe('/child-2');
+        expect(history.location.search).toBeFalsy();
+        expect(screen.queryByText('Child 2')).toBeTruthy();
+
+        act(() => history.back());
+        expect(history.location.pathname).toBe('/child-1/grand-child-1');
+        expect(history.location.search).toBeFalsy();
+        expect(screen.queryByText('Grand Child 1')).toBeTruthy();
+
+        act(() => history.forward());
+        expect(history.location.pathname).toBe('/child-2');
+        expect(history.location.search).toBeFalsy();
+        expect(screen.queryByText('Child 2')).toBeTruthy();
+
+        act(() => history.forward());
+        expect(history.location.pathname).toBe('/child-3');
+        expect(history.location.search).toBe('?query=true');
+        expect(screen.queryByText('Grand Child 3')).toBeTruthy();
+
+        act(() => history.forward());
+        expect(history.location.pathname).toBe('/child-4');
+        expect(history.location.search).toBe('?query=true');
+        expect(screen.queryByText('Grand Child 4-1')).toBeTruthy();
+    });
+
+    test('Preserves URL query parameters through history push/replace actions that result in a new URL', () => {
+        const [ history ] = renderWithNavigation(<State id='parent'>
+            <State id='child-1' path='/child-1'>
+                <State id='grand-child-1' path='/grand-child-1' component={generic('Grand Child 1')}/>
+            </State>
+            <State id='child-2' path='/child-2' component={generic('Child 2')}/>
+            <State id='child-3' path='/child-3'>
+                <State id='grand-child-3' component={generic('Grand Child 3')}/>
+            </State>
+            <State id='child-4' path='/child-4'>
+                <State id='grand-child-4-1' component={generic('Grand Child 4-1')}/>
+                <State id='grand-child-4-2' component={generic('Grand Child 4-2')}/>
+            </State>
+        </State>,
+        [ '/child-1?query=true' ]);
+
+        expect(history.location.pathname).toBe('/child-1/grand-child-1');
+        expect(history.location.search).toBe('?query=true');
+        expect(screen.queryByText('Grand Child 1')).toBeTruthy();
+
+        act(() => history.push('/child-3'));
+        expect(history.location.pathname).toBe('/child-3');
+        expect(history.location.search).toBe('?query=true');
+        expect(screen.queryByText('Grand Child 3')).toBeTruthy();
+
+        act(() => history.push('/child-2'));
+        expect(history.location.pathname).toBe('/child-2');
+        expect(history.location.search).toBe('?query=true');
+        expect(screen.queryByText('Child 2')).toBeTruthy();
+
+        act(() => history.replace('/child-1'));
+        expect(history.location.pathname).toBe('/child-1/grand-child-1');
+        expect(history.location.search).toBe('?query=true');
+        expect(screen.queryByText('Grand Child 1')).toBeTruthy();
+
+        act(() => history.replace('/child-2'));
+        expect(history.location.pathname).toBe('/child-2');
+        expect(history.location.search).toBe('?query=true');
+        expect(screen.queryByText('Child 2')).toBeTruthy();
+    });
+
+    test('Preserves URL query parameters through state transitions that result in a new URL', () => {
+        const [ history ] = renderWithNavigation(<State id='parent' path='/parent'>
+            <State id='child-1' path='/child-1' component={({ machine }) => <div>
+                <h1>Child 1</h1>
+                <button onClick={event => machine.send('test-event-1')}>Fire event</button>
+            </div>}>
+                <Transition event='test-event-1' target='child-2'/>
+            </State>
+            <State id='child-2' path='/child-2' component={generic('Child 2')}/>
+        </State>,
+        [ '/parent?search=true' ]);
+
+        expect(history.location.pathname).toBe('/parent/child-1');
+        expect(history.location.search).toBe('?search=true');
+        expect(screen.queryByText('Child 1')).toBeTruthy();
+
+        userEvent.click(screen.queryByText(/Fire event/i));
+        expect(history.location.pathname).toBe('/parent/child-2');
+        expect(history.location.search).toBe('?search=true');
+        expect(screen.queryByText('Child 2')).toBeTruthy();
     });
 });
