@@ -2,12 +2,13 @@ import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { createBrowserHistory } from 'history';
 import useLogger from './logger';
 import {
+    getAtomic,
     getChildStateNodes,
     injectUrlParams,
     normalizeChildStateProps,
     resolveUrlToAtomic,
-    getAtomic,
-    selectTransition
+    selectTransition,
+    urlMatchesPathname
 } from './util';
 
 export const MachineContext = React.createContext({});
@@ -38,8 +39,9 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
 
     const [ initialStack, params ] = useMemo(() => {
         const { params, path, stack, url } = resolveUrlToAtomic(history.location.pathname, normalizedChildStates, machineId);
-
-        if (history.location.pathname !== url) {
+        
+        // For mount
+        if (urlMatchesPathname(history.location.pathname, url)) {
             history.replace(url);
         }
 
@@ -68,7 +70,7 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
                 if (url !== history.location.pathname) {
                     history.push(url, { target: stack });
                 } else {
-                    setState({ current: stack, location: history.location, params });
+                    setState((prevState) => ({ current: stack, location: history.location, params }));
                 }
 
                 log({
@@ -95,12 +97,21 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
         }
     }
 
-    useEffect(() => history.listen(({ action, location }) => {
+    /*
+        useMemo ensures history listener is invoked prior to render.
+        This is vital to ensure any "send" events in child "useEffects" are captured
+    */
+    const unlisten = useMemo(() => history.listen(({ action, location }) => {
         const { params, path, stack, url } = resolveUrlToAtomic(location.pathname, normalizedChildStates, machineId);
         let target = stack;
 
+        // After mount
+        if (urlMatchesPathname(history.location.pathname, url)) {
+            history.replace(url);
+        }
+
         if (ignoreHash && state.location.hash !== location.hash) {
-            setState({ ...state, location: history.location, params });
+            setState((prevState) => ({ ...state, location: history.location, params }));
             return;
         }
 
@@ -120,8 +131,10 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
             });
         }
 
-        setState({ current: target, location: history.location, params });
+        setState((prevState) => ({ current: target, location: history.location, params }));
     }));
+
+    useEffect(() => unlisten);
 
     const providerValue = {
         ...state,

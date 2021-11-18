@@ -1,20 +1,18 @@
 import React from 'react';
-import State from './State';
-import Transition from './Transition';
 
-const getChildStateNodes = (children: React.ReactElement[]): React.ReactElement[] => {
+const getChildStateNodes = (children: React.ReactElement): React.ReactElement[] => {
     const childArray = React.Children.toArray(children);
 
     if (childArray.length) {
-        const childStates = getChildrenOfType(children, State);
+        const childStates = getChildrenOfType(children, 'State');
 
         if (childStates.length) {
             return childStates;
         }
         
-        if (children.props && children.props.children) {
-            return children.props.children.reduce((acc: React.ReactElement[], child: React.ReactElement) => {
-                acc = acc.concat(getChildrenOfType((child.props.children), State));
+        if (children.props?.children) {
+            return children.props?.children.reduce((acc: React.ReactElement[], child: React.ReactElement) => {
+                acc = acc.concat(getChildrenOfType(child.props.children, 'State'));
                 return acc;
             }, []);
         }
@@ -31,7 +29,7 @@ const classNames = (classes: ClasseName[]): string => {
             case 'string':
                 return className;
             case 'object':
-                return Object.keys(className).filter(key => Boolean(className[key])).join(' ').trim();
+                return Object.keys(className).filter((key) => Boolean(className[key])).join(' ').trim();
             default:
                 return '';
         }
@@ -40,12 +38,11 @@ const classNames = (classes: ClasseName[]): string => {
     return Boolean(next) ? next : '';
 }
 
-const getChildrenOfType = (children: React.ReactElement, type: React.ReactElement): React.ReactElement[] =>
+const getChildrenOfType = (children: React.ReactElement, type: string): React.ReactElement[] =>
     React.Children.toArray(children).filter((child) =>
-        React.isValidElement(child) ? child.type === type : false
-    );
+        React.isValidElement(child) ? child.type === type : false) as React.ReactElement[];
 
-const isCurrentStack = (id: string, stack: string): boolean => !!stack.split('.').find(state => state === id);
+const isCurrentStack = (id: string, stack: string): boolean => !!stack.split('.').find((state) => state === id);
 const isExactStack = (id: string, stack: string): boolean => stack.split('.').pop() === id;
 const isDynamicSegment = (segment: string): boolean => /^:(.+)/.test(segment);
 const isRootPath = (path: string): boolean => path === '/';
@@ -55,7 +52,7 @@ const isNotFound = (stack: string): boolean => stack.split('.').pop() === '*';
 const segmentize = (url: string): string[] => url.split('/').filter(Boolean);
 
 const injectUrlParams = (path: string, params: { [name: string]: string }): string => {
-    const url = segmentize(path).map(seg => {
+    const url = segmentize(path).map((seg) => {
         if (isDynamicSegment(seg)) {
             const param = seg.replace(':', '');
 
@@ -76,20 +73,22 @@ const injectUrlParams = (path: string, params: { [name: string]: string }): stri
 type StateMatch = {
     exact: boolean,
     params: { [key: string]: string },
-    path: string,
-    stack: string,
-    url: string
+    path: string | null,
+    stack: string | null,
+    url: string | null
 }
 
 const deriveStateFromUrl = (url: string, normalizedChildStates: NormalizedState[], rootId: string): StateMatch => {
-    let match = {
+    let match: StateMatch = {
+        exact: false,
         params: {},
         path: url,
-        stack: null
+        stack: null,
+        url: null
     }
 
     // 1. Exact match, no dynamic URL needed
-    const childMatch = normalizedChildStates.find(norm => norm.path === url);
+    const childMatch = normalizedChildStates.find((norm) => norm.path === url);
 
     if (childMatch) {
         match.path = childMatch.path;
@@ -99,12 +98,13 @@ const deriveStateFromUrl = (url: string, normalizedChildStates: NormalizedState[
 
     // 1.1 Check if URL is root, return initial stack
     if (isRootSegment(url)) {
-        match.stack = normalizedChildStates.find(norm => norm.stack.match(/\./g).length === 1 && norm.initial).stack;
+        match.stack = normalizedChildStates.find((norm) =>
+            norm.stack.match(/\./g)!.length === 1 && norm.initial)!.stack;
         return match;
     }
 
     // 2. No exact match yet, compare to dynamic URLs for match
-    const dynamicPaths = normalizedChildStates.filter(norm => norm.path && norm.path.match(/\/:/g)).map(norm => norm.path);
+    const dynamicPaths = normalizedChildStates.filter((norm) => norm.path && norm.path.match(/\/:/g)).map((norm) => norm.path);
 
     if (dynamicPaths.length) {
         // 2.1 Split url && child paths into arrays, compare 1 by 1
@@ -139,13 +139,13 @@ const deriveStateFromUrl = (url: string, normalizedChildStates: NormalizedState[
         if (dynamicPathMatch) {
             // 2.4 finally, return the stack that corresponds to the URL
             match.path = dynamicPathMatch;
-            match.stack = normalizedChildStates.find(norm => norm.path === dynamicPathMatch).stack;;
+            match.stack = normalizedChildStates.find((norm) => norm.path === dynamicPathMatch)!.stack;
         }
     }
 
     // 3.0 if no match, resolve to wildcard route "*""
     if (!match.stack) {
-        const notFoundState = normalizedChildStates.find(norm => norm.id === '*');
+        const notFoundState = normalizedChildStates.find((norm) => norm.id === '*');
         match.stack = '#' + rootId + '.*';
 
         // 3.1 If no wildcard route "*", throw error
@@ -176,13 +176,13 @@ type NormalizedState = {
 
 const normalizeChildStateProps = (stateNodes: React.ReactElement[], rootId: string): NormalizedState[] => {
     const normalizeLoop = (stateNodes: React.ReactElement[]) => {
-        let initialIndex = stateNodes.findIndex(s => s.props.initial);
+        let initialIndex = stateNodes.findIndex((s) => s.props.initial);
         initialIndex = initialIndex >= 0 ? initialIndex : 0;
 
-        return stateNodes.reduce((acc, stateNode, i) => {
+        return stateNodes.reduce((acc: NormalizedState[], stateNode, i) => {
             const { children, id, parallel, path = '/' } = stateNode.props;
             const childStates = getChildStateNodes(children);
-            const transitions = getChildrenOfType(children, Transition)
+            const transitions = getChildrenOfType(children, 'Transition')
                 .map(({ props }) => ({
                     cond: props.cond === true || props.cond === undefined ? true : false,
                     event: props.event,
@@ -192,7 +192,7 @@ const normalizeChildStateProps = (stateNodes: React.ReactElement[], rootId: stri
 
             // Add current state node to array
             acc.push({
-                childStates: childStates.map(child => child.props.id),
+                childStates: childStates.map((child) => child.props.id),
                 id,
                 initial: initialIndex === i,
                 path,
@@ -220,22 +220,24 @@ const normalizeChildStateProps = (stateNodes: React.ReactElement[], rootId: stri
         }, []);
     };
 
-    return normalizeLoop(React.Children.toArray(stateNodes)).map(norm => {
+    return normalizeLoop(React.Children.toArray(stateNodes) as React.ReactElement[]).map((norm) => {
         norm.stack = '#' + rootId + norm.stack;
         return norm;
     });
 }
 
-const getAtomic = (stack: string, normalizedChildStates: NormalizedState[]): { path: string, stack: string } => {
-    const { childStates, path, stack: _stack } = normalizedChildStates.find(child =>  child.stack === stack);
-    let initial = {
+type AtomicState = { path: string, stack: string };
+
+const getAtomic = (stack: string, normalizedChildStates: NormalizedState[]): AtomicState => {
+    const { childStates, path, stack: _stack } = normalizedChildStates.find((child) =>  child.stack === stack)!;
+    let initial: AtomicState = {
         path,
         stack: _stack
     }
 
     if (childStates.length) {
-        const childStatesPopulate = childStates.map((id: string) => normalizedChildStates.find(norm => norm.id === id));
-        const initialChild = childStatesPopulate.find(child => child.initial) || childStatesPopulate[0];
+        const childStatesPopulate = childStates.map((id: string) => normalizedChildStates.find((norm) => norm.id === id)!);
+        const initialChild = childStatesPopulate.find((child: NormalizedState) => child.initial) || childStatesPopulate[0];
 
         if (initialChild.childStates.length) {
             return getAtomic(initialChild.stack, normalizedChildStates);
@@ -248,14 +250,14 @@ const getAtomic = (stack: string, normalizedChildStates: NormalizedState[]): { p
     return initial;
 }
 
-type AtomicExists = {
-    params: { [name: string]: string },
-    path: string | null,
-    stack: string | null,
-    url: string
-}
-
 const resolveUrlToAtomic = (url: string, normalizedChildStates: NormalizedState[], machineId: string) => {
+    type AtomicExists = {
+        params: { [name: string]: string },
+        path: string | null,
+        stack: string | null,
+        url: string
+    }
+
     let atomic: AtomicExists = {
         params: {},
         path: null,
@@ -285,8 +287,8 @@ const resolveUrlToAtomic = (url: string, normalizedChildStates: NormalizedState[
             stack: currentStack
         }
 
-        if (!isNotFound(currentStack)) {
-            atomic = atomicExists(currentStack, currentPath);
+        if (!isNotFound(currentStack!)) {
+            atomic = atomicExists(currentStack!, currentPath!);
         }
     }
 
@@ -312,15 +314,16 @@ const selectTransition = (event: string, currentStack: string, normalizedChildSt
     return selectTransition(event, parentStack, normalizedChildStates);
 }
 
+const urlMatchesPathname = (pathname: string, url: string): boolean => pathname !== url.split('?')[0];
+
 export {
     classNames,
     getChildrenOfType,
     getChildStateNodes,
-    injectUrlParams,
     isCurrentStack, 
     isExactStack,
     normalizeChildStateProps,
     resolveUrlToAtomic,
-    getAtomic,
-    selectTransition
+    selectTransition,
+    urlMatchesPathname
 }

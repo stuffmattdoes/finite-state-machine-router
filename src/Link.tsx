@@ -28,7 +28,7 @@ const Link: React.FC<LinkProps> = ({ children, className, disabled = false, href
         className,
         { 
             'link-exact': href === history.location.pathname,
-            'link-active': history.location.pathname.includes(href) && !disabled,
+            'link-active': history.location.pathname.includes(href),
             'disabled': disabled
         }
     ])} href={href} onClick={handleClick}>{children}</a>

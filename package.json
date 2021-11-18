@@ -1,6 +1,6 @@
 {
   "name": "fsm-router",
-  "version": "0.3.5",
+  "version": "0.3.9",
   "dependencies": {
     "history": "^5.0.0"
   },
@@ -10,6 +10,7 @@
     "@babel/preset-env": "^7.14.1",
     "@babel/preset-react": "^7.13.13",
     "@testing-library/react": "^10.4.9",
+    "@testing-library/user-event": "^13.3.0",
     "@types/react": "^17.0.5",
     "@types/react-dom": "^17.0.3",
     "babel-jest": "^26.6.3",

@@ -1,46 +1,19 @@
-# This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
+name: Publish NPM Package
 
-name: Publish NPM Package    # (Required) name of the workflow
-
-on:         # (Required) Name of GitHub event that triggers the workflow
+on:
   release:
-    types: [ created ]    # This action is performed on publishings a "release" in GitHub
+    types: [published]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v1
       - uses: actions/setup-node@v1
         with:
-          node-version: '12.x'
-      - run: npm ci
-      - run: npm test
-
-  publish-npm:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: '12.x'
-          registry-url: https://registry.npmjs.org/fsm-router
-      - run: npm ci
+          node-version: 12
+          registry-url: https://registry.npmjs.org/
+      - run: yarn install
       - run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
-
-  # publish-gpr:
-  #   needs: build
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - uses: actions/setup-node@v1
-  #       with:
-  #         node-version: 12
-  #         registry-url: https://npm.pkg.github.com/
-  #     - run: npm ci
-  #     - run: npm publish
-  #       env:
-  #         NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
