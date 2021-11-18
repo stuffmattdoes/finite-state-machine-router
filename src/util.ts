@@ -1,6 +1,6 @@
 import React from 'react';
 
-const getChildStateNodes = (children: React.ReactElement): React.ReactElement[] => {
+export const getChildStateNodes = (children: React.ReactElement): React.ReactElement[] => {
     const childArray = React.Children.toArray(children);
 
     if (childArray.length) {
@@ -23,7 +23,7 @@ const getChildStateNodes = (children: React.ReactElement): React.ReactElement[] 
 
 type ClasseName = string | { [name: string]: boolean };
 
-const classNames = (classes: ClasseName[]): string => {
+export const classNames = (classes: ClasseName[]): string => {
     const next = classes.map((className: ClasseName) => {
         switch(typeof className) {
             case 'string':
@@ -42,8 +42,8 @@ const getChildrenOfType = (children: React.ReactElement, type: string): React.Re
     React.Children.toArray(children).filter((child) =>
         React.isValidElement(child) ? child.type === type : false) as React.ReactElement[];
 
-const isCurrentStack = (id: string, stack: string): boolean => !!stack.split('.').find((state) => state === id);
-const isExactStack = (id: string, stack: string): boolean => stack.split('.').pop() === id;
+export const isCurrentStack = (id: string, stack: string): boolean => !!stack.split('.').find((state) => state === id);
+export const isExactStack = (id: string, stack: string): boolean => stack.split('.').pop() === id;
 const isDynamicSegment = (segment: string): boolean => /^:(.+)/.test(segment);
 const isRootPath = (path: string): boolean => path === '/';
 const isRootSegment = (url: string): boolean => url.slice(1) === '';
@@ -51,7 +51,7 @@ const isRootStack = (stack: string): boolean => !stack.match(/\./g);
 const isNotFound = (stack: string): boolean => stack.split('.').pop() === '*';
 const segmentize = (url: string): string[] => url.split('/').filter(Boolean);
 
-const injectUrlParams = (path: string, params: { [name: string]: string }): string => {
+export const injectUrlParams = (path: string, params: { [name: string]: string }): string => {
     const url = segmentize(path).map((seg) => {
         if (isDynamicSegment(seg)) {
             const param = seg.replace(':', '');
@@ -174,7 +174,7 @@ type NormalizedState = {
     type: 'atomic' | 'compound' | 'default' | 'parallel'
 }
 
-const normalizeChildStateProps = (stateNodes: React.ReactElement[], rootId: string): NormalizedState[] => {
+export const normalizeChildStateProps = (stateNodes: React.ReactElement[], rootId: string): NormalizedState[] => {
     const normalizeLoop = (stateNodes: React.ReactElement[]) => {
         let initialIndex = stateNodes.findIndex((s) => s.props.initial);
         initialIndex = initialIndex >= 0 ? initialIndex : 0;
@@ -228,7 +228,7 @@ const normalizeChildStateProps = (stateNodes: React.ReactElement[], rootId: stri
 
 type AtomicState = { path: string, stack: string };
 
-const getAtomic = (stack: string, normalizedChildStates: NormalizedState[]): AtomicState => {
+export const getAtomic = (stack: string, normalizedChildStates: NormalizedState[]): AtomicState => {
     const { childStates, path, stack: _stack } = normalizedChildStates.find((child) =>  child.stack === stack)!;
     let initial: AtomicState = {
         path,
@@ -250,7 +250,7 @@ const getAtomic = (stack: string, normalizedChildStates: NormalizedState[]): Ato
     return initial;
 }
 
-const resolveUrlToAtomic = (url: string, normalizedChildStates: NormalizedState[], machineId: string) => {
+export const resolveUrlToAtomic = (url: string, normalizedChildStates: NormalizedState[], machineId: string) => {
     type AtomicExists = {
         params: { [name: string]: string },
         path: string | null,
@@ -295,7 +295,7 @@ const resolveUrlToAtomic = (url: string, normalizedChildStates: NormalizedState[
     return atomic;
 }
 
-const selectTransition = (event: string, currentStack: string, normalizedChildStates: NormalizedState[]): TransitionType | null => {
+export const selectTransition = (event: string, currentStack: string, normalizedChildStates: NormalizedState[]): TransitionType | null => {
     if (isRootStack(currentStack)) {
         return null;
     }
@@ -314,16 +314,4 @@ const selectTransition = (event: string, currentStack: string, normalizedChildSt
     return selectTransition(event, parentStack, normalizedChildStates);
 }
 
-const urlMatchesPathname = (pathname: string, url: string): boolean => pathname !== url.split('?')[0];
-
-export {
-    classNames,
-    getChildrenOfType,
-    getChildStateNodes,
-    isCurrentStack, 
-    isExactStack,
-    normalizeChildStateProps,
-    resolveUrlToAtomic,
-    selectTransition,
-    urlMatchesPathname
-}
+export const urlMatchesPathname = (pathname: string, url: string): boolean => pathname !== url.split('?')[0];
