@@ -72,7 +72,10 @@ enum ActionTypes {
 }
 
 type Action = TransitionAction | HistoryAction | NoMatchinStateAction | NoMatchingTransitionAction;
-type UseLogger = (source: { current: string, location: Location }, enabled: boolean) => void;
+
+type Log = ({ type, payload }: Action | any) => void;
+
+type UseLogger = (source: { current: string, location: Location }, enabled: boolean) => [ Action[], Log ];
 
 const useLogger: UseLogger = (source, enabled) => {
     if (!enabled) {
@@ -80,7 +83,7 @@ const useLogger: UseLogger = (source, enabled) => {
     }
 
     const [ logs, setLogs ] = useState<Action[]>([]);
-    const log = ({ type, payload }: Action | any) => {
+    const log: Log = ({ type, payload }) => {
         const date = new Date();
         const time = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}.${date.getMilliseconds()}`;
         const { event, target } = payload;
@@ -137,7 +140,6 @@ const useLogger: UseLogger = (source, enabled) => {
         }
 
         console.groupEnd();
-
         setLogs(logs.concat({ type, payload }));
     }
 
