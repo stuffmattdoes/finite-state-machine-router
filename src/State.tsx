@@ -21,7 +21,7 @@ type StateProps = {
 
 type Match = {
     exact: boolean,
-    params: { [key: string]: string },
+    params?: { [key: string]: string },
     path: string,
     url: string
 } | boolean;
@@ -37,29 +37,29 @@ type ComponentProps = {
 }
 
 const State: React.FC<StateProps> = ({ children, component: Component, id, initial, path }) => {
-    const { event: machineEvent, current, history, id: machineId, params, send: machineSend } = useContext(MachineContext);
+    const { current, history, id: machineId, params, send: machineSend } = useContext(MachineContext);
     const { id: parentId, path: parentPath, stack: parentStack } = useContext(StateNodeContext);
     const stack = parentStack ? `${parentStack}.${id}` : `#${machineId}.${id}`;
     const stackPath = path ? parentPath ? parentPath + path : path : parentPath || '';
-    const match: Match = isCurrentStack(id, current) ? {
-        exact: isExactStack(id, current),
+    const match: Match = isCurrentStack(id, current!) ? {
+        exact: isExactStack(id, current!),
         params,
         path: stackPath,
-        url: history.location.pathname
+        url: history!.location.pathname
     } : false;
 
     const initialContext: StateNodeContextProps = {
         id,
         path: stackPath,
         stack,
-        send: machineSend,
+        send: machineSend!,
     }
     const componentProps: ComponentProps = {
         children,
         history,
         machine: {
-            current,
-            send: machineSend
+            current: current!,
+            send: machineSend!
         },
         match
     }

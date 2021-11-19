@@ -31,8 +31,8 @@ export const useMachine = () => {
 }
 
 type State = {
-    current: string | null;
-    location: Location;
+    current: string;
+    location: Partial<Location>;
     params: {
         [name: string]: string;
     };
@@ -72,11 +72,11 @@ const Machine: React.FC<MachineProps> = ({ children: machineChildren, history: m
     }, []);
 
     const [ state, setState ] = useState<State>({
-        current: initialStack,
+        current: initialStack!,
         location: history.location,
         params
     });
-    const [ logs, log ] = useLogger(state, logging);
+    const [ logs, log ] = useLogger({ current: state.current!, location: state.location }, logging);
 
     const send = (event: string, data: any = null) => {
         const targetState = selectTransition(event, state.current!, normalizedChildStates);
@@ -93,7 +93,11 @@ const Machine: React.FC<MachineProps> = ({ children: machineChildren, history: m
                 if (url !== history.location.pathname) {
                     history.push(url, { target: stack });
                 } else {
-                    setState((prevState) => ({ current: stack, location: history.location, params }));
+                    setState((prevState) => ({
+                        current: stack,
+                        location: history.location,
+                        params
+                    }));
                 }
 
                 log({
@@ -135,7 +139,11 @@ const Machine: React.FC<MachineProps> = ({ children: machineChildren, history: m
         }
 
         if (ignoreHash && state.location.hash !== location.hash) {
-            setState((prevState) => ({ ...state, location: history.location, params }));
+            setState((prevState) => ({
+                ...prevState,
+                location: history.location,
+                params
+            }));
             return;
         }
 
@@ -155,7 +163,11 @@ const Machine: React.FC<MachineProps> = ({ children: machineChildren, history: m
             });
         }
 
-        setState((prevState) => ({ current: target, location: history.location, params }));
+        setState((prevState) => ({
+            current: target!,
+            location: history.location,
+            params
+        }));
     }));
 
     const providerValue = {

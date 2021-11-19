@@ -26,7 +26,7 @@ type TransitionAction = {
         event: string,
         target: {
             params: { [name: string]: string },
-            location: Location,
+            location: Partial<Location>,
             state: string
         }
     }
@@ -38,7 +38,7 @@ type HistoryAction = {
         target: {
             target: string,
             params: { [name: string]: string },
-            location: Location,
+            location: Partial<Location>,
             state: string
         }
     }
@@ -75,7 +75,7 @@ type Action = TransitionAction | HistoryAction | NoMatchinStateAction | NoMatchi
 
 type Log = ({ type, payload }: Action | any) => void;
 
-type UseLogger = (source: { current: string, location: Location }, enabled: boolean) => [ Action[], Log ];
+type UseLogger = (source: { current: string, location: Partial<Location> }, enabled: boolean) => [ Action[], Log ];
 
 const useLogger: UseLogger = (source, enabled) => {
     if (!enabled) {
