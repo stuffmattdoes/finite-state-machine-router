@@ -19,6 +19,8 @@ type StateProps = {
     path: string
 }
 
+export type StateNode = React.FC<StateProps>;
+
 type Match = {
     exact: boolean,
     params?: { [key: string]: string },
@@ -36,7 +38,7 @@ type ComponentProps = {
     match: Match
 }
 
-const State: React.FC<StateProps> = ({ children, component: Component, id, initial, path }) => {
+const State: StateNode = ({ children, component: Component, id, initial, path }) => {
     const { current, history, id: machineId, params, send: machineSend } = useContext(MachineContext);
     const { id: parentId, path: parentPath, stack: parentStack } = useContext(StateNodeContext);
     const stack = parentStack ? `${parentStack}.${id}` : `#${machineId}.${id}`;

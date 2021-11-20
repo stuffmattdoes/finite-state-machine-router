@@ -21,7 +21,6 @@ module.exports = (env, argv) => ({
             // Resolves & bundles all Javascript dependencies
             {
                 test: /\.ts(x?)$/,
-                include: path.resolve('Scripts'),
                 use: [
                     {
                         loader: 'ts-loader',

@@ -1,4 +1,5 @@
 import React from 'react';
+import { StateNode } from './State';
 
 export const getChildStateNodes = (children: React.ReactElement): React.ReactElement[] => {
     const childArray = React.Children.toArray(children);
@@ -38,9 +39,9 @@ export const classNames = (classes: ClasseName[]): string => {
     return Boolean(next) ? next : '';
 }
 
-const getChildrenOfType = (children: React.ReactElement, type: string): React.ReactElement[] =>
+const getChildrenOfType = (children: React.ReactNode, type: string): React.ReactNode[] =>
     React.Children.toArray(children).filter((child) =>
-        React.isValidElement(child) ? child.type === type : false) as React.ReactElement[];
+        React.isValidElement(child) && (child as React.ReactElement).type.name === type) as React.ReactElement[];
 
 export const isCurrentStack = (id: string, stack: string): boolean => !!stack.split('.').find((state) => state === id);
 export const isExactStack = (id: string, stack: string): boolean => stack.split('.').pop() === id;
@@ -78,7 +79,7 @@ type StateMatch = {
     url: string | null
 }
 
-const deriveStateFromUrl = (url: string, normalizedChildStates: NormalizedState[], rootId: string): StateMatch => {
+const deriveStateFromUrl = (url: string, normalizedChildStates: NormalizedStateNode[], rootId: string): StateMatch => {
     let match: StateMatch = {
         exact: false,
         params: {},
@@ -164,7 +165,7 @@ type TransitionType = {
     target: string
 }
 
-type NormalizedState = {
+type NormalizedStateNode = {
     childStates: string[],
     id: string,
     initial: boolean,
@@ -174,12 +175,12 @@ type NormalizedState = {
     type: 'atomic' | 'compound' | 'default' | 'parallel'
 }
 
-export const normalizeChildStateProps = (stateNodes: React.ReactElement[], rootId: string): NormalizedState[] => {
-    const normalizeLoop = (stateNodes: React.ReactElement[]) => {
+export const normalizeChildStateProps = (stateNodes: StateNode[], rootId: string): NormalizedStateNode[] => {
+    const normalizeLoop = (stateNodes: StateNode[]) => {
         let initialIndex = stateNodes.findIndex((s) => s.props.initial);
         initialIndex = initialIndex >= 0 ? initialIndex : 0;
 
-        return stateNodes.reduce((acc: NormalizedState[], stateNode, i) => {
+        return stateNodes.reduce((acc: NormalizedStateNode[], stateNode, i) => {
             const { children, id, parallel, path = '/' } = stateNode.props;
             const childStates = getChildStateNodes(children);
             const transitions = getChildrenOfType(children, 'Transition')
@@ -228,7 +229,7 @@ export const normalizeChildStateProps = (stateNodes: React.ReactElement[], rootI
 
 type AtomicState = { path: string, stack: string };
 
-export const getAtomic = (stack: string, normalizedChildStates: NormalizedState[]): AtomicState => {
+export const getAtomic = (stack: string, normalizedChildStates: NormalizedStateNode[]): AtomicState => {
     const { childStates, path, stack: _stack } = normalizedChildStates.find((child) =>  child.stack === stack)!;
     let initial: AtomicState = {
         path,
@@ -237,7 +238,7 @@ export const getAtomic = (stack: string, normalizedChildStates: NormalizedState[
 
     if (childStates.length) {
         const childStatesPopulate = childStates.map((id: string) => normalizedChildStates.find((norm) => norm.id === id)!);
-        const initialChild = childStatesPopulate.find((child: NormalizedState) => child.initial) || childStatesPopulate[0];
+        const initialChild = childStatesPopulate.find((child: NormalizedStateNode) => child.initial) || childStatesPopulate[0];
 
         if (initialChild.childStates.length) {
             return getAtomic(initialChild.stack, normalizedChildStates);
@@ -250,7 +251,7 @@ export const getAtomic = (stack: string, normalizedChildStates: NormalizedState[
     return initial;
 }
 
-export const resolveUrlToAtomic = (url: string, normalizedChildStates: NormalizedState[], machineId: string) => {
+export const resolveUrlToAtomic = (url: string, normalizedChildStates: NormalizedStateNode[], machineId: string) => {
     type AtomicExists = {
         params: { [name: string]: string },
         path: string | null,
@@ -295,7 +296,7 @@ export const resolveUrlToAtomic = (url: string, normalizedChildStates: Normalize
     return atomic;
 }
 
-export const selectTransition = (event: string, currentStack: string, normalizedChildStates: NormalizedState[]): TransitionType | null => {
+export const selectTransition = (event: string, currentStack: string, normalizedChildStates: NormalizedStateNode[]): TransitionType | null => {
     if (isRootStack(currentStack)) {
         return null;
     }
