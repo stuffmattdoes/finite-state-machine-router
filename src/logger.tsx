@@ -1,33 +1,89 @@
 import React, { useState } from 'react';
-/*
-    TRANSITION log
-    source: { state: "stateId", : path: "/path" }
-    event: { event: "event-name", : data: { ...data }}
-        if transition isn't child:
-        matched: { state: "stateId", oath: "/path" }
-    target: { state: "stateId", : path: "/path" }
-        if not atomic:
-        resolved: { state: "stateId", : path: "/path" }
 
-    EVENT DISCARDED
-    source: { state: "stateId", : path: "/path" }
-    target: { state: "stateId", : path: "/path" }
+// type TransitionLog = {
+//     source: { state: "stateId", : path: "/path" }
+//     event: { event: "event-name", : data: { ...data }}
+//     matched: { state: "stateId", oath: "/path" } // if transition isn't child:
+//     target: { state: "stateId", : path: "/path" }
+//     resolved: { state: "stateId", : path: "/path" } // if not atomic:
+// }
 
-    HISTORY PUSH/POP/REPLACE
-    source: { state: "stateId", : path: "/path" }
-    url: "/path",
-    target: { state: "stateId", : path: "/path" }
-        if not atomic:
-        resolved: { state: "stateId", : path: "/path" }
-*/
+// type EventDiscardedLog = {
+//     source: { state: "stateId", : path: "/path" },
+//     target: { state: "stateId", : path: "/path" }
+// }
 
-const useLogger = (source, enabled) => {
+// type HistoryLog = {
+//     source: { state: "stateId", : path: "/path" },
+//     url: "/path",
+//     target: { state: "stateId", : path: "/path" },
+//     resolved: { state: "stateId", : path: "/path" } //if not atomic:
+// }
+
+type TransitionAction = {
+    type: ActionTypes.transition,
+    payload: {
+        event: string,
+        target: {
+            params: { [name: string]: string },
+            location: Partial<Location>,
+            state: string
+        }
+    }
+}
+
+type HistoryAction = {
+    type: ActionTypes.historyPop | ActionTypes.historyPush | ActionTypes.historyReplace,
+    payload: {
+        target: {
+            target: string,
+            params: { [name: string]: string },
+            location: Partial<Location>,
+            state: string
+        }
+    }
+}
+
+type NoMatchinStateAction = {
+    type: ActionTypes.noMatchingState,
+    payload: { 
+        event: string,
+        target: {
+            params: { [name: string]: string },
+            state: string
+        }
+    }
+}
+
+type NoMatchingTransitionAction = {
+    type: ActionTypes.noMatchingTransition,
+    payload: {
+        event: string
+    }
+}
+
+enum ActionTypes {
+    historyReplace = 'history/REPLACE',
+    historyPush = 'history/PUSH',
+    historyPop = 'history/POP',
+    transition = 'machine/TRANSITION',
+    noMatchingState = 'machine/NO_MATCHING_STATE',
+    noMatchingTransition = 'machine/NO_MATCHING_TRANSITION'
+}
+
+type Action = TransitionAction | HistoryAction | NoMatchinStateAction | NoMatchingTransitionAction;
+
+type Log = ({ type, payload }: Action | any) => void;
+
+type UseLogger = (source: { current: string, location: Partial<Location> }, enabled: boolean) => [ Action[], Log ];
+
+const useLogger: UseLogger = (source, enabled) => {
     if (!enabled) {
         return [ [], () => {} ];
     }
 
-    const [ logs, setLogs ] = useState([]);
-    const log = ({ type, payload }) => {
+    const [ logs, setLogs ] = useState<Action[]>([]);
+    const log: Log = ({ type, payload }) => {
         const date = new Date();
         const time = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}.${date.getMilliseconds()}`;
         const { event, target } = payload;
@@ -52,13 +108,13 @@ const useLogger = (source, enabled) => {
         }
 
         switch(type) {
-            case 'TRANSITION':
+            case ActionTypes.transition:
                 logTitle();
                 logEvent();
                 logSource();
                 logTarget();
                 break;
-            case 'NO_MATCHING_STATE':
+            case ActionTypes.noMatchingState:
                 logTitle('EVENT DISCARDED');
                 console.log(`%cdetails: %cNo matching <State id="%c${target.state}%c"/> found.`,
                     'color: red; font-weight: bold;', null, 'font-weight: bold; font-family: monospace;', null);
@@ -66,16 +122,16 @@ const useLogger = (source, enabled) => {
                 logSource();
                 console.log('%ctarget', 'color: green; font-weight: bold;', { state: target.state });
                 break;
-            case 'NO_MATCHING_TRANSITION':
+            case ActionTypes.noMatchingTransition:
                 logTitle('EVENT DISCARDED');
                 console.log(`%cdetails: %cNo matching <Transition id="%c${event}%c"/> found within source state or any of its ancestors.`,
                     'color: red; font-weight: bold;', null, 'font-weight: bold; font-family: monospace;', null);
                 logEvent();
                 logSource();
                 break;
-            case 'HISTORY_REPLACE':
-            case 'HISTORY_PUSH':
-            case 'HISTORY_POP':
+            case ActionTypes.historyReplace:
+            case ActionTypes.historyPush:
+            case ActionTypes.historyPop:
                 logTitle();
                 console.log('%cpath', 'color: blue; font-weight: bold;', target.location.pathname);
                 logSource();
@@ -84,7 +140,6 @@ const useLogger = (source, enabled) => {
         }
 
         console.groupEnd();
-
         setLogs(logs.concat({ type, payload }));
     }
 

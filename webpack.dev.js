@@ -3,7 +3,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 const webpack = require('webpack');
 
-module.exports = {
+module.exports = (env, argv) => ({
     devServer: {
         contentBase: path.join(__dirname, 'examples', 'public'),
         // compress: true,
@@ -18,6 +18,19 @@ module.exports = {
     mode: 'development',
     module: {
         rules: [
+            // Resolves & bundles all Javascript dependencies
+            {
+                test: /\.ts(x?)$/,
+                use: [
+                    {
+                        loader: 'ts-loader',
+                        // options: {
+                        //     configFile: path.resolve('config', 'ts.config.json'),
+                        //     transpileOnly: true
+                        // },
+                    },
+                ],
+            },
             // Resolves & bundles all Javascript dependencies (.js and .jsx)
             {
                 test: /\.(js|jsx)$/,
@@ -71,6 +84,6 @@ module.exports = {
         new webpack.HotModuleReplacementPlugin()
     ],
     resolve: {
-        extensions: [ '.js', '.jsx' ],
+        extensions: [ '.js', '.jsx', '.ts', '.tsx' ],
     }
-};
+});

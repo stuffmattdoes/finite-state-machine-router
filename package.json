@@ -2,6 +2,7 @@
   "name": "fsm-router",
   "version": "0.3.9",
   "dependencies": {
+    "@types/history": "^4.7.9",
     "history": "^5.0.0"
   },
   "devDependencies": {
@@ -9,14 +10,19 @@
     "@babel/core": "^7.14.0",
     "@babel/preset-env": "^7.14.1",
     "@babel/preset-react": "^7.13.13",
+    "@babel/preset-typescript": "^7.16.0",
     "@testing-library/react": "^10.4.9",
     "@testing-library/user-event": "^13.3.0",
+    "@types/react": "^17.0.5",
+    "@types/react-dom": "^17.0.3",
     "babel-jest": "^26.6.3",
     "babel-loader": "^8.2.2",
     "html-webpack-plugin": "^4.5.2",
     "jest": "^26.6.3",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
+    "ts-loader": "^8.2.0",
+    "typescript": "^4.2.4",
     "webpack": "^4.46.0",
     "webpack-cli": "^3.3.12",
     "webpack-dev-server": "^3.11.2"
@@ -38,9 +44,9 @@
     "url": "git+https://github.com/stuffmattdoes/finite-state-machine-router.git"
   },
   "scripts": {
-    "build": "webpack",
+    "build": "webpack --config webpack.prod.js",
     "deploy": "npm publish --access public",
-    "dev": "webpack-dev-server --config webpack.config.dev.js",
+    "dev": "webpack-dev-server --config webpack.dev.js",
     "test": "jest",
     "testing": "jest --watch"
   },
