@@ -45,23 +45,27 @@ const isRootStack = stack => !stack.match(/\./g);
 const isNotFound = stack => stack.split('.').pop() === '*';
 const segmentize = url => url.split('/').filter(Boolean);
 
-const injectUrlParams = (path, params) => {
+const injectUrlParams = (path, params = {}) => {
     const url = segmentize(path).map(seg => {
         if (isDynamicSegment(seg)) {
             const param = seg.replace(':', '');
 
-            if (Object.keys(params).includes(param)) {
+            if (params[param] !== undefined && params[param] !== null) {
                 return params[param].toString();
             } else {
                 console.error(`Cannot push to a dynamic URL without supplying the proper parameters: ${seg} parameter is missing.`);
-                return 'undefined';
+                return null;
             }
         }
 
         return seg;
-    }).join('/');
+    });
 
-    return '/' + url + (window.location.search ? window.location.search : '');
+    if (url.includes(null)) {
+        return null;
+    }
+
+    return '/' + url.join('/') + (window.location.search ? window.location.search : '');
 }
 
 const deriveStateFromUrl = (url, normalizedChildStates, rootId) => {
@@ -277,7 +281,7 @@ const selectTransition = (event, currentStack, normalizedChildStates) => {
     return selectTransition(event, parentStack, normalizedChildStates);
 }
 
-const urlMatchesPathname = (pathname, url) => pathname !== url.split('?')[0];
+const urlMatchesPathname = (pathname, url) => url ? pathname !== url.split('?')[0] : false;
 
 export {
     classNames,
