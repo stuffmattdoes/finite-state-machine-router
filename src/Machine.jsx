@@ -122,7 +122,7 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
         }
 
         if (ignoreHash && state.location.hash !== location.hash) {
-            setState((prevState) => ({ ...state, location: history.location, params }));
+            setState((prevState) => ({ ...prevState, location: history.location, params }));
             return;
         }
 
