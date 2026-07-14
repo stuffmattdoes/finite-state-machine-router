@@ -112,6 +112,9 @@ describe('utility functions', () => {
         expect(injectUrlParams('/:dynamicPath/static-path', params)).toBe('/dynamic-path/static-path');
         expect(injectUrlParams('/static-path/:dynamicPath', params)).toBe('/static-path/dynamic-path');
         expect(injectUrlParams('/static-path/:dynamicPath/another-static-path', params)).toBe('/static-path/dynamic-path/another-static-path');
+        expect(injectUrlParams('/:missingParam', params)).toBeNull();
+        expect(injectUrlParams('/:dynamicPath', { dynamicPath: undefined })).toBeNull();
+        expect(injectUrlParams('/:dynamicPath', { dynamicPath: null })).toBeNull();
     });
 
     test.skip('isAtomic', () => {

@@ -167,6 +167,26 @@ describe('<Machine/>', () => {
         expect(screen.queryByText('Child 2')).toBeTruthy();
     });
 
+    test('Does not push invalid dynamic URLs when required params are missing', () => {
+        const [ history ] = renderWithNavigation(<State id='parent'>
+            <State id='child-1' path='/child-1' component={({ machine }) => <div>
+                <h1>Child 1</h1>
+                <button onClick={event => machine.send('test-event-1', { params: {} })}>Fire event</button>
+            </div>}>
+                <Transition event='test-event-1' target='child-2'/>
+            </State>
+            <State id='child-2' path='/session/:sessionId' component={generic('Child 2')}/>
+        </State>);
+
+        expect(history.location.pathname).toBe('/child-1');
+        expect(screen.queryByText('Child 1')).toBeTruthy();
+
+        userEvent.click(screen.queryByText(/Fire event/i));
+        expect(history.location.pathname).toBe('/child-1');
+        expect(screen.queryByText('Child 1')).toBeTruthy();
+        expect(screen.queryByText('Child 2')).toBeFalsy();
+    });
+
     test('Transitions state & resolves URL upon event emission, even if the <Transition/> is an ancestor', () => {
         const [ history ] = renderWithNavigation(<State id='parent'>
             <Transition event='test-event-1' target='child-2'/>
@@ -356,6 +376,34 @@ describe('<Machine/>', () => {
         expect(history.location.pathname).toBe('/parent');
         expect(history.location.hash).toBeNull();
         expect(screen.queryByText('Child 2')).toBeTruthy();
+    });
+
+    test('Preserves the current state when ignoreHash handles a hash-only history update', () => {
+        const [ history ] = renderWithNavigation(<State id='parent' path='/parent'>
+            <State id='child-1' path='/child-1' component={({ machine }) => <div>
+                <h1>Child 1</h1>
+                <button onClick={event => machine.send('test-event-1')}>Fire event</button>
+            </div>}>
+                <Transition event='test-event-1' target='child-2'/>
+            </State>
+            <State id='child-2' path='/child-2' component={generic('Child 2')}/>
+        </State>,
+        [ '/child-1#hash=true' ],
+        { ignoreHash: true });
+
+        expect(history.location.pathname).toBe('/child-1');
+        expect(history.location.hash).toBe('#hash=true');
+        expect(screen.queryByText('Child 1')).toBeTruthy();
+
+        userEvent.click(screen.queryByText(/Fire event/i));
+        expect(history.location.pathname).toBe('/child-2');
+        expect(screen.queryByText('Child 2')).toBeTruthy();
+
+        act(() => history.push({ hash: '#hash=false' }));
+        expect(history.location.pathname).toBe('/child-2');
+        expect(history.location.hash).toBe('#hash=false');
+        expect(screen.queryByText('Child 2')).toBeTruthy();
+        expect(screen.queryByText('Child 1')).toBeFalsy();
     });
 
     test('Passes on guarded <Transition/>s', () => {

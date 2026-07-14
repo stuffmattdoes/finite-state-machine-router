@@ -67,6 +67,17 @@ function Machine ({ children: machineChildren, history: machineHistory, id: mach
                 const { path, stack } = getAtomic(targetNode.stack, normalizedChildStates);
                 const url = injectUrlParams(path, params);
 
+                if (!url) {
+                    log({
+                        type: 'INVALID_TRANSITION_URL',
+                        payload: {
+                            event,
+                            target: { params, path, state: stack }
+                        }
+                    });
+                    return;
+                }
+
                 if (url !== history.location.pathname) {
                     history.push(url, { target: stack });
                 } else {
