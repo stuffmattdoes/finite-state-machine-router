@@ -380,27 +380,27 @@ describe('<Machine/>', () => {
 
     test('Preserves the current state when ignoreHash handles a hash-only history update', () => {
         const [ history ] = renderWithNavigation(<State id='parent' path='/parent'>
-            <State id='child-1' path='/child-1' component={({ machine }) => <div>
+            <State id='child-1' component={({ machine }) => <div>
                 <h1>Child 1</h1>
                 <button onClick={event => machine.send('test-event-1')}>Fire event</button>
             </div>}>
                 <Transition event='test-event-1' target='child-2'/>
             </State>
-            <State id='child-2' path='/child-2' component={generic('Child 2')}/>
+            <State id='child-2' component={generic('Child 2')}/>
         </State>,
-        [ '/child-1#hash=true' ],
+        [ '/parent#hash=true' ],
         { ignoreHash: true });
 
-        expect(history.location.pathname).toBe('/child-1');
+        expect(history.location.pathname).toBe('/parent');
         expect(history.location.hash).toBe('#hash=true');
         expect(screen.queryByText('Child 1')).toBeTruthy();
 
         userEvent.click(screen.queryByText(/Fire event/i));
-        expect(history.location.pathname).toBe('/child-2');
+        expect(history.location.pathname).toBe('/parent');
         expect(screen.queryByText('Child 2')).toBeTruthy();
 
         act(() => history.push({ hash: '#hash=false' }));
-        expect(history.location.pathname).toBe('/child-2');
+        expect(history.location.pathname).toBe('/parent');
         expect(history.location.hash).toBe('#hash=false');
         expect(screen.queryByText('Child 2')).toBeTruthy();
         expect(screen.queryByText('Child 1')).toBeFalsy();
